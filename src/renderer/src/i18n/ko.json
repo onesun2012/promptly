@@ -27,7 +27,9 @@
     "about": "정보",
     "donate": "프로젝트 후원",
     "events": "이벤트",
-    "helper": "헬퍼"
+    "helper": "헬퍼",
+    "feedback": "피드백",
+    "savedHiding": "저장됨 — 창을 숨깁니다…"
   },
   "toolbar": {
     "ask": "질문",

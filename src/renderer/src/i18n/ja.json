@@ -27,7 +27,9 @@
     "about": "情報",
     "donate": "プロジェクトを支援",
     "events": "イベント",
-    "helper": "ヘルパー"
+    "helper": "ヘルパー",
+    "feedback": "フィードバック",
+    "savedHiding": "保存しました — ウィンドウを隠します…"
   },
   "toolbar": {
     "ask": "質問",

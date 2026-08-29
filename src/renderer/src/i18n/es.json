@@ -27,7 +27,9 @@
     "about": "Acerca de",
     "donate": "Apoyar el proyecto",
     "events": "Eventos",
-    "helper": "Auxiliar"
+    "helper": "Auxiliar",
+    "feedback": "Comentarios",
+    "savedHiding": "Guardado — ocultando ventana…"
   },
   "toolbar": {
     "ask": "Preguntar",

@@ -27,7 +27,9 @@
     "about": "About",
     "donate": "Support the project",
     "events": "Events",
-    "helper": "Helper"
+    "helper": "Helper",
+    "feedback": "Feedback",
+    "savedHiding": "Saved — hiding window…"
   },
   "toolbar": {
     "ask": "Ask",

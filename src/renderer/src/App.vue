@@ -70,7 +70,12 @@ async function testProvider(): Promise<void> {
 async function saveProvider(): Promise<void> {
   if (!form.value.id) form.value.id = 'p_' + Date.now().toString(36)
   const r = await window.promptly.saveProvider({ ...form.value })
-  saveMsg.value = r.ok ? t('app.savedOk') : t('app.saveFailed')
+  if (r.ok) {
+    saveMsg.value = t('app.savedHiding')
+    setTimeout(() => window.promptly.hideMainWindow(), 1500)
+  } else {
+    saveMsg.value = t('app.saveFailed')
+  }
   await refreshProfiles()
 }
 
@@ -86,6 +91,10 @@ async function removeProvider(id: string): Promise<void> {
 
 function openChat(): void {
   window.promptly.openChat()
+}
+
+function openFeedback(): void {
+  void window.promptly.openFeedback()
 }
 
 onMounted(() => {
@@ -286,6 +295,7 @@ function snippet(env: PipelineEvent | null): string {
         >
           {{ t('app.openChat') }}
         </button>
+        <a class="muted" href="#" @click.prevent="openFeedback">✉ {{ t('app.feedback') }}</a>
         <a
           class="muted"
           href="#"

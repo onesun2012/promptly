@@ -38,6 +38,9 @@ const api = {
   setAutostart: (enabled: boolean) => ipcRenderer.invoke('settings:autostart', enabled),
   openChat: () => ipcRenderer.send('chat:toggle'),
   onAppLocale: subscriber<string>('app:locale'),
+  hideMainWindow: () => ipcRenderer.send('main:hide'),
+  showMainWindow: () => ipcRenderer.send('main:show'),
+  openFeedback: () => ipcRenderer.invoke('app:feedback'),
   onChatChunk: subscriber<{ conversationId: string; chunk: { type: string; content?: string } }>('chat:chunk'),
   onChatPreloadAction: subscriber<{ actionId: string; selection: string }>('chat:preload-action'),
 }

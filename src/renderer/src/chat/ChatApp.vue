@@ -146,6 +146,14 @@ function pinWindow(): void {
   window.promptly.chatPin()
 }
 
+function showMain(): void {
+  window.promptly.showMainWindow()
+}
+
+function sendFeedback(): void {
+  void window.promptly.openFeedback()
+}
+
 function closeWindow(): void {
   window.promptly.chatClose()
 }
@@ -166,6 +174,20 @@ function stopStreaming(): void {
         ＋
       </button>
       <span class="title">{{ activeId ? $t('chat.conversation') : $t('chat.newChat') }}</span>
+      <button
+        class="bar-btn"
+        :title="$t('app.settings')"
+        @click="showMain"
+      >
+        ⚙
+      </button>
+      <button
+        class="bar-btn"
+        :title="$t('app.feedback')"
+        @click="sendFeedback"
+      >
+        ✉
+      </button>
       <button
         class="bar-btn"
         :title="$t('chat.pin')"

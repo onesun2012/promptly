@@ -1,4 +1,4 @@
-import { app, globalShortcut, ipcMain, BrowserWindow } from 'electron'
+import { app, globalShortcut, ipcMain, BrowserWindow, shell } from 'electron'
 import { join } from 'path'
 import type { AppInfo } from '../shared'
 import { HelperClient } from './selection/helper-client'
@@ -11,6 +11,8 @@ import { forwardChatChunk, initChatIpc, openChatWithAction, toggleChatWindow } f
 import * as secureStore from './secure-store'
 import { applyFirstRunAutostart, loadSettings, saveSettings, setAutostart } from './settings-store'
 import { createBallWindow, initBallIpc, labelsFor, setBallLabels } from './ball'
+
+let mainWin: BrowserWindow | null = null
 
 function createWindow(): void {
   const locale = loadSettings().language
@@ -29,6 +31,7 @@ function createWindow(): void {
     }
   })
 
+  mainWin = win
   win.on('ready-to-show', () => win.show())
 
   win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }))
@@ -106,6 +109,22 @@ if (!gotLock) {
       return { ok: true }
     })
     ipcMain.on('chat:toggle', () => toggleChatWindow())
+    ipcMain.on('main:hide', () => mainWin?.hide())
+    ipcMain.on('main:show', () => {
+      if (!mainWin || mainWin.isDestroyed()) createWindow()
+      else { mainWin.show(); mainWin.focus() }
+    })
+    ipcMain.handle('app:feedback', () => {
+      const nl = '\n'
+      const subject = encodeURIComponent('Promptly feedback (v' + app.getVersion() + ')')
+      const body = encodeURIComponent(
+        'Feedback: ' + nl + nl + nl + '---' + nl +
+        'Version: ' + app.getVersion() + nl +
+        'Platform: ' + process.platform + ' / Electron ' + process.versions.electron + nl
+      )
+      void shell.openExternal('mailto:tonny2008@gmail.com?subject=' + subject + '&body=' + body)
+      return { ok: true }
+    })
 
     globalShortcut.register('Alt+Space', () => {
       toggleChatWindow()

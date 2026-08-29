@@ -32,6 +32,9 @@ declare global {
       setAutostart: (enabled: boolean) => Promise<{ ok: boolean }>
       openChat: () => void
       onAppLocale: (callback: (locale: string) => void) => () => void
+      hideMainWindow: () => void
+      showMainWindow: () => void
+      openFeedback: () => Promise<{ ok: boolean }>
       onChatChunk: (callback: (data: { conversationId: string; chunk: { type: string; content?: string } }) => void) => () => void
       onChatPreloadAction: (callback: (data: { actionId: string; selection: string }) => void) => () => void
     }
