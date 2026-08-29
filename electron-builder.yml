@@ -15,6 +15,8 @@ files:
   - "!{.eslintignore,.eslintrc.cjs,.prettierrc,dev-app-update.yml,CHANGELOG.md,README.md}"
 
 asar: true
+# Electron 44 embeds Node 24 — same ABI as our better-sqlite3 prebuild, no rebuild needed
+npmRebuild: false
 
 extraResources:
   # native selection helper (compiled from src/helper by npm run build:helper)
