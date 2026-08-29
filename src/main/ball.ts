@@ -59,12 +59,22 @@ export function createBallWindow(): BrowserWindow {
   // Persist ball position (SPEC: draggable, position survives restarts).
   // Belt and braces: listen for 'move' AND poll bounds — app-region dragging
   // has quirks where neither event may fire, but bounds never lie.
+  // Clamp keeps the ball fully visible inside the work area (user request:
+  // the icon must never hang half off the screen edge).
   let lastPos = { x, y }
   const persistIfChanged = (): void => {
     if (!ball || ball.isDestroyed()) return
     const [bx, by] = ball.getPosition()
-    if (bx !== lastPos.x || by !== lastPos.y) {
-      lastPos = { x: bx, y: by }
+    const display = screen.getDisplayNearestPoint({ x: bx, y: by })
+    const wa = display.workArea
+    const cx = Math.min(Math.max(bx, wa.x), wa.x + wa.width - BALL_SIZE)
+    const cy = Math.min(Math.max(by, wa.y), wa.y + wa.height - BALL_SIZE)
+    if (cx !== bx || cy !== by) {
+      ball.setPosition(cx, cy)
+      return // move event will re-trigger persist with the clamped position
+    }
+    if (cx !== lastPos.x || cy !== lastPos.y) {
+      lastPos = { x: cx, y: cy }
       saveSettings({ ballPosition: lastPos })
     }
   }
