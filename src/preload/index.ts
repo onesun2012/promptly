@@ -22,7 +22,17 @@ const api = {
   saveProvider: (profile: unknown) => ipcRenderer.invoke('provider:save', profile),
   deleteProvider: (id: string) => ipcRenderer.invoke('provider:delete', id),
   setActiveProvider: (id: string) => ipcRenderer.invoke('provider:setActive', id),
-  testProvider: (profile: unknown) => ipcRenderer.invoke('provider:test', profile)
+  testProvider: (profile: unknown) => ipcRenderer.invoke('provider:test', profile),
+  chatConversations: () => ipcRenderer.invoke('chat:conversations'),
+  chatMessages: (id: string) => ipcRenderer.invoke('chat:messages', id),
+  chatDelete: (id: string) => ipcRenderer.invoke('chat:delete', id),
+  chatSend: (payload: unknown) => ipcRenderer.send('chat:send', payload),
+  chatStop: (id: string) => ipcRenderer.send('chat:stop', id),
+  chatPin: () => ipcRenderer.send('chat:pin'),
+  chatClose: () => ipcRenderer.send('chat:hide'),
+  runAction: (id: string) => ipcRenderer.send('toolbar:action', id),
+  onChatChunk: subscriber<{ conversationId: string; chunk: { type: string; content?: string } }>('chat:chunk'),
+  onChatPreloadAction: subscriber<{ actionId: string; selection: string }>('chat:preload-action'),
 }
 
 export type PromptlyAPI = typeof api

@@ -3,8 +3,12 @@ import { join } from 'path'
 import type { AppInfo } from '../shared'
 import { HelperClient } from './selection/helper-client'
 import { SelectionMachine } from './selection/state-machine'
-import { initToolbarIpc, showToolbarForSelection } from './selection/toolbar'
+import { getLastSelection, initToolbarIpc, hideToolbar, showToolbarForSelection } from './selection/toolbar'
 import { initProviderIpc } from './providers/ipc'
+import { initSqliteDb } from './db'
+import { createChatService } from './chat-service'
+import { forwardChatChunk, initChatIpc, openChatWithAction, toggleChatWindow } from './chat-window'
+import * as secureStore from './secure-store'
 
 function createWindow(): void {
   const win = new BrowserWindow({
@@ -64,8 +68,28 @@ if (!gotLock) {
 
   app.whenReady().then(() => {
     createWindow()
-    initToolbarIpc(() => machine.transition('IDLE', machine.activeSessionId))
+    const db = initSqliteDb(app.getPath('userData'))
+    const chat = createChatService({
+      db,
+      getActiveProvider: () => secureStore.getActive(),
+      onChunk: (cid, chunk) => forwardChatChunk(cid, chunk)
+    })
+    initToolbarIpc(
+      () => machine.transition('IDLE', machine.activeSessionId),
+      (actionId) => {
+        const sel = getLastSelection()
+        if (!sel || !sel.text) return
+        if (actionId === 'copy') return
+        hideToolbar()
+        openChatWithAction(actionId, sel.text)
+      }
+    )
+    initChatIpc(db, (opts) => chat.send(opts), (id) => chat.stop(id))
     initProviderIpc()
+
+    globalShortcut.register('Alt+Space', () => {
+      toggleChatWindow()
+    })
 
     // Q5 hotkey mode: capture the selection at the current cursor position.
     // The default hotkey is always registered; per-mode switch lands with the

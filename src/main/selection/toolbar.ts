@@ -3,16 +3,22 @@ import { join } from 'node:path'
 import type { PipelineEvent } from '../../shared'
 
 const TOOLBAR_WIDTH = 360
-const TOOLBAR_HEIGHT = 148
+const TOOLBAR_HEIGHT = 196
 const AUTO_HIDE_MS = 8000
 
 let toolbar: BrowserWindow | null = null
 let pending: { env: PipelineEvent; text: string } | null = null
 let autoHideTimer: NodeJS.Timeout | null = null
 let onHideCallback: (() => void) | null = null
+let onActionCallback: ((actionId: string) => void) | null = null
 
-export function initToolbarIpc(onHide: () => void): void {
+export function getLastSelection(): { env: PipelineEvent; text: string } | null {
+  return pending
+}
+
+export function initToolbarIpc(onHide: () => void, onAction: (actionId: string) => void): void {
   onHideCallback = onHide
+  onActionCallback = onAction
 
   ipcMain.on('toolbar:ready', (event) => {
     console.log('[toolbar] ready received, pending =', pending !== null)
@@ -21,6 +27,9 @@ export function initToolbarIpc(onHide: () => void): void {
     }
   })
   ipcMain.on('toolbar:hide', () => hideToolbar())
+  ipcMain.on('toolbar:action', (_e, actionId: unknown) => {
+    if (typeof actionId === 'string' && onActionCallback) onActionCallback(actionId)
+  })
   ipcMain.handle('toolbar:copy', (_event, text: unknown) => {
     if (typeof text === 'string' && text) clipboard.writeText(text)
     hideToolbar()

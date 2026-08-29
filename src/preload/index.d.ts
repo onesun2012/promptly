@@ -17,6 +17,16 @@ declare global {
       deleteProvider: (id: string) => Promise<{ ok: boolean }>
       setActiveProvider: (id: string) => Promise<{ ok: boolean }>
       testProvider: (profile: ProviderProfile) => Promise<TestConnectionResult>
+      chatConversations: () => Promise<Array<{ id: string; title: string; updated_at: number }>>
+      chatMessages: (id: string) => Promise<Array<{ id: number; role: string; content: string }>>
+      chatDelete: (id: string) => Promise<{ ok: boolean }>
+      chatSend: (payload: { conversationId?: string; actionId?: string; selection?: string; text?: string }) => void
+      chatStop: (id: string) => void
+      chatPin: () => void
+      chatClose: () => void
+      runAction: (id: string) => void
+      onChatChunk: (callback: (data: { conversationId: string; chunk: { type: string; content?: string } }) => void) => () => void
+      onChatPreloadAction: (callback: (data: { actionId: string; selection: string }) => void) => () => void
     }
   }
 }
