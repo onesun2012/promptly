@@ -15,6 +15,7 @@ export function initToolbarIpc(onHide: () => void): void {
   onHideCallback = onHide
 
   ipcMain.on('toolbar:ready', (event) => {
+    console.log('[toolbar] ready received, pending =', pending !== null)
     if (pending && !event.sender.isDestroyed()) {
       event.sender.send('toolbar:data', pending)
     }
@@ -47,6 +48,17 @@ export function showToolbarForSelection(env: PipelineEvent): void {
   if (!win) return
   win.setBounds({ x, y: yClamped, width: TOOLBAR_WIDTH, height: TOOLBAR_HEIGHT })
   win.showInactive()
+
+  // First display: data is delivered on the renderer's toolbar:ready handshake.
+  // Every later display must push the fresh session explicitly, otherwise the
+  // toolbar keeps showing the previous selection (bug caught in E2E).
+  console.log('[toolbar] show, isLoading =', win.webContents.isLoading())
+  if (!win.webContents.isLoading()) {
+    win.webContents.send('toolbar:data', pending)
+  }
+  win.webContents.on('console-message', (_e, level, message) => {
+    console.log('[toolbar-renderer]', level, message)
+  })
 
   resetAutoHide()
 }
