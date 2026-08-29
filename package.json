@@ -7,13 +7,14 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "dev": "electron-vite dev",
+    "build:helper": "node scripts/build-helper.mjs",
+    "dev": "npm run build:helper && electron-vite dev",
     "typecheck": "vue-tsc --noEmit -p tsconfig.node.json && vue-tsc --noEmit -p tsconfig.web.json",
     "lint": "eslint .",
     "build": "electron-vite build",
     "start": "electron-vite preview",
-    "dist:dir": "npm run build && electron-builder --dir",
-    "dist": "npm run build && electron-builder --win"
+    "dist:dir": "npm run build:helper && npm run build && electron-builder --dir",
+    "dist": "npm run build:helper && npm run build && electron-builder --win"
   },
   "engines": {
     "node": ">=20"

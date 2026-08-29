@@ -16,6 +16,13 @@ files:
 
 asar: true
 
+extraResources:
+  # native selection helper (compiled from src/helper by npm run build:helper)
+  - from: build/helper
+    to: helper
+    filter:
+      - "*.exe"
+
 win:
   target:
     - target: nsis
