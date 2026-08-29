@@ -1,0 +1,32 @@
+# AppId is permanent once released (lesson from bragi: never change it after v1)
+appId: com.onesun2012.promptly
+productName: Promptly
+copyright: Copyright © 2026 onesun2012
+
+directories:
+  buildResources: build
+  output: dist
+
+files:
+  - out/**
+  - "!**/.vscode/*"
+  - "!src/*"
+  - "!electron.vite.config.*"
+  - "!{.eslintignore,.eslintrc.cjs,.prettierrc,dev-app-update.yml,CHANGELOG.md,README.md}"
+
+asar: true
+
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+
+nsis:
+  # per-user install into %LOCALAPPDATA%\Programs, no admin required (SPEC constraint)
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  # follow bragi lesson: desktop icon opt-in, start menu always
+  createDesktopShortcut: false
+  deleteAppDataOnUninstall: false

@@ -17,6 +17,7 @@ references/
 # Logs & local state
 *.log
 *.local
+*.tsbuildinfo
 .DS_Store
 Thumbs.db
 
