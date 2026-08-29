@@ -103,7 +103,7 @@ interface AIProvider {
 - **v1 内置三个适配器**（覆盖 95% 海外用户）：① OpenAI 兼容协议（OpenAI / OpenRouter / Groq / Mistral / Ollama / LM Studio / 任意中转站，自定义 base_url）；② Anthropic 原生；③ Gemini 原生；
 - **能力模型（Capability Model）**：`{streaming, vision, reasoning, tools, jsonMode}` —— "OpenAI 兼容"端点之间在流式格式/错误格式/工具调用/推理字段上**并不真兼容**，逐端点探测，UI 按能力显隐功能，不假设一致；
 - **Test Connection 向导**（BYOK 产品刚需）：填 Base URL / API Key → 拉取模型列表 → 选模型 → 发送测试请求 → 成功打勾；
-- **Key 安全**：DPAPI 加密存储（Bragi 同款方案，已验证）；多套配置可命名、可一键切换。
+- **Key 安全**：Electron 内置 `safeStorage` API 加密存储（Windows 底层即 DPAPI，Bragi 已验证该路线；零原生模块）；多套配置可命名、可一键切换。
 
 ### C. 外围组件
 
@@ -250,4 +250,6 @@ settings(key, value_json, updated_at)
 - [ ] 产品最终命名核查：Promptly 与现有商标/产品（如 Promptly AI 等）的冲突风险与应对（名称、logo、域名）；
 - [ ] NSIS 默认勾选自启在海外市场的观感（部分用户视为流氓行为）——发布前 A/B 决定默认值；
 - [ ] Sentry 崩溃上报的隐私政策措辞；
-- [ ] 捐赠入口转化数据（决定捐赠制维持时长）。
+- [ ] 捐赠入口转化数据（决定捐赠制维持时长）；
+- [ ] v1.x 候选：**"重复上次动作"快捷键**（借鉴 Bragi，高频用户效率倍增器）；
+- [ ] v1.x 候选：**Replace 写回选区**（借鉴 Bragi 的 Ctrl+V 机制，注意修饰键释放与焦点时机）。
