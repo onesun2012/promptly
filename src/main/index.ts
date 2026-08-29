@@ -1,4 +1,4 @@
-import { app, ipcMain, BrowserWindow } from 'electron'
+import { app, globalShortcut, ipcMain, BrowserWindow } from 'electron'
 import { join } from 'path'
 import type { AppInfo } from '../shared'
 import { HelperClient } from './selection/helper-client'
@@ -65,6 +65,13 @@ if (!gotLock) {
     createWindow()
     initToolbarIpc(() => machine.transition('IDLE', machine.activeSessionId))
 
+    // Q5 hotkey mode: capture the selection at the current cursor position.
+    // The default hotkey is always registered; per-mode switch lands with the
+    // settings page (M4).
+    globalShortcut.register('Control+Shift+A', () => {
+      helper.captureNow()
+    })
+
     helper.on('lifecycle', (info) => {
       console.log('[helper-lifecycle]', JSON.stringify(info))
       broadcast('pipeline:lifecycle', info)
@@ -89,6 +96,7 @@ if (!gotLock) {
   })
 
   app.on('will-quit', () => {
+    globalShortcut.unregisterAll()
     helper.shutdown()
   })
 

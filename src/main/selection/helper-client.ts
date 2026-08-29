@@ -73,7 +73,7 @@ export class HelperClient extends EventEmitter {
       '--poll',
       '15',
       '--timeout',
-      '300',
+      '600',
       '--blacklist',
       this.blacklist.join(',')
     ]
