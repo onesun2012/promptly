@@ -1,6 +1,6 @@
 # Promptly
 
-**Select text anywhere. Ask with your own AI.**
+**Select anything. Ask any AI. Without giving us your data.**
 
 The best local-first BYOK (bring-your-own-key) selection-to-AI assistant for Windows. Select text in any app — browser, office suite, editor — and ask AI instantly with **your own API keys**, connecting **directly** to your providers. No account. No cloud relay. No telemetry on your content.
 

@@ -14,7 +14,7 @@ onMounted(() => {
     <header class="brand">
       <h1>Promptly</h1>
       <p class="tagline">
-        Select text anywhere. Ask with your own AI.
+        Select anything. Ask any AI. Without giving us your data.
       </p>
     </header>
 
