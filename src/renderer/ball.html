@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:"
+    />
+    <title>Promptly</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        background: transparent;
+        overflow: hidden;
+      }
+      .ball {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #1f883d 0%, #0969da 100%);
+        box-shadow: 0 3px 10px rgba(9, 105, 218, 0.45);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        -webkit-app-region: drag;
+        user-select: none;
+        border: 2px solid rgba(255, 255, 255, 0.85);
+      }
+      .mark {
+        -webkit-app-region: no-drag;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-weight: 700;
+        font-size: 15px;
+        letter-spacing: -0.5px;
+        cursor: pointer;
+      }
+      .mark:active {
+        transform: scale(0.92);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="ball" class="ball">
+      <div class="mark">P</div>
+    </div>
+    <script type="module" src="/src/ball/main.ts"></script>
+  </body>
+</html>
