@@ -1,8 +1,10 @@
 import {
   errorText,
   joinUrl,
+  splitDataUrl,
   type AIProvider,
   type ChatChunk,
+  type ChatMessage,
   type ChatRequest,
   type ProviderCapabilities,
   type ProviderProfile,
@@ -42,7 +44,7 @@ export class AnthropicProvider implements AIProvider {
       .join('\n')
     const messages = req.messages
       .filter((m) => m.role !== 'system')
-      .map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content }))
+      .map((m) => ({ role: m.role as 'user' | 'assistant', content: toAnthropicContent(m) }))
 
     const res = await fetch(joinUrl(profile.baseUrl, '/v1/messages'), {
       method: 'POST',
@@ -110,4 +112,16 @@ export class AnthropicProvider implements AIProvider {
       'anthropic-version': ANTHROPIC_VERSION
     }
   }
+}
+
+/** Anthropic vision shape: base64 image block + text block. */
+function toAnthropicContent(m: ChatMessage): unknown {
+  if (!m.imageDataUrl) return m.content
+  const parts: Array<Record<string, unknown>> = []
+  if (m.content) parts.push({ type: 'text', text: m.content })
+  const img = splitDataUrl(m.imageDataUrl)
+  if (img) {
+    parts.push({ type: 'image', source: { type: 'base64', media_type: img.mime, data: img.data } })
+  }
+  return parts
 }

@@ -3,6 +3,7 @@ import {
   joinUrl,
   type AIProvider,
   type ChatChunk,
+  type ChatMessage,
   type ChatRequest,
   type ProviderCapabilities,
   type ProviderProfile,
@@ -44,7 +45,7 @@ export class OpenAICompatibleProvider implements AIProvider {
       signal: req.signal,
       body: JSON.stringify({
         model: req.model,
-        messages: req.messages,
+        messages: req.messages.map(toOpenAIMessage),
         stream: true,
         ...(req.temperature !== undefined ? { temperature: req.temperature } : {}),
         ...(req.maxTokens !== undefined ? { max_tokens: req.maxTokens } : {})
@@ -100,4 +101,18 @@ export class OpenAICompatibleProvider implements AIProvider {
     if (profile.apiKey) h.authorization = `Bearer ${profile.apiKey}`
     return h
   }
+}
+
+/** OpenAI vision shape: text+image parts when a screenshot is attached. */
+function toOpenAIMessage(m: ChatMessage): unknown {
+  if (m.imageDataUrl) {
+    return {
+      role: m.role,
+      content: [
+        { type: 'text', text: m.content },
+        { type: 'image_url', image_url: { url: m.imageDataUrl } }
+      ]
+    }
+  }
+  return { role: m.role, content: m.content }
 }

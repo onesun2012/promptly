@@ -13,6 +13,7 @@ interface ConversationRow {
 interface ChatMsg {
   role: 'user' | 'assistant'
   content: string
+  imageDataUrl?: string
   reasoning?: string
   streaming?: boolean
   error?: boolean
@@ -24,6 +25,7 @@ const messages = ref<ChatMsg[]>([])
 const input = ref('')
 const streaming = ref(false)
 const bodyEl = ref<HTMLElement | null>(null)
+const pendingImage = ref<string | null>(null)
 
 marked.setOptions({ breaks: true, gfm: true })
 
@@ -54,7 +56,11 @@ async function loadConversations(): Promise<void> {
 async function openConversation(id: string): Promise<void> {
   activeId.value = id
   const rows = await window.promptly.chatMessages(id)
-  messages.value = rows.map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content }))
+  messages.value = rows.map((m) => ({
+    role: m.role as 'user' | 'assistant',
+    content: m.content,
+    imageDataUrl: m.imageDataUrl ?? undefined
+  }))
   scrollBottom()
   void nextTick(() => highlight(document.getElementById('messages') ?? document.body))
 }
@@ -68,8 +74,8 @@ async function removeConversation(id: string): Promise<void> {
   await loadConversations()
 }
 
-function pushUser(content: string): void {
-  messages.value.push({ role: 'user', content })
+function pushUser(content: string, imageDataUrl?: string | null): void {
+  messages.value.push({ role: 'user', content, imageDataUrl: imageDataUrl ?? undefined })
   scrollBottom()
 }
 
@@ -83,10 +89,30 @@ function ensureAssistant(): ChatMsg {
 
 function sendText(): void {
   const text = input.value.trim()
-  if (!text || streaming.value) return
+  const image = pendingImage.value
+  if ((!text && !image) || streaming.value) return
   input.value = ''
-  pushUser(text)
-  void start({ conversationId: activeId.value ?? undefined, text })
+  pendingImage.value = null
+  pushUser(text, image)
+  void start({ conversationId: activeId.value ?? undefined, text, imageDataUrl: image === null ? undefined : image })
+}
+
+/** Paste handler: screenshots from the clipboard become an attached image. */
+function onPaste(e: ClipboardEvent): void {
+  const items = e.clipboardData?.items ?? []
+  for (const item of items) {
+    if (item.type.startsWith('image/')) {
+      const file = item.getAsFile()
+      if (!file) continue
+      const reader = new FileReader()
+      reader.onload = () => {
+        pendingImage.value = String(reader.result)
+      }
+      reader.readAsDataURL(file)
+      e.preventDefault()
+      return
+    }
+  }
 }
 
 function runAction(actionId: string, selection: string): void {
@@ -94,7 +120,13 @@ function runAction(actionId: string, selection: string): void {
   void start({ conversationId: activeId.value ?? undefined, actionId, selection })
 }
 
-async function start(payload: { conversationId?: string; actionId?: string; selection?: string; text?: string }): Promise<void> {
+async function start(payload: {
+  conversationId?: string
+  actionId?: string
+  selection?: string
+  text?: string
+  imageDataUrl?: string
+}): Promise<void> {
   const assistant = ensureAssistant()
   streaming.value = true
   scrollBottom()
@@ -247,7 +279,13 @@ function stopStreaming(): void {
               v-if="m.role === 'user'"
               class="bubble user"
             >
-              {{ m.content }}
+              <img
+                v-if="m.imageDataUrl"
+                class="shot"
+                :src="m.imageDataUrl"
+                alt="screenshot"
+              >
+              <span v-if="m.content">{{ m.content }}</span>
             </div>
             <div
               v-else
@@ -274,12 +312,19 @@ function stopStreaming(): void {
           </template>
         </div>
 
+        <div v-if="pendingImage" class="pending">
+          <img :src="pendingImage" alt="paste preview">
+          <button class="rm" title="✕" @click="pendingImage = null">
+            ✕
+          </button>
+        </div>
         <div class="inputbar">
           <textarea
             v-model="input"
             rows="2"
             :placeholder="$t('chat.inputPlaceholder')"
             @keydown="onInputKeydown"
+            @paste="onPaste"
           />
           <button
             v-if="!streaming"
@@ -406,6 +451,36 @@ body { margin: 0; overflow: hidden; }
   gap: 8px;
   padding: 10px;
   border-top: 1px solid #d0d7de;
+}
+.pending {
+  position: relative;
+  padding: 0 10px;
+}
+.pending img {
+  max-height: 72px;
+  max-width: 140px;
+  border-radius: 8px;
+  border: 1px solid #d0d7de;
+}
+.pending .rm {
+  position: absolute;
+  top: -6px;
+  right: 2px;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  font-size: 10px;
+  background: #57606a;
+  color: #fff;
+  border: none;
+}
+.user .shot {
+  display: block;
+  max-width: 100%;
+  max-height: 180px;
+  border-radius: 8px;
+  margin-bottom: 6px;
 }
 textarea {
   flex: 1;

@@ -7,6 +7,14 @@ export type ProviderProtocol = 'openai' | 'anthropic' | 'gemini'
 export interface ChatMessage {
   role: 'system' | 'user' | 'assistant'
   content: string
+  /** data:image/...;base64 — attaches a screenshot for vision models. */
+  imageDataUrl?: string
+}
+
+/** Splits a data URL into mime type and base64 payload (no prefix). */
+export function splitDataUrl(dataUrl: string): { mime: string; data: string } | null {
+  const m = /^data:([^;]+);base64,(.*)$/s.exec(dataUrl)
+  return m ? { mime: m[1], data: m[2] } : null
 }
 
 export interface ChatRequest {

@@ -18,6 +18,7 @@ export interface MessageRow {
   role: string
   content: string
   created_at: number
+  image_data?: string | null
 }
 
 export interface Db {
@@ -50,6 +51,12 @@ export function initSqliteDb(userDataPath: string): Db {
     );
     CREATE INDEX IF NOT EXISTS idx_messages_conversation ON messages(conversation_id, id);
   `)
+  // migration: pasted screenshots on user messages (M3.5)
+  try {
+    db.exec('ALTER TABLE messages ADD COLUMN image_data TEXT')
+  } catch {
+    // column already exists
+  }
 
   return {
     listConversations(): ConversationRow[] {
@@ -74,14 +81,16 @@ export function initSqliteDb(userDataPath: string): Db {
     getMessages(conversationId: string): MessageRow[] {
       return db
         .prepare(
-          'SELECT id, conversation_id, role, content, created_at FROM messages WHERE conversation_id = ? ORDER BY id'
+          'SELECT id, conversation_id, role, content, created_at, image_data FROM messages WHERE conversation_id = ? ORDER BY id'
         )
         .all(conversationId) as MessageRow[]
     },
     insertMessage(m: Omit<MessageRow, 'id'>): number {
       const r = db
-        .prepare('INSERT INTO messages (conversation_id, role, content, created_at) VALUES (?, ?, ?, ?)')
-        .run(m.conversation_id, m.role, m.content, m.created_at)
+        .prepare(
+          'INSERT INTO messages (conversation_id, role, content, created_at, image_data) VALUES (?, ?, ?, ?, ?)'
+        )
+        .run(m.conversation_id, m.role, m.content, m.created_at, m.image_data ?? null)
       return Number(r.lastInsertRowid)
     }
   }

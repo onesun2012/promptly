@@ -1,6 +1,7 @@
 import {
   errorText,
   joinUrl,
+  splitDataUrl,
   type AIProvider,
   type ChatChunk,
   type ChatMessage,
@@ -11,6 +12,15 @@ import {
   type TestConnectionResult
 } from './types.ts'
 import { sseData } from './sse.ts'
+
+/** Gemini vision shape: inline_data part alongside the text part. */
+function toGeminiParts(m: ChatMessage): Array<{ text?: string; inline_data?: { mime_type: string; data: string } }> {
+  const parts: Array<{ text?: string; inline_data?: { mime_type: string; data: string } }> = []
+  if (m.content) parts.push({ text: m.content })
+  const img = m.imageDataUrl ? splitDataUrl(m.imageDataUrl) : null
+  if (img) parts.push({ inline_data: { mime_type: img.mime, data: img.data } })
+  return parts.length ? parts : [{ text: '' }]
+}
 
 /** Google Gemini native adapter (generativelanguage.googleapis.com, SPEC §2B). */
 export class GeminiProvider implements AIProvider {
@@ -42,7 +52,7 @@ export class GeminiProvider implements AIProvider {
     const system = req.messages.filter((m) => m.role === 'system').map((m) => m.content).join('\n')
     const contents = req.messages
       .filter((m) => m.role !== 'system')
-      .map((m: ChatMessage) => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] }))
+      .map((m: ChatMessage) => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: toGeminiParts(m) }))
 
     const url =
       joinUrl(profile.baseUrl, '/v1beta/models') +

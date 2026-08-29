@@ -9,7 +9,7 @@ import type { ChatChunk, ProviderProfile } from '../src/main/providers/types.ts'
 
 class MemoryDb implements DbLike {
   conversations: Array<{ id: string; title: string; provider_id: string; model: string; created_at: number; updated_at: number }> = []
-  messages: Array<{ conversation_id: string; role: string; content: string; created_at: number }> = []
+  messages: Array<{ conversation_id: string; role: string; content: string; created_at: number; image_data?: string | null }> = []
 
   listConversations() {
     return this.conversations
@@ -22,10 +22,12 @@ class MemoryDb implements DbLike {
     if (c) c.updated_at = at
   }
   getMessages(conversationId: string) {
-    return this.messages.filter((m) => m.conversation_id === conversationId).map((m) => ({ role: m.role, content: m.content }))
+    return this.messages
+      .filter((m) => m.conversation_id === conversationId)
+      .map((m) => ({ role: m.role, content: m.content, image_data: m.image_data ?? null }))
   }
-  insertMessage(m: { conversation_id: string; role: string; content: string; created_at: number }) {
-    this.messages.push({ ...m })
+  insertMessage(m: { conversation_id: string; role: string; content: string; created_at: number; image_data?: string | null }) {
+    this.messages.push({ ...m, image_data: m.image_data ?? null })
     return this.messages.length
   }
 }
@@ -41,6 +43,14 @@ const server = http.createServer((req, res) => {
     res.end(JSON.stringify({ data: [{ id: 'mock-mini' }] }))
     return
   }
+  // capture the request body for multimodal assertions
+  let body = ''
+  req.on('data', (d) => {
+    body += d
+  })
+  req.on('end', () => {
+    ;(globalThis as { LAST_BODY?: string }).LAST_BODY = body
+  })
   res.setHeader('content-type', 'text/event-stream')
   res.write('data: ' + JSON.stringify({ choices: [{ delta: { content: 'Hello' } }] }) + '\n\n')
   res.write('data: ' + JSON.stringify({ choices: [{ delta: { content: ' from mock' } }] }) + '\n\n')
@@ -85,6 +95,23 @@ server.listen(0, '127.0.0.1', async () => {
   // 2) follow-up on the same conversation appends history
   await service.send({ conversationId: cid, text: 'second question' })
   if (db.getMessages(cid).length !== 4) fail('history not appended')
+
+  // 2b) pasted screenshot: image must reach the API in OpenAI vision shape
+  const tinyPng =
+    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='
+  const rImg = await service.send({ conversationId: cid, text: 'What is this?', imageDataUrl: tinyPng })
+  if (!rImg.conversationId) fail('image send failed')
+  const lastBody = JSON.parse((globalThis as { LAST_BODY?: string }).LAST_BODY ?? '{}') as {
+    messages?: Array<{ content: unknown }>
+  }
+  const lastContent = lastBody.messages?.[lastBody.messages.length - 1]?.content
+  const okShape =
+    Array.isArray(lastContent) &&
+    JSON.stringify(lastContent).includes('image_url') &&
+    JSON.stringify(lastContent).includes(tinyPng.slice(0, 40))
+  if (!okShape) fail('vision payload shape wrong: ' + JSON.stringify(lastContent).slice(0, 120))
+  const imgRow = db.getMessages(cid).find((m) => m.content === 'What is this?')
+  if (!imgRow || imgRow.image_data !== tinyPng) fail('image not persisted with message')
 
   // 3) no provider -> error chunk, nothing persisted
   const emptyService = createChatService({

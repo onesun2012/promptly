@@ -7,6 +7,8 @@ export interface ChatSendOptions {
   actionId?: string
   selection?: string
   text?: string
+  /** data:image/...;base64 — pasted screenshot for vision models. */
+  imageDataUrl?: string
 }
 
 export interface ChatDeps {
@@ -27,8 +29,14 @@ export interface DbLike {
     updated_at: number
   }): void
   touchConversation(id: string, at: number): void
-  getMessages(conversationId: string): { role: string; content: string }[]
-  insertMessage(m: { conversation_id: string; role: string; content: string; created_at: number }): number
+  getMessages(conversationId: string): { role: string; content: string; image_data?: string | null }[]
+  insertMessage(m: {
+    conversation_id: string
+    role: string
+    content: string
+    created_at: number
+    image_data?: string | null
+  }): number
 }
 
 const HISTORY_LIMIT = 20
@@ -52,7 +60,7 @@ export function createChatService(deps: ChatDeps) {
     const userText = opts.actionId
       ? applyTemplate(opts.actionId, opts.selection ?? '')
       : (opts.text ?? opts.selection ?? '')
-    if (!userText.trim()) {
+    if (!userText.trim() && !opts.imageDataUrl) {
       return { conversationId: null, error: 'empty message' }
     }
 
@@ -63,7 +71,7 @@ export function createChatService(deps: ChatDeps) {
       conversationId = 'c_' + now.toString(36) + Math.random().toString(36).slice(2, 6)
       deps.db.createConversation({
         id: conversationId,
-        title: userText.replace(/\s+/g, ' ').slice(0, 48),
+        title: (userText || 'Screenshot').replace(/\s+/g, ' ').slice(0, 48),
         provider_id: provider.id,
         model: provider.model ?? '',
         created_at: now,
@@ -71,7 +79,13 @@ export function createChatService(deps: ChatDeps) {
       })
     }
 
-    deps.db.insertMessage({ conversation_id: conversationId, role: 'user', content: userText, created_at: now })
+    deps.db.insertMessage({
+      conversation_id: conversationId,
+      role: 'user',
+      content: userText,
+      created_at: now,
+      image_data: opts.imageDataUrl ?? null
+    })
 
     let model = provider.model
     if (!model) {
@@ -89,7 +103,11 @@ export function createChatService(deps: ChatDeps) {
     const history = deps.db
       .getMessages(conversationId)
       .slice(-HISTORY_LIMIT)
-      .map((m) => ({ role: m.role as 'user' | 'assistant' | 'system', content: m.content }))
+      .map((m) => ({
+        role: m.role as 'user' | 'assistant' | 'system',
+        content: m.content,
+        ...(m.image_data ? { imageDataUrl: m.image_data } : {})
+      }))
 
     const controller = new AbortController()
     aborts.set(conversationId, controller)
