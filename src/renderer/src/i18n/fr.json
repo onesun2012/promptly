@@ -1,0 +1,56 @@
+{
+  "app": {
+    "tagline": "Sélectionnez tout. Demandez à n'importe quelle IA.",
+    "providers": "Fournisseurs",
+    "providerLab": "Laboratoire de fournisseurs",
+    "protocol": "Protocole",
+    "openaiCompatible": "Compatible OpenAI",
+    "anthropic": "Anthropic",
+    "gemini": "Gemini",
+    "baseUrl": "URL de base",
+    "apiKey": "Clé API",
+    "model": "Modèle (optionnel)",
+    "modelPlaceholder": "auto depuis la liste",
+    "testConnection": "Tester la connexion",
+    "testing": "Test en cours…",
+    "save": "Enregistrer",
+    "savedOk": "Enregistré (clé chiffrée via DPAPI).",
+    "saveFailed": "Échec de l'enregistrement.",
+    "connected": "Connecté en {ms} ms — {count} modèles.",
+    "sample": "Exemple : {reply}",
+    "savedProfiles": "Profils enregistrés",
+    "plainKeyWarn": "clé en clair",
+    "settings": "Paramètres",
+    "language": "Langue",
+    "autostart": "Lancer Promptly au démarrage",
+    "openChat": "Ouvrir le chat (Alt+Espace)",
+    "about": "À propos",
+    "donate": "Soutenir le projet",
+    "events": "Événements",
+    "helper": "Assistant"
+  },
+  "toolbar": {
+    "ask": "Demander",
+    "translate": "Traduire",
+    "summarize": "Résumer",
+    "explain": "Expliquer",
+    "copy": "Copier",
+    "close": "Fermer"
+  },
+  "chat": {
+    "newChat": "Nouveau chat",
+    "conversation": "Conversation",
+    "pin": "Épingler",
+    "close": "Fermer",
+    "noConversations": "Aucune conversation",
+    "emptyHint": "Sélectionnez du texte n'importe où, ou saisissez ci-dessous.",
+    "inputPlaceholder": "Posez votre question… (Entrée pour envoyer)",
+    "send": "Envoyer",
+    "stop": "Arrêter"
+  },
+  "ball": {
+    "openChat": "Ouvrir le chat",
+    "settings": "Paramètres",
+    "quit": "Quitter Promptly"
+  }
+}

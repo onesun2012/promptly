@@ -1,0 +1,56 @@
+{
+  "app": {
+    "tagline": "Select anything. Ask any AI.",
+    "providers": "Providers",
+    "providerLab": "Provider lab",
+    "protocol": "Protocol",
+    "openaiCompatible": "OpenAI compatible",
+    "anthropic": "Anthropic",
+    "gemini": "Gemini",
+    "baseUrl": "Base URL",
+    "apiKey": "API key",
+    "model": "Model (optional)",
+    "modelPlaceholder": "auto from list",
+    "testConnection": "Test connection",
+    "testing": "Testing…",
+    "save": "Save",
+    "savedOk": "Saved (key encrypted via DPAPI).",
+    "saveFailed": "Save failed.",
+    "connected": "Connected in {ms}ms — {count} models.",
+    "sample": "Sample: {reply}",
+    "savedProfiles": "Saved profiles",
+    "plainKeyWarn": "plain key",
+    "settings": "Settings",
+    "language": "Language",
+    "autostart": "Launch Promptly at startup",
+    "openChat": "Open chat (Alt+Space)",
+    "about": "About",
+    "donate": "Support the project",
+    "events": "Events",
+    "helper": "Helper"
+  },
+  "toolbar": {
+    "ask": "Ask",
+    "translate": "Translate",
+    "summarize": "Summarize",
+    "explain": "Explain",
+    "copy": "Copy",
+    "close": "Close"
+  },
+  "chat": {
+    "newChat": "New chat",
+    "conversation": "Conversation",
+    "pin": "Pin",
+    "close": "Close",
+    "noConversations": "No conversations yet",
+    "emptyHint": "Select text anywhere, or type below.",
+    "inputPlaceholder": "Ask anything… (Enter to send)",
+    "send": "Send",
+    "stop": "Stop"
+  },
+  "ball": {
+    "openChat": "Open chat",
+    "settings": "Settings",
+    "quit": "Quit Promptly"
+  }
+}

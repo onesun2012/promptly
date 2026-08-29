@@ -1,0 +1,56 @@
+{
+  "app": {
+    "tagline": "무엇이든 선택하고, 어떤 AI든 물어보세요.",
+    "providers": "공급자",
+    "providerLab": "공급자 랩",
+    "protocol": "프로토콜",
+    "openaiCompatible": "OpenAI 호환",
+    "anthropic": "Anthropic",
+    "gemini": "Gemini",
+    "baseUrl": "기본 URL",
+    "apiKey": "API 키",
+    "model": "모델 (선택)",
+    "modelPlaceholder": "목록에서 자동",
+    "testConnection": "연결 테스트",
+    "testing": "테스트 중…",
+    "save": "저장",
+    "savedOk": "저장되었습니다 (키는 DPAPI로 암호화).",
+    "saveFailed": "저장에 실패했습니다.",
+    "connected": "{ms}ms 만에 연결 — 모델 {count}개.",
+    "sample": "샘플: {reply}",
+    "savedProfiles": "저장된 프로필",
+    "plainKeyWarn": "평문 키",
+    "settings": "설정",
+    "language": "언어",
+    "autostart": "시작할 때 Promptly 실행",
+    "openChat": "채팅 열기 (Alt+Space)",
+    "about": "정보",
+    "donate": "프로젝트 후원",
+    "events": "이벤트",
+    "helper": "헬퍼"
+  },
+  "toolbar": {
+    "ask": "질문",
+    "translate": "번역",
+    "summarize": "요약",
+    "explain": "설명",
+    "copy": "복사",
+    "close": "닫기"
+  },
+  "chat": {
+    "newChat": "새 채팅",
+    "conversation": "대화",
+    "pin": "고정",
+    "close": "닫기",
+    "noConversations": "아직 대화가 없습니다",
+    "emptyHint": "어디서든 텍스트를 선택하거나 아래에 입력하세요.",
+    "inputPlaceholder": "무엇이든 물어보세요… (Enter로 전송)",
+    "send": "보내기",
+    "stop": "중지"
+  },
+  "ball": {
+    "openChat": "채팅 열기",
+    "settings": "설정",
+    "quit": "Promptly 종료"
+  }
+}

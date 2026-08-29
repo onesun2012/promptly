@@ -1,6 +1,7 @@
 import { BrowserWindow, clipboard, ipcMain, screen } from 'electron'
 import { join } from 'node:path'
 import type { PipelineEvent } from '../../shared'
+import { loadSettings } from '../settings-store'
 
 const TOOLBAR_WIDTH = 360
 const TOOLBAR_HEIGHT = 196
@@ -112,7 +113,11 @@ function ensureToolbar(): BrowserWindow | null {
   toolbar.on('closed', () => {
     toolbar = null
   })
-  void toolbar.loadFile(join(__dirname, '../renderer/toolbar.html'))
+  if (process.env.ELECTRON_RENDERER_URL) {
+    void toolbar.loadURL(process.env.ELECTRON_RENDERER_URL + '/toolbar.html?locale=' + loadSettings().language)
+  } else {
+    void toolbar.loadFile(join(__dirname, '../renderer/toolbar.html'), { search: 'locale=' + loadSettings().language })
+  }
   return toolbar
 }
 

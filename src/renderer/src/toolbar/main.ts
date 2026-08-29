@@ -1,3 +1,13 @@
+import { createAppI18n } from '../i18n'
+
+const i18n = createAppI18n()
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+;(globalThis as any).__PROMPTLY_I18N__ = i18n
+window.promptly.onAppLocale((locale) => {
+  i18n.global.locale.value = locale as 'en'
+})
+const t = (k: string): string => i18n.global.t(k)
+
 interface ViewData {
   text: string
   app: string
@@ -5,11 +15,11 @@ interface ViewData {
   sensitive: string
 }
 
-const AI_ACTIONS: Array<{ id: string; label: string }> = [
-  { id: 'ask', label: 'Ask' },
-  { id: 'translate', label: 'Translate' },
-  { id: 'summarize', label: 'Summarize' },
-  { id: 'explain', label: 'Explain' }
+const AI_ACTIONS: Array<{ id: string; labelKey: string }> = [
+  { id: 'ask', labelKey: 'toolbar.ask' },
+  { id: 'translate', labelKey: 'toolbar.translate' },
+  { id: 'summarize', labelKey: 'toolbar.summarize' },
+  { id: 'explain', labelKey: 'toolbar.explain' }
 ]
 
 let current: ViewData | null = null
@@ -30,11 +40,11 @@ function render(data: ViewData): void {
       </div>
       <div class="text">${escapeHtml(data.text.length > 120 ? data.text.slice(0, 120) + '…' : data.text)}</div>
       <div class="airow">
-        ${AI_ACTIONS.map((a) => `<button class="ai" data-action="${a.id}">${a.label}</button>`).join('')}
+        ${AI_ACTIONS.map((a) => `<button class="ai" data-action="${a.id}">${escapeHtml(t(a.labelKey))}</button>`).join('')}
       </div>
       <div class="actions">
-        <button id="copy">Copy</button>
-        <button id="close">Close</button>
+        <button id="copy">${escapeHtml(t('toolbar.copy'))}</button>
+        <button id="close">${escapeHtml(t('toolbar.close'))}</button>
       </div>
     </div>`
   for (const a of AI_ACTIONS) {

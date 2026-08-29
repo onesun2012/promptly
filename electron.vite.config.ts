@@ -22,7 +22,8 @@ export default defineConfig({
         input: {
           index: resolve('src/renderer/index.html'),
           toolbar: resolve('src/renderer/toolbar.html'),
-          chat: resolve('src/renderer/chat.html')
+          chat: resolve('src/renderer/chat.html'),
+          ball: resolve('src/renderer/ball.html')
         }
       }
     }

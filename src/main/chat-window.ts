@@ -1,5 +1,6 @@
 import { BrowserWindow, ipcMain, screen } from 'electron'
 import { join } from 'node:path'
+import { loadSettings } from './settings-store'
 import type { Db } from './db'
 import type { ChatSendOptions } from './chat-service'
 import type { ChatChunk } from '../shared/providers.ts'
@@ -89,9 +90,9 @@ function ensureChatWindow(): BrowserWindow {
   })
 
   if (process.env.ELECTRON_RENDERER_URL) {
-    void chat.loadURL(process.env.ELECTRON_RENDERER_URL + '/chat.html')
+    void chat.loadURL(process.env.ELECTRON_RENDERER_URL + '/chat.html?locale=' + loadSettings().language)
   } else {
-    void chat.loadFile(join(__dirname, '../renderer/chat.html'))
+    void chat.loadFile(join(__dirname, '../renderer/chat.html'), { search: 'locale=' + loadSettings().language })
   }
   return chat
 }

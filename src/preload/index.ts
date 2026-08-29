@@ -31,6 +31,13 @@ const api = {
   chatPin: () => ipcRenderer.send('chat:pin'),
   chatClose: () => ipcRenderer.send('chat:hide'),
   runAction: (id: string) => ipcRenderer.send('toolbar:action', id),
+  ballOpenChat: () => ipcRenderer.send('ball:open-chat'),
+  ballMenu: (pos: { x: number; y: number }) => ipcRenderer.send('ball:menu', pos),
+  getSettings: () => ipcRenderer.invoke('settings:get'),
+  setLanguage: (locale: string) => ipcRenderer.invoke('settings:language', locale),
+  setAutostart: (enabled: boolean) => ipcRenderer.invoke('settings:autostart', enabled),
+  openChat: () => ipcRenderer.send('chat:toggle'),
+  onAppLocale: subscriber<string>('app:locale'),
   onChatChunk: subscriber<{ conversationId: string; chunk: { type: string; content?: string } }>('chat:chunk'),
   onChatPreloadAction: subscriber<{ actionId: string; selection: string }>('chat:preload-action'),
 }

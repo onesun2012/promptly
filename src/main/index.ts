@@ -9,8 +9,11 @@ import { initSqliteDb } from './db'
 import { createChatService } from './chat-service'
 import { forwardChatChunk, initChatIpc, openChatWithAction, toggleChatWindow } from './chat-window'
 import * as secureStore from './secure-store'
+import { applyFirstRunAutostart, loadSettings, saveSettings, setAutostart } from './settings-store'
+import { createBallWindow, initBallIpc, labelsFor, setBallLabels } from './ball'
 
 function createWindow(): void {
+  const locale = loadSettings().language
   const win = new BrowserWindow({
     width: 960,
     height: 680,
@@ -31,9 +34,9 @@ function createWindow(): void {
   win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }))
 
   if (process.env.ELECTRON_RENDERER_URL) {
-    win.loadURL(process.env.ELECTRON_RENDERER_URL)
+    win.loadURL(process.env.ELECTRON_RENDERER_URL + '/?locale=' + locale)
   } else {
-    win.loadFile(join(__dirname, '../renderer/index.html'))
+    win.loadFile(join(__dirname, '../renderer/index.html'), { search: 'locale=' + locale })
   }
 }
 
@@ -67,7 +70,11 @@ if (!gotLock) {
   })
 
   app.whenReady().then(() => {
+    applyFirstRunAutostart()
     createWindow()
+    initBallIpc()
+    setBallLabels(labelsFor(loadSettings().language))
+    createBallWindow()
     const db = initSqliteDb(app.getPath('userData'))
     const chat = createChatService({
       db,
@@ -86,6 +93,19 @@ if (!gotLock) {
     )
     initChatIpc(db, (opts) => chat.send(opts), (id) => chat.stop(id))
     initProviderIpc()
+
+    ipcMain.handle('settings:get', () => loadSettings())
+    ipcMain.handle('settings:language', (_e, locale: string) => {
+      saveSettings({ language: String(locale) })
+      setBallLabels(labelsFor(String(locale)))
+      for (const w of BrowserWindow.getAllWindows()) w.webContents.send('app:locale', String(locale))
+      return { ok: true }
+    })
+    ipcMain.handle('settings:autostart', (_e, enabled: boolean) => {
+      setAutostart(Boolean(enabled))
+      return { ok: true }
+    })
+    ipcMain.on('chat:toggle', () => toggleChatWindow())
 
     globalShortcut.register('Alt+Space', () => {
       toggleChatWindow()

@@ -1,0 +1,56 @@
+{
+  "app": {
+    "tagline": "Selecciona cualquier cosa. Pregunta a cualquier IA.",
+    "providers": "Proveedores",
+    "providerLab": "Laboratorio de proveedores",
+    "protocol": "Protocolo",
+    "openaiCompatible": "Compatible con OpenAI",
+    "anthropic": "Anthropic",
+    "gemini": "Gemini",
+    "baseUrl": "URL base",
+    "apiKey": "Clave API",
+    "model": "Modelo (opcional)",
+    "modelPlaceholder": "automático de la lista",
+    "testConnection": "Probar conexión",
+    "testing": "Probando…",
+    "save": "Guardar",
+    "savedOk": "Guardado (clave cifrada con DPAPI).",
+    "saveFailed": "Error al guardar.",
+    "connected": "Conectado en {ms} ms — {count} modelos.",
+    "sample": "Muestra: {reply}",
+    "savedProfiles": "Perfiles guardados",
+    "plainKeyWarn": "clave sin cifrar",
+    "settings": "Ajustes",
+    "language": "Idioma",
+    "autostart": "Iniciar Promptly al arrancar",
+    "openChat": "Abrir chat (Alt+Espacio)",
+    "about": "Acerca de",
+    "donate": "Apoyar el proyecto",
+    "events": "Eventos",
+    "helper": "Auxiliar"
+  },
+  "toolbar": {
+    "ask": "Preguntar",
+    "translate": "Traducir",
+    "summarize": "Resumir",
+    "explain": "Explicar",
+    "copy": "Copiar",
+    "close": "Cerrar"
+  },
+  "chat": {
+    "newChat": "Nuevo chat",
+    "conversation": "Conversación",
+    "pin": "Fijar",
+    "close": "Cerrar",
+    "noConversations": "Aún no hay conversaciones",
+    "emptyHint": "Selecciona texto en cualquier lugar o escribe abajo.",
+    "inputPlaceholder": "Pregunta lo que quieras… (Entrar para enviar)",
+    "send": "Enviar",
+    "stop": "Detener"
+  },
+  "ball": {
+    "openChat": "Abrir chat",
+    "settings": "Ajustes",
+    "quit": "Salir de Promptly"
+  }
+}

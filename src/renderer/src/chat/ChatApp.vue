@@ -158,10 +158,28 @@ function stopStreaming(): void {
 <template>
   <div class="chat">
     <header class="titlebar">
-      <button class="bar-btn" title="New chat" @click="activeId = null; messages = []">＋</button>
-      <span class="title">{{ activeId ? 'Conversation' : 'New chat' }}</span>
-      <button class="bar-btn" title="Pin" @click="pinWindow">📌</button>
-      <button class="bar-btn" title="Close" @click="closeWindow">✕</button>
+      <button
+        class="bar-btn"
+        :title="$t('chat.newChat')"
+        @click="activeId = null; messages = []"
+      >
+        ＋
+      </button>
+      <span class="title">{{ activeId ? $t('chat.conversation') : $t('chat.newChat') }}</span>
+      <button
+        class="bar-btn"
+        :title="$t('chat.pin')"
+        @click="pinWindow"
+      >
+        📌
+      </button>
+      <button
+        class="bar-btn"
+        :title="$t('chat.close')"
+        @click="closeWindow"
+      >
+        ✕
+      </button>
     </header>
 
     <div class="layout">
@@ -174,28 +192,62 @@ function stopStreaming(): void {
           @click="openConversation(c.id)"
         >
           <span class="stitle">{{ c.title }}</span>
-          <span class="del" @click.stop="removeConversation(c.id)">✕</span>
+          <span
+            class="del"
+            @click.stop="removeConversation(c.id)"
+          >✕</span>
         </button>
-        <div v-if="!conversations.length" class="muted">
+        <div
+          v-if="!conversations.length"
+          class="muted"
+        >
           No conversations yet
         </div>
       </aside>
 
       <main class="main">
-        <div ref="bodyEl" id="messages" class="messages">
-          <div v-if="!messages.length" class="empty">
-            Select text anywhere, or type below.
+        <div
+          id="messages"
+          ref="bodyEl"
+          class="messages"
+        >
+          <div
+            v-if="!messages.length"
+            class="empty"
+          >
+            {{ $t('chat.emptyHint') }}
           </div>
-          <template v-for="(m, i) in messages" :key="i">
-            <div v-if="m.role === 'user'" class="bubble user">
+          <template
+            v-for="(m, i) in messages"
+            :key="i"
+          >
+            <div
+              v-if="m.role === 'user'"
+              class="bubble user"
+            >
               {{ m.content }}
             </div>
-            <div v-else class="bubble assistant" :class="{ err: m.error }">
-              <div v-if="m.reasoning" class="reasoning">
+            <div
+              v-else
+              class="bubble assistant"
+              :class="{ err: m.error }"
+            >
+              <div
+                v-if="m.reasoning"
+                class="reasoning"
+              >
                 {{ m.reasoning }}
               </div>
-              <div v-if="m.content" class="md" :data-i="i" v-html="mdOf(m)" />
-              <span v-if="m.streaming && !m.content" class="cursor">▍</span>
+              <div
+                v-if="m.content"
+                class="md"
+                :data-i="i"
+                v-html="mdOf(m)"
+              />
+              <span
+                v-if="m.streaming && !m.content"
+                class="cursor"
+              >▍</span>
             </div>
           </template>
         </div>
@@ -204,14 +256,22 @@ function stopStreaming(): void {
           <textarea
             v-model="input"
             rows="2"
-            placeholder="Ask anything… (Enter to send)"
+            :placeholder="$t('chat.inputPlaceholder')"
             @keydown="onInputKeydown"
           />
-          <button v-if="!streaming" class="send" @click="sendText">
-            Send
+          <button
+            v-if="!streaming"
+            class="send"
+            @click="sendText"
+          >
+            {{ $t('chat.send') }}
           </button>
-          <button v-else class="send stop" @click="stopStreaming">
-            Stop
+          <button
+            v-else
+            class="send stop"
+            @click="stopStreaming"
+          >
+            {{ $t('chat.stop') }}
           </button>
         </div>
       </main>

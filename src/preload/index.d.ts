@@ -25,6 +25,13 @@ declare global {
       chatPin: () => void
       chatClose: () => void
       runAction: (id: string) => void
+      ballOpenChat: () => void
+      ballMenu: (pos: { x: number; y: number }) => void
+      getSettings: () => Promise<{ language: string; autostart: boolean }>
+      setLanguage: (locale: string) => Promise<{ ok: boolean }>
+      setAutostart: (enabled: boolean) => Promise<{ ok: boolean }>
+      openChat: () => void
+      onAppLocale: (callback: (locale: string) => void) => () => void
       onChatChunk: (callback: (data: { conversationId: string; chunk: { type: string; content?: string } }) => void) => () => void
       onChatPreloadAction: (callback: (data: { actionId: string; selection: string }) => void) => () => void
     }

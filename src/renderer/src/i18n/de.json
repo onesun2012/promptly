@@ -1,0 +1,56 @@
+{
+  "app": {
+    "tagline": "Alles markieren. Jede KI fragen.",
+    "providers": "Anbieter",
+    "providerLab": "Anbieter-Labor",
+    "protocol": "Protokoll",
+    "openaiCompatible": "OpenAI-kompatibel",
+    "anthropic": "Anthropic",
+    "gemini": "Gemini",
+    "baseUrl": "Basis-URL",
+    "apiKey": "API-Schlüssel",
+    "model": "Modell (optional)",
+    "modelPlaceholder": "automatisch aus Liste",
+    "testConnection": "Verbindung testen",
+    "testing": "Teste…",
+    "save": "Speichern",
+    "savedOk": "Gespeichert (Schlüssel per DPAPI verschlüsselt).",
+    "saveFailed": "Speichern fehlgeschlagen.",
+    "connected": "Verbunden in {ms} ms — {count} Modelle.",
+    "sample": "Beispiel: {reply}",
+    "savedProfiles": "Gespeicherte Profile",
+    "plainKeyWarn": "Klartext-Schlüssel",
+    "settings": "Einstellungen",
+    "language": "Sprache",
+    "autostart": "Promptly beim Start ausführen",
+    "openChat": "Chat öffnen (Alt+Leertaste)",
+    "about": "Über",
+    "donate": "Projekt unterstützen",
+    "events": "Ereignisse",
+    "helper": "Helfer"
+  },
+  "toolbar": {
+    "ask": "Fragen",
+    "translate": "Übersetzen",
+    "summarize": "Zusammenfassen",
+    "explain": "Erklären",
+    "copy": "Kopieren",
+    "close": "Schließen"
+  },
+  "chat": {
+    "newChat": "Neuer Chat",
+    "conversation": "Unterhaltung",
+    "pin": "Anheften",
+    "close": "Schließen",
+    "noConversations": "Noch keine Unterhaltungen",
+    "emptyHint": "Markiere überall Text oder tippe unten.",
+    "inputPlaceholder": "Frag anything… (Enter zum Senden)",
+    "send": "Senden",
+    "stop": "Stopp"
+  },
+  "ball": {
+    "openChat": "Chat öffnen",
+    "settings": "Einstellungen",
+    "quit": "Promptly beenden"
+  }
+}

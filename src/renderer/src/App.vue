@@ -1,17 +1,22 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useAppStore } from './stores/app'
 import type { LifecycleInfo, PipelineEvent } from '@shared'
 import type { ProviderProfile, ProviderView, TestConnectionResult } from '@shared'
+import { SUPPORTED_LOCALES, applyLocale, type Locale } from './i18n'
 
 const app = useAppStore()
+const { t, locale } = useI18n()
 
 const lastEvent = ref<PipelineEvent | null>(null)
 const eventCount = ref(0)
 const lifecycle = ref<LifecycleInfo | null>(null)
 let offEvent: (() => void) | null = null
 let offLifecycle: (() => void) | null = null
+let offLocale: (() => void) | null = null
 
+const locales: Locale[] = [...SUPPORTED_LOCALES]
 const form = ref<ProviderProfile>({
   id: '',
   name: 'My provider',
@@ -25,6 +30,8 @@ const activeId = ref<string | null>(null)
 const testing = ref(false)
 const testResult = ref<TestConnectionResult | null>(null)
 const saveMsg = ref('')
+const settingsLanguage = ref('en')
+const autostart = ref(true)
 
 async function refreshProfiles(): Promise<void> {
   profiles.value = await window.promptly.listProviders()
@@ -33,6 +40,21 @@ async function refreshProfiles(): Promise<void> {
   if (active) {
     form.value = { ...active, apiKey: '' }
   }
+}
+
+async function loadSettings(): Promise<void> {
+  const s = await window.promptly.getSettings()
+  settingsLanguage.value = s.language
+  autostart.value = s.autostart
+}
+
+async function onLanguageChange(): Promise<void> {
+  locale.value = settingsLanguage.value as Locale
+  await window.promptly.setLanguage(settingsLanguage.value)
+}
+
+async function onAutostartChange(): Promise<void> {
+  await window.promptly.setAutostart(autostart.value)
 }
 
 async function testProvider(): Promise<void> {
@@ -48,7 +70,7 @@ async function testProvider(): Promise<void> {
 async function saveProvider(): Promise<void> {
   if (!form.value.id) form.value.id = 'p_' + Date.now().toString(36)
   const r = await window.promptly.saveProvider({ ...form.value })
-  saveMsg.value = r.ok ? 'Saved (key encrypted via DPAPI).' : 'Save failed.'
+  saveMsg.value = r.ok ? t('app.savedOk') : t('app.saveFailed')
   await refreshProfiles()
 }
 
@@ -62,9 +84,14 @@ async function removeProvider(id: string): Promise<void> {
   await refreshProfiles()
 }
 
+function openChat(): void {
+  window.promptly.openChat()
+}
+
 onMounted(() => {
   void app.load()
   void refreshProfiles()
+  void loadSettings()
   offEvent = window.promptly.onPipelineEvent((env) => {
     lastEvent.value = env
     eventCount.value += 1
@@ -72,11 +99,16 @@ onMounted(() => {
   offLifecycle = window.promptly.onPipelineLifecycle((info) => {
     lifecycle.value = info
   })
+  offLocale = window.promptly.onAppLocale((l) => {
+    applyLocale(l)
+    locale.value = l as Locale
+  })
 })
 
 onUnmounted(() => {
   offEvent?.()
   offLifecycle?.()
+  offLocale?.()
 })
 
 function snippet(env: PipelineEvent | null): string {
@@ -92,24 +124,24 @@ function snippet(env: PipelineEvent | null): string {
     <header class="brand">
       <h1>Promptly</h1>
       <p class="tagline">
-        Select anything. Ask any AI.
+        {{ t('app.tagline') }}
       </p>
     </header>
 
     <main class="card">
       <template v-if="app.loaded && app.info">
-        <h2>M2 providers</h2>
+        <h2>{{ t('app.providers') }}</h2>
         <ul class="meta">
           <li>
-            <span>App</span>
+            <span>{{ t('app.about') }}</span>
             <code>{{ app.info.name }} v{{ app.info.version }}</code>
           </li>
           <li>
-            <span>Helper</span>
-            <code>{{ lifecycle ? lifecycle.state : 'starting…' }}</code>
+            <span>{{ t('app.helper') }}</span>
+            <code>{{ lifecycle ? lifecycle.state : '…' }}</code>
           </li>
           <li>
-            <span>Events</span>
+            <span>{{ t('app.events') }}</span>
             <code>{{ eventCount }}</code>
           </li>
         </ul>
@@ -120,25 +152,25 @@ function snippet(env: PipelineEvent | null): string {
     </main>
 
     <section class="card">
-      <h2>Provider lab</h2>
+      <h2>{{ t('app.providerLab') }}</h2>
       <div class="grid">
         <label>
-          Protocol
+          {{ t('app.protocol') }}
           <select v-model="form.protocol">
-            <option value="openai">OpenAI compatible</option>
-            <option value="anthropic">Anthropic</option>
-            <option value="gemini">Gemini</option>
+            <option value="openai">{{ t('app.openaiCompatible') }}</option>
+            <option value="anthropic">{{ t('app.anthropic') }}</option>
+            <option value="gemini">{{ t('app.gemini') }}</option>
           </select>
         </label>
         <label>
-          Base URL
+          {{ t('app.baseUrl') }}
           <input
             v-model="form.baseUrl"
             spellcheck="false"
           >
         </label>
         <label>
-          API key
+          {{ t('app.apiKey') }}
           <input
             v-model="form.apiKey"
             type="password"
@@ -147,11 +179,11 @@ function snippet(env: PipelineEvent | null): string {
           >
         </label>
         <label>
-          Model (optional)
+          {{ t('app.model') }}
           <input
             v-model="form.model"
             spellcheck="false"
-            placeholder="auto from list"
+            :placeholder="t('app.modelPlaceholder')"
           >
         </label>
       </div>
@@ -161,10 +193,10 @@ function snippet(env: PipelineEvent | null): string {
           :disabled="testing"
           @click="testProvider"
         >
-          {{ testing ? 'Testing…' : 'Test connection' }}
+          {{ testing ? t('app.testing') : t('app.testConnection') }}
         </button>
         <button @click="saveProvider">
-          Save
+          {{ t('app.save') }}
         </button>
         <span
           v-if="saveMsg"
@@ -177,9 +209,9 @@ function snippet(env: PipelineEvent | null): string {
         :class="testResult.ok ? 'ok' : 'bad'"
       >
         <template v-if="testResult.ok">
-          ✓ Connected in {{ testResult.latencyMs }}ms — {{ testResult.models?.length ?? 0 }} models.
+          ✓ {{ t('app.connected', { ms: testResult.latencyMs, count: testResult.models?.length ?? 0 }) }}
           <div class="muted">
-            Sample: {{ testResult.sampleReply }}
+            {{ t('app.sample', { reply: testResult.sampleReply }) }}
           </div>
         </template>
         <template v-else>
@@ -191,7 +223,7 @@ function snippet(env: PipelineEvent | null): string {
         v-if="profiles.length"
         class="saved"
       >
-        <h3>Saved profiles</h3>
+        <h3>{{ t('app.savedProfiles') }}</h3>
         <ul>
           <li
             v-for="p in profiles"
@@ -210,8 +242,8 @@ function snippet(env: PipelineEvent | null): string {
               <span
                 v-if="p.insecureKey"
                 class="warn"
-                title="OS encryption unavailable"
-              >⚠ plain key</span>
+                :title="t('app.plainKeyWarn')"
+              >⚠</span>
               <button
                 class="mini"
                 @click="removeProvider(p.id)"
@@ -222,11 +254,51 @@ function snippet(env: PipelineEvent | null): string {
       </div>
     </section>
 
+    <section class="card">
+      <h2>{{ t('app.settings') }}</h2>
+      <div class="grid">
+        <label>
+          {{ t('app.language') }}
+          <select
+            v-model="settingsLanguage"
+            @change="onLanguageChange"
+          >
+            <option
+              v-for="l in locales"
+              :key="l"
+              :value="l"
+            >{{ l.toUpperCase() }}</option>
+          </select>
+        </label>
+        <label class="check">
+          <input
+            v-model="autostart"
+            type="checkbox"
+            @change="onAutostartChange"
+          >
+          {{ t('app.autostart') }}
+        </label>
+      </div>
+      <div class="actions">
+        <button
+          class="primary"
+          @click="openChat"
+        >
+          {{ t('app.openChat') }}
+        </button>
+        <a
+          class="muted"
+          href="#"
+          @click.prevent
+        >{{ t('app.donate') }}</a>
+      </div>
+    </section>
+
     <section
       v-if="lastEvent"
       class="card"
     >
-      <h2>Last pipeline event</h2>
+      <h2>{{ t('app.events') }}</h2>
       <p class="evline">
         <code class="evtype">{{ lastEvent.type }}</code>
         <code>{{ lastEvent.sessionId }}</code>
@@ -243,33 +315,11 @@ function snippet(env: PipelineEvent | null): string {
   font-family: 'Segoe UI', system-ui, sans-serif;
   color: #1f2328;
 }
-
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  background: #f6f8fa;
-}
-
-.shell {
-  max-width: 620px;
-  margin: 6vh auto 0;
-  padding: 0 24px 40px;
-}
-
-.brand h1 {
-  margin: 0;
-  font-size: 28px;
-  letter-spacing: -0.02em;
-}
-
-.tagline {
-  margin: 4px 0 28px;
-  color: #57606a;
-}
-
+* { box-sizing: border-box; }
+body { margin: 0; background: #f6f8fa; }
+.shell { max-width: 620px; margin: 6vh auto 0; padding: 0 24px 40px; }
+.brand h1 { margin: 0; font-size: 28px; letter-spacing: -0.02em; }
+.tagline { margin: 4px 0 28px; color: #57606a; }
 .card {
   background: #fff;
   border: 1px solid #d0d7de;
@@ -277,152 +327,29 @@ body {
   padding: 20px 24px;
   margin-bottom: 16px;
 }
-
-.card h2 {
-  margin: 0 0 12px;
-  font-size: 16px;
-}
-
-.meta {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.meta li {
-  display: flex;
-  justify-content: space-between;
-  padding: 6px 0;
-  border-bottom: 1px solid #eff2f5;
-}
-
-.meta li span {
-  color: #57606a;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px 14px;
-}
-
-label {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: 12px;
-  color: #57606a;
-}
-
-input,
-select {
-  font-size: 13px;
-  padding: 6px 8px;
-  border: 1px solid #d0d7de;
-  border-radius: 6px;
-}
-
-.actions {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  margin-top: 14px;
-}
-
-button {
-  font-size: 13px;
-  padding: 6px 16px;
-  border-radius: 6px;
-  border: 1px solid #d0d7de;
-  background: #f6f8fa;
-  cursor: pointer;
-}
-
-button.primary {
-  background: #1f883d;
-  border-color: #1f883d;
-  color: #fff;
-}
-
-button:disabled {
-  opacity: 0.6;
-}
-
-button.mini {
-  padding: 2px 8px;
-  font-size: 11px;
-  margin-left: auto;
-}
-
-.muted {
-  color: #57606a;
-  font-size: 12px;
-}
-
-.warn {
-  color: #bf8700;
-  font-size: 12px;
-}
-
-.result {
-  margin-top: 12px;
-  padding: 10px 12px;
-  border-radius: 6px;
-  font-size: 13px;
-}
-
-.result.ok {
-  background: #dafbe1;
-  color: #1a7f37;
-}
-
-.result.bad {
-  background: #ffebe9;
-  color: #cf222e;
-}
-
-.saved h3 {
-  font-size: 13px;
-  margin: 16px 0 6px;
-}
-
-.saved ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.row {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 8px;
-  padding: 4px 0;
-}
-
-.pname {
-  font-weight: 600;
-}
-
-.evline {
-  display: flex;
-  gap: 8px;
-  margin: 0 0 8px;
-  flex-wrap: wrap;
-}
-
-.evtype {
-  background: #ddf4ff;
-  color: #0969da;
-  padding: 1px 8px;
-  border-radius: 8px;
-  font-size: 12px;
-}
-
-.evtext {
-  margin: 0;
-  font-size: 12px;
-  color: #57606a;
-  word-break: break-all;
-}
+.card h2 { margin: 0 0 12px; font-size: 16px; }
+.meta { list-style: none; margin: 0; padding: 0; }
+.meta li { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #eff2f5; }
+.meta li span { color: #57606a; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; }
+label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #57606a; }
+label.check { flex-direction: row; align-items: center; gap: 8px; font-size: 13px; padding-top: 20px; }
+input, select { font-size: 13px; padding: 6px 8px; border: 1px solid #d0d7de; border-radius: 6px; }
+.actions { display: flex; gap: 10px; align-items: center; margin-top: 14px; }
+button { font-size: 13px; padding: 6px 16px; border-radius: 6px; border: 1px solid #d0d7de; background: #f6f8fa; cursor: pointer; }
+button.primary { background: #1f883d; border-color: #1f883d; color: #fff; }
+button:disabled { opacity: 0.6; }
+button.mini { padding: 2px 8px; font-size: 11px; margin-left: auto; }
+.muted { color: #57606a; font-size: 12px; }
+.warn { color: #bf8700; font-size: 12px; }
+.result { margin-top: 12px; padding: 10px 12px; border-radius: 6px; font-size: 13px; }
+.result.ok { background: #dafbe1; color: #1a7f37; }
+.result.bad { background: #ffebe9; color: #cf222e; }
+.saved h3 { font-size: 13px; margin: 16px 0 6px; }
+.saved ul { list-style: none; margin: 0; padding: 0; }
+.row { display: flex; flex-direction: row; align-items: center; gap: 8px; padding: 4px 0; }
+.pname { font-weight: 600; }
+.evline { display: flex; gap: 8px; margin: 0 0 8px; flex-wrap: wrap; }
+.evtype { background: #ddf4ff; color: #0969da; padding: 1px 8px; border-radius: 8px; font-size: 12px; }
+.evtext { margin: 0; font-size: 12px; color: #57606a; word-break: break-all; }
 </style>
