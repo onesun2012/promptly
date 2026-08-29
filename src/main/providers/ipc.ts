@@ -1,20 +1,7 @@
 import { ipcMain } from 'electron'
-import type { AIProvider, ProviderProfile, ProviderProtocol, TestConnectionResult } from './types.ts'
-import { AnthropicProvider } from './anthropic.ts'
-import { GeminiProvider } from './gemini.ts'
-import { OpenAICompatibleProvider } from './openai-compatible.ts'
+import type { ProviderProfile, TestConnectionResult } from './types.ts'
+import { getProvider } from './factory.ts'
 import * as store from '../secure-store'
-
-export function getProvider(protocol: ProviderProtocol): AIProvider {
-  switch (protocol) {
-    case 'anthropic':
-      return new AnthropicProvider()
-    case 'gemini':
-      return new GeminiProvider()
-    default:
-      return new OpenAICompatibleProvider()
-  }
-}
 
 export function initProviderIpc(): void {
   ipcMain.handle('provider:list', () => store.listViews())
