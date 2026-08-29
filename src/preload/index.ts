@@ -16,7 +16,13 @@ const api = {
   onToolbarData: subscriber<{ env: PipelineEvent; text: string }>('toolbar:data'),
   toolbarReady: (): void => ipcRenderer.send('toolbar:ready'),
   hideToolbar: (): void => ipcRenderer.send('toolbar:hide'),
-  copySelection: (text: string): Promise<boolean> => ipcRenderer.invoke('toolbar:copy', text)
+  copySelection: (text: string): Promise<boolean> => ipcRenderer.invoke('toolbar:copy', text),
+  listProviders: () => ipcRenderer.invoke('provider:list'),
+  activeProvider: () => ipcRenderer.invoke('provider:active'),
+  saveProvider: (profile: unknown) => ipcRenderer.invoke('provider:save', profile),
+  deleteProvider: (id: string) => ipcRenderer.invoke('provider:delete', id),
+  setActiveProvider: (id: string) => ipcRenderer.invoke('provider:setActive', id),
+  testProvider: (profile: unknown) => ipcRenderer.invoke('provider:test', profile)
 }
 
 export type PromptlyAPI = typeof api

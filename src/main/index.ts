@@ -4,6 +4,7 @@ import type { AppInfo } from '../shared'
 import { HelperClient } from './selection/helper-client'
 import { SelectionMachine } from './selection/state-machine'
 import { initToolbarIpc, showToolbarForSelection } from './selection/toolbar'
+import { initProviderIpc } from './providers/ipc'
 
 function createWindow(): void {
   const win = new BrowserWindow({
@@ -64,6 +65,7 @@ if (!gotLock) {
   app.whenReady().then(() => {
     createWindow()
     initToolbarIpc(() => machine.transition('IDLE', machine.activeSessionId))
+    initProviderIpc()
 
     // Q5 hotkey mode: capture the selection at the current cursor position.
     // The default hotkey is always registered; per-mode switch lands with the

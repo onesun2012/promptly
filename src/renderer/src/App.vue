@@ -2,6 +2,7 @@
 import { onMounted, onUnmounted, ref } from 'vue'
 import { useAppStore } from './stores/app'
 import type { LifecycleInfo, PipelineEvent } from '@shared'
+import type { ProviderProfile, ProviderView, TestConnectionResult } from '@shared'
 
 const app = useAppStore()
 
@@ -11,8 +12,59 @@ const lifecycle = ref<LifecycleInfo | null>(null)
 let offEvent: (() => void) | null = null
 let offLifecycle: (() => void) | null = null
 
+const form = ref<ProviderProfile>({
+  id: '',
+  name: 'My provider',
+  protocol: 'openai',
+  baseUrl: 'https://api.deepseek.com/v1',
+  apiKey: '',
+  model: ''
+})
+const profiles = ref<ProviderView[]>([])
+const activeId = ref<string | null>(null)
+const testing = ref(false)
+const testResult = ref<TestConnectionResult | null>(null)
+const saveMsg = ref('')
+
+async function refreshProfiles(): Promise<void> {
+  profiles.value = await window.promptly.listProviders()
+  const active = await window.promptly.activeProvider()
+  activeId.value = active?.id ?? null
+  if (active) {
+    form.value = { ...active, apiKey: '' }
+  }
+}
+
+async function testProvider(): Promise<void> {
+  testing.value = true
+  testResult.value = null
+  try {
+    testResult.value = await window.promptly.testProvider({ ...form.value })
+  } finally {
+    testing.value = false
+  }
+}
+
+async function saveProvider(): Promise<void> {
+  if (!form.value.id) form.value.id = 'p_' + Date.now().toString(36)
+  const r = await window.promptly.saveProvider({ ...form.value })
+  saveMsg.value = r.ok ? 'Saved (key encrypted via DPAPI).' : 'Save failed.'
+  await refreshProfiles()
+}
+
+async function makeActive(id: string): Promise<void> {
+  await window.promptly.setActiveProvider(id)
+  activeId.value = id
+}
+
+async function removeProvider(id: string): Promise<void> {
+  await window.promptly.deleteProvider(id)
+  await refreshProfiles()
+}
+
 onMounted(() => {
   void app.load()
+  void refreshProfiles()
   offEvent = window.promptly.onPipelineEvent((env) => {
     lastEvent.value = env
     eventCount.value += 1
@@ -46,15 +98,11 @@ function snippet(env: PipelineEvent | null): string {
 
     <main class="card">
       <template v-if="app.loaded && app.info">
-        <h2>M1 selection pipeline</h2>
+        <h2>M2 providers</h2>
         <ul class="meta">
           <li>
             <span>App</span>
             <code>{{ app.info.name }} v{{ app.info.version }}</code>
-          </li>
-          <li>
-            <span>Electron</span>
-            <code>{{ app.info.electron }}</code>
           </li>
           <li>
             <span>Helper</span>
@@ -65,14 +113,114 @@ function snippet(env: PipelineEvent | null): string {
             <code>{{ eventCount }}</code>
           </li>
         </ul>
-        <p class="hint">
-          Drag-select text in any app to see the pipeline live.
-        </p>
       </template>
       <p v-else>
         Loading…
       </p>
     </main>
+
+    <section class="card">
+      <h2>Provider lab</h2>
+      <div class="grid">
+        <label>
+          Protocol
+          <select v-model="form.protocol">
+            <option value="openai">OpenAI compatible</option>
+            <option value="anthropic">Anthropic</option>
+            <option value="gemini">Gemini</option>
+          </select>
+        </label>
+        <label>
+          Base URL
+          <input
+            v-model="form.baseUrl"
+            spellcheck="false"
+          >
+        </label>
+        <label>
+          API key
+          <input
+            v-model="form.apiKey"
+            type="password"
+            spellcheck="false"
+            placeholder="sk-…"
+          >
+        </label>
+        <label>
+          Model (optional)
+          <input
+            v-model="form.model"
+            spellcheck="false"
+            placeholder="auto from list"
+          >
+        </label>
+      </div>
+      <div class="actions">
+        <button
+          class="primary"
+          :disabled="testing"
+          @click="testProvider"
+        >
+          {{ testing ? 'Testing…' : 'Test connection' }}
+        </button>
+        <button @click="saveProvider">
+          Save
+        </button>
+        <span
+          v-if="saveMsg"
+          class="muted"
+        >{{ saveMsg }}</span>
+      </div>
+      <div
+        v-if="testResult"
+        class="result"
+        :class="testResult.ok ? 'ok' : 'bad'"
+      >
+        <template v-if="testResult.ok">
+          ✓ Connected in {{ testResult.latencyMs }}ms — {{ testResult.models?.length ?? 0 }} models.
+          <div class="muted">
+            Sample: {{ testResult.sampleReply }}
+          </div>
+        </template>
+        <template v-else>
+          ✗ {{ testResult.error }}
+        </template>
+      </div>
+
+      <div
+        v-if="profiles.length"
+        class="saved"
+      >
+        <h3>Saved profiles</h3>
+        <ul>
+          <li
+            v-for="p in profiles"
+            :key="p.id"
+          >
+            <label class="row">
+              <input
+                type="radio"
+                name="active"
+                :checked="p.id === activeId"
+                @change="makeActive(p.id)"
+              >
+              <span class="pname">{{ p.name }}</span>
+              <code>{{ p.protocol }}</code>
+              <code class="muted">{{ p.baseUrl }}</code>
+              <span
+                v-if="p.insecureKey"
+                class="warn"
+                title="OS encryption unavailable"
+              >⚠ plain key</span>
+              <button
+                class="mini"
+                @click="removeProvider(p.id)"
+              >✕</button>
+            </label>
+          </li>
+        </ul>
+      </div>
+    </section>
 
     <section
       v-if="lastEvent"
@@ -106,8 +254,8 @@ body {
 }
 
 .shell {
-  max-width: 560px;
-  margin: 8vh auto 0;
+  max-width: 620px;
+  margin: 6vh auto 0;
   padding: 0 24px 40px;
 }
 
@@ -118,7 +266,7 @@ body {
 }
 
 .tagline {
-  margin: 4px 0 32px;
+  margin: 4px 0 28px;
   color: #57606a;
 }
 
@@ -152,10 +300,108 @@ body {
   color: #57606a;
 }
 
-.hint {
-  margin: 12px 0 0;
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 14px;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   font-size: 12px;
+  color: #57606a;
+}
+
+input,
+select {
+  font-size: 13px;
+  padding: 6px 8px;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 14px;
+}
+
+button {
+  font-size: 13px;
+  padding: 6px 16px;
+  border-radius: 6px;
+  border: 1px solid #d0d7de;
+  background: #f6f8fa;
+  cursor: pointer;
+}
+
+button.primary {
+  background: #1f883d;
+  border-color: #1f883d;
+  color: #fff;
+}
+
+button:disabled {
+  opacity: 0.6;
+}
+
+button.mini {
+  padding: 2px 8px;
+  font-size: 11px;
+  margin-left: auto;
+}
+
+.muted {
+  color: #57606a;
+  font-size: 12px;
+}
+
+.warn {
+  color: #bf8700;
+  font-size: 12px;
+}
+
+.result {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.result.ok {
+  background: #dafbe1;
   color: #1a7f37;
+}
+
+.result.bad {
+  background: #ffebe9;
+  color: #cf222e;
+}
+
+.saved h3 {
+  font-size: 13px;
+  margin: 16px 0 6px;
+}
+
+.saved ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.pname {
+  font-weight: 600;
 }
 
 .evline {
