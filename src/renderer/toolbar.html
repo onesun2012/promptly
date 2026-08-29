@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:"
+    />
+    <title>Promptly</title>
+    <style>
+      :root {
+        font-family: 'Segoe UI', system-ui, sans-serif;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: transparent;
+        user-select: none;
+      }
+      .toolbar {
+        background: #ffffff;
+        border: 1px solid #d0d7de;
+        border-radius: 10px;
+        box-shadow: 0 8px 24px rgba(31, 35, 40, 0.18);
+        padding: 10px 12px;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+      }
+      .app {
+        font-size: 12px;
+        font-weight: 600;
+        color: #57606a;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .badges {
+        display: flex;
+        gap: 4px;
+        flex-shrink: 0;
+      }
+      .badge {
+        font-size: 10px;
+        padding: 1px 6px;
+        border-radius: 8px;
+        background: #eff2f5;
+        color: #57606a;
+      }
+      .badge.ok {
+        background: #dafbe1;
+        color: #1a7f37;
+      }
+      .text {
+        flex: 1;
+        font-size: 12px;
+        line-height: 1.45;
+        color: #1f2328;
+        overflow: hidden;
+        user-select: text;
+      }
+      .actions {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+      }
+      button {
+        font-size: 12px;
+        padding: 4px 14px;
+        border-radius: 6px;
+        border: 1px solid #d0d7de;
+        background: #f6f8fa;
+        color: #1f2328;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #eef1f4;
+      }
+      #copy {
+        background: #1f883d;
+        border-color: #1f883d;
+        color: #fff;
+      }
+      #copy:hover {
+        background: #1a7f37;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/toolbar/main.ts"></script>
+  </body>
+</html>

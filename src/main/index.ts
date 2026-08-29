@@ -1,6 +1,9 @@
 import { app, ipcMain, BrowserWindow } from 'electron'
 import { join } from 'path'
 import type { AppInfo } from '../shared'
+import { HelperClient } from './selection/helper-client'
+import { SelectionMachine } from './selection/state-machine'
+import { initToolbarIpc, showToolbarForSelection } from './selection/toolbar'
 
 function createWindow(): void {
   const win = new BrowserWindow({
@@ -37,6 +40,15 @@ ipcMain.handle('app:getInfo', (): AppInfo => ({
   platform: process.platform
 }))
 
+const helper = new HelperClient([])
+const machine = new SelectionMachine((msg) => console.log(msg))
+
+function broadcast(channel: string, data: unknown): void {
+  for (const win of BrowserWindow.getAllWindows()) {
+    if (!win.isDestroyed()) win.webContents.send(channel, data)
+  }
+}
+
 const gotLock = app.requestSingleInstanceLock()
 if (!gotLock) {
   app.quit()
@@ -49,7 +61,36 @@ if (!gotLock) {
     }
   })
 
-  app.whenReady().then(createWindow)
+  app.whenReady().then(() => {
+    createWindow()
+    initToolbarIpc(() => machine.transition('IDLE', machine.activeSessionId))
+
+    helper.on('lifecycle', (info) => {
+      console.log('[helper-lifecycle]', JSON.stringify(info))
+      broadcast('pipeline:lifecycle', info)
+    })
+
+    helper.on('event', (env) => {
+      broadcast('pipeline:event', env)
+      if (env.type === 'selectionCaptured') {
+        if (machine.validate(env)) {
+          const payload = env.payload as { app?: unknown }
+          machine.transition('POSITION_TOOLBAR', env.sessionId, String(payload.app ?? ''))
+          showToolbarForSelection(env)
+          machine.transition('TOOLBAR_VISIBLE', env.sessionId)
+        }
+      } else if (env.type === 'captureFailed') {
+        const payload = env.payload as { reason?: unknown }
+        machine.transition('NO_ACTION', env.sessionId, String(payload.reason ?? ''))
+      }
+    })
+
+    helper.start()
+  })
+
+  app.on('will-quit', () => {
+    helper.shutdown()
+  })
 
   app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') app.quit()

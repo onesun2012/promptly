@@ -1,12 +1,38 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { useAppStore } from './stores/app'
+import type { LifecycleInfo, PipelineEvent } from '@shared'
 
 const app = useAppStore()
 
+const lastEvent = ref<PipelineEvent | null>(null)
+const eventCount = ref(0)
+const lifecycle = ref<LifecycleInfo | null>(null)
+let offEvent: (() => void) | null = null
+let offLifecycle: (() => void) | null = null
+
 onMounted(() => {
-  app.load()
+  void app.load()
+  offEvent = window.promptly.onPipelineEvent((env) => {
+    lastEvent.value = env
+    eventCount.value += 1
+  })
+  offLifecycle = window.promptly.onPipelineLifecycle((info) => {
+    lifecycle.value = info
+  })
 })
+
+onUnmounted(() => {
+  offEvent?.()
+  offLifecycle?.()
+})
+
+function snippet(env: PipelineEvent | null): string {
+  if (!env) return ''
+  const text = env.payload['text']
+  if (typeof text !== 'string') return JSON.stringify(env.payload).slice(0, 120)
+  return text.length > 120 ? text.slice(0, 120) + '…' : text
+}
 </script>
 
 <template>
@@ -14,27 +40,53 @@ onMounted(() => {
     <header class="brand">
       <h1>Promptly</h1>
       <p class="tagline">
-        Select anything. Ask any AI. Without giving us your data.
+        Select anything. Ask any AI.
       </p>
     </header>
 
     <main class="card">
       <template v-if="app.loaded && app.info">
-        <h2>M0 scaffold ready</h2>
+        <h2>M1 selection pipeline</h2>
         <ul class="meta">
-          <li><span>App</span><code>{{ app.info.name }} v{{ app.info.version }}</code></li>
-          <li><span>Electron</span><code>{{ app.info.electron }}</code></li>
-          <li><span>Node</span><code>{{ app.info.node }}</code></li>
-          <li><span>Platform</span><code>{{ app.info.platform }}</code></li>
+          <li>
+            <span>App</span>
+            <code>{{ app.info.name }} v{{ app.info.version }}</code>
+          </li>
+          <li>
+            <span>Electron</span>
+            <code>{{ app.info.electron }}</code>
+          </li>
+          <li>
+            <span>Helper</span>
+            <code>{{ lifecycle ? lifecycle.state : 'starting…' }}</code>
+          </li>
+          <li>
+            <span>Events</span>
+            <code>{{ eventCount }}</code>
+          </li>
         </ul>
         <p class="hint">
-          Renderer ⇄ preload ⇄ main IPC verified.
+          Drag-select text in any app to see the pipeline live.
         </p>
       </template>
       <p v-else>
         Loading…
       </p>
     </main>
+
+    <section
+      v-if="lastEvent"
+      class="card"
+    >
+      <h2>Last pipeline event</h2>
+      <p class="evline">
+        <code class="evtype">{{ lastEvent.type }}</code>
+        <code>{{ lastEvent.sessionId }}</code>
+      </p>
+      <p class="evtext">
+        {{ snippet(lastEvent) }}
+      </p>
+    </section>
   </div>
 </template>
 
@@ -55,8 +107,8 @@ body {
 
 .shell {
   max-width: 560px;
-  margin: 12vh auto 0;
-  padding: 0 24px;
+  margin: 8vh auto 0;
+  padding: 0 24px 40px;
 }
 
 .brand h1 {
@@ -75,6 +127,7 @@ body {
   border: 1px solid #d0d7de;
   border-radius: 10px;
   padding: 20px 24px;
+  margin-bottom: 16px;
 }
 
 .card h2 {
@@ -103,5 +156,27 @@ body {
   margin: 12px 0 0;
   font-size: 12px;
   color: #1a7f37;
+}
+
+.evline {
+  display: flex;
+  gap: 8px;
+  margin: 0 0 8px;
+  flex-wrap: wrap;
+}
+
+.evtype {
+  background: #ddf4ff;
+  color: #0969da;
+  padding: 1px 8px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.evtext {
+  margin: 0;
+  font-size: 12px;
+  color: #57606a;
+  word-break: break-all;
 }
 </style>

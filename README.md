@@ -1,6 +1,6 @@
 # Promptly
 
-**Select anything. Ask any AI. Without giving us your data.**
+**Select anything. Ask any AI.**
 
 The best local-first BYOK (bring-your-own-key) selection-to-AI assistant for Windows. Select text in any app — browser, office suite, editor — and ask AI instantly with **your own API keys**, connecting **directly** to your providers. No account. No cloud relay. No telemetry on your content.
 
@@ -8,7 +8,7 @@ The best local-first BYOK (bring-your-own-key) selection-to-AI assistant for Win
 
 ## Status
 
-**M0 scaffold** — Electron + Vue3 + TypeScript foundation with window management and the NSIS packaging chain verified.
+**M0 ✅ M1 core ✅** — Electron + Vue3 + TypeScript foundation, and the selection detection pipeline (native helper with global mouse hook → UIA capture → clipboard fallback → sensitive-field guard → selection toolbar) verified end-to-end on real Windows apps.
 
 | Milestone | Scope |
 |---|---|
