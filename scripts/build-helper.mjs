@@ -34,7 +34,7 @@ const args = [
   `/out:${outFile}`,
   '/r:System.dll',
   '/r:System.Core.dll',
-  '/r:System.Windows.Forms.dll',
+  
   '/r:UIAutomationClient.dll',
   '/r:UIAutomationTypes.dll',
   `/lib:${wpfDir}`,

@@ -9,13 +9,13 @@
 // so there are zero redistribution dependencies (SPEC §2A helper choice).
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Windows.Automation;
 using System.Windows.Automation.Text;
-using System.Windows.Forms;
 
 namespace Promptly.Helper
 {
@@ -30,6 +30,15 @@ namespace Promptly.Helper
 
         internal static int Main(string[] args)
         {
+            // Console.Out defaults to the OEM/ANSI codepage (GBK on zh-CN);
+            // Electron reads the pipe as UTF-8, so CJK text would be mojibake.
+            try
+            {
+                Console.OutputEncoding = Encoding.UTF8;
+                Console.InputEncoding = Encoding.UTF8;
+            }
+            catch { }
+
             ParseArgs(args);
 
             AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
@@ -271,20 +280,22 @@ namespace Promptly.Helper
         }
 
         // ---- clipboard fallback -----------------------------------------------
+        //
+        // All clipboard work goes through raw Win32 (NativeClipboard below).
+        // System.Windows.Forms.Clipboard is OLE-based and requires a message
+        // pump; our STA pipeline thread never pumps, so OLE clipboard state
+        // owned by it BLOCKS other apps' clipboard writes until we release -
+        // which made apps like VSCode appear to "copy slowly".
 
         private static bool TryClipboardFallback(SelectionSession session, out string text, out string failReason)
         {
             text = null;
             failReason = null;
 
-            IDataObject backup = null;
+            Dictionary<uint, byte[]> backup = null;
             try
             {
-                for (int i = 0; i < 3 && backup == null; i++)
-                {
-                    try { backup = Clipboard.GetDataObject(); }
-                    catch { Thread.Sleep(30); }
-                }
+                backup = NativeClipboard.Backup();
                 if (backup == null)
                 {
                     failReason = "clipboard_failed";
@@ -292,8 +303,13 @@ namespace Promptly.Helper
                 }
 
                 string marker = "PROMPTLY_MARKER_" + Guid.NewGuid().ToString("N");
-                Clipboard.SetText(marker);
+                if (!NativeClipboard.WriteText(marker))
+                {
+                    failReason = "clipboard_failed";
+                    return false;
+                }
                 long seqMarker = GetClipboardSequenceNumber();
+                Log("marker set, seqMarker=" + seqMarker);
 
                 ReleaseModifiersAndCopy();
                 Log("clipboard fallback: copy sent (pid=" + session.LockedPid + " app=" + session.ProcessName + ")");
@@ -305,12 +321,29 @@ namespace Promptly.Helper
                 {
                     Thread.Sleep(config.PollIntervalMs);
                     waited += config.PollIntervalMs;
-                    if (GetClipboardSequenceNumber() != seqMarker)
+                    long seqNow = GetClipboardSequenceNumber();
+                    if (seqNow != seqMarker)
                     {
+                        Log("seq changed after " + waited + "ms (seq " + seqMarker + " -> " + seqNow + ")");
                         Thread.Sleep(20); // let the source app finish writing
-                        copied = SafeGetText();
+                        copied = NativeClipboard.ReadText();
                         seqRead = GetClipboardSequenceNumber();
                         break;
+                    }
+                }
+
+                // Late-arrival recovery: some apps take longer than the wait
+                // window for their first copy. A marker replacement right after
+                // the window is still OUR copy target, not a user modification.
+                if (copied == null || copied == marker)
+                {
+                    Thread.Sleep(80);
+                    string late = NativeClipboard.ReadText();
+                    if (!string.IsNullOrEmpty(late) && late != marker)
+                    {
+                        copied = late;
+                        seqRead = GetClipboardSequenceNumber();
+                        Log("clipboard fallback: late arrival adopted");
                     }
                 }
 
@@ -323,7 +356,15 @@ namespace Promptly.Helper
                     userModified = GetClipboardSequenceNumber() != seqRead;
                 }
 
-                RestoreClipboard(backup, userModified);
+                if (userModified)
+                {
+                    Log("clipboard race detected: user copied during fallback, keeping user clipboard");
+                }
+                else
+                {
+                    NativeClipboard.Restore(backup);
+                    Log("clipboard restored (" + backup.Count + " formats)");
+                }
 
                 if (text == null)
                 {
@@ -335,40 +376,10 @@ namespace Promptly.Helper
             catch (Exception ex)
             {
                 Log("clipboard fallback error: " + ex.Message);
-                if (backup != null) RestoreClipboard(backup, false);
+                if (backup != null && text == null) NativeClipboard.Restore(backup);
                 failReason = "clipboard_failed";
                 return false;
             }
-        }
-
-        private static string SafeGetText()
-        {
-            for (int i = 0; i < 3; i++)
-            {
-                try { return Clipboard.GetText(); }
-                catch { Thread.Sleep(20); }
-            }
-            return null;
-        }
-
-        private static void RestoreClipboard(IDataObject backup, bool userModified)
-        {
-            if (userModified)
-            {
-                Log("clipboard race detected: user copied during fallback, keeping user clipboard");
-                return;
-            }
-            for (int i = 0; i < 5; i++)
-            {
-                try
-                {
-                    Clipboard.SetDataObject(backup, true, 3, 40);
-                    Log("clipboard restored");
-                    return;
-                }
-                catch { Thread.Sleep(40); }
-            }
-            Log("clipboard restore failed after retries");
         }
 
         private static void ReleaseModifiersAndCopy()
@@ -778,6 +789,159 @@ namespace Promptly.Helper
             [DllImport("user32.dll")]
             private static extern IntPtr DispatchMessage(ref MSG msg);
         }
+    }
+
+    // Raw Win32 clipboard access. No OLE, no message pump required, so it is
+    // safe on the non-pumping STA pipeline thread. Backup/Restore deep-copy
+    // every HGLOBAL-backed format (text, CF_HDROP, registered formats like
+    // HTML/PNG). GDI-handle formats (CF_BITMAP/CF_PALETTE/CF_METAFILEPICT/
+    // CF_ENHMETAFILE) are skipped - they cannot be restored as raw bytes.
+    internal static class NativeClipboard
+    {
+        private const uint CF_UNICODETEXT = 13;
+
+        public static Dictionary<uint, byte[]> Backup()
+        {
+            if (!OpenRetry()) return null;
+            try
+            {
+                var result = new Dictionary<uint, byte[]>();
+                uint fmt = 0;
+                while (true)
+                {
+                    fmt = EnumClipboardFormats(fmt);
+                    if (fmt == 0) break;
+                    if (fmt == 2 || fmt == 3 || fmt == 9 || fmt == 14) continue; // GDI-handle formats
+                    IntPtr h = GetClipboardData(fmt);
+                    if (h == IntPtr.Zero) continue;
+                    IntPtr ptr = GlobalLock(h);
+                    if (ptr == IntPtr.Zero) continue;
+                    try
+                    {
+                        int len = (int)GlobalSize(h);
+                        if (len <= 0) continue;
+                        var bytes = new byte[len];
+                        Marshal.Copy(ptr, bytes, 0, len);
+                        result[fmt] = bytes;
+                    }
+                    finally { GlobalUnlock(h); }
+                }
+                return result;
+            }
+            finally { CloseClipboard(); }
+        }
+
+        public static bool Restore(Dictionary<uint, byte[]> formats)
+        {
+            if (!OpenRetry()) return false;
+            try
+            {
+                if (!EmptyClipboard()) return false;
+                foreach (KeyValuePair<uint, byte[]> kv in formats)
+                {
+                    byte[] bytes = kv.Value;
+                    IntPtr h = GlobalAlloc(GMEM_MOVEABLE, (UIntPtr)bytes.Length);
+                    if (h == IntPtr.Zero) continue;
+                    IntPtr ptr = GlobalLock(h);
+                    if (ptr == IntPtr.Zero) { GlobalFree(h); continue; }
+                    Marshal.Copy(bytes, 0, ptr, bytes.Length);
+                    GlobalUnlock(h);
+                    if (SetClipboardData(kv.Key, h) == IntPtr.Zero) GlobalFree(h);
+                }
+                return true;
+            }
+            finally { CloseClipboard(); }
+        }
+
+        public static bool WriteText(string s)
+        {
+            byte[] bytes = Encoding.Unicode.GetBytes(s + "\0");
+            if (!OpenRetry()) return false;
+            try
+            {
+                if (!EmptyClipboard()) return false;
+                IntPtr h = GlobalAlloc(GMEM_MOVEABLE, (UIntPtr)bytes.Length);
+                if (h == IntPtr.Zero) return false;
+                IntPtr ptr = GlobalLock(h);
+                if (ptr == IntPtr.Zero) { GlobalFree(h); return false; }
+                Marshal.Copy(bytes, 0, ptr, bytes.Length);
+                GlobalUnlock(h);
+                if (SetClipboardData(CF_UNICODETEXT, h) == IntPtr.Zero) { GlobalFree(h); return false; }
+                return true;
+            }
+            finally { CloseClipboard(); }
+        }
+
+        public static string ReadText()
+        {
+            if (!OpenRetry()) return null;
+            try
+            {
+                if (!IsClipboardFormatAvailable(CF_UNICODETEXT)) return null;
+                IntPtr h = GetClipboardData(CF_UNICODETEXT);
+                if (h == IntPtr.Zero) return null;
+                IntPtr ptr = GlobalLock(h);
+                if (ptr == IntPtr.Zero) return null;
+                try
+                {
+                    int chars = (int)GlobalSize(h) / 2;
+                    if (chars <= 0) return null;
+                    string s = Marshal.PtrToStringUni(ptr, chars);
+                    int nullAt = s.IndexOf('\0');
+                    return nullAt >= 0 ? s.Substring(0, nullAt) : s;
+                }
+                finally { GlobalUnlock(h); }
+            }
+            finally { CloseClipboard(); }
+        }
+
+        private static bool OpenRetry()
+        {
+            for (int i = 0; i < 10; i++)
+            {
+                if (OpenClipboard(IntPtr.Zero)) return true;
+                Thread.Sleep(20);
+            }
+            return false;
+        }
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern bool OpenClipboard(IntPtr owner);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern bool CloseClipboard();
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern bool EmptyClipboard();
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern bool IsClipboardFormatAvailable(uint format);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern IntPtr GetClipboardData(uint format);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern IntPtr SetClipboardData(uint format, IntPtr data);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern uint EnumClipboardFormats(uint format);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern IntPtr GlobalLock(IntPtr h);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool GlobalUnlock(IntPtr h);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern UIntPtr GlobalSize(IntPtr h);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern IntPtr GlobalAlloc(uint flags, UIntPtr bytes);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern IntPtr GlobalFree(IntPtr h);
+
+        private const uint GMEM_MOVEABLE = 0x0002;
     }
 
     // Minimal JSON value writers (C# 5 compatible, no dependencies).
