@@ -1,0 +1,1 @@
+Promptly VSCode capture test. Select this editor line to verify the pipeline works in Electron-based editors too.
