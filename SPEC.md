@@ -56,7 +56,7 @@
 
 - **API 直连零中继**是最锋利的一刀：Promptly 的请求从用户设备直接发往用户配置的 Provider 端点，不经过任何中间服务器（对比 Raycast 请求过它的服务器）；
 - 宣传语使用 **"Bring Your Own AI Provider"**，不使用"所有 AI API 都能用"（期望管理 + 商标/法律风险）；
-- 主口号：**"Select anything. Ask any AI. Without giving us your data."**（三段式记忆点：全桌面划词 / 任意模型 BYOK / 数据不经手）。
+- 主口号：**"Select anything. Ask any AI."**（"Without giving us your data." 作为隐私副文案，用于官网/商店页而非口号）。
 
 ### 目标用户
 
@@ -117,7 +117,7 @@ interface AIProvider {
 ### E. 技术栈与分发
 
 - **技术栈**：Electron 30+ / TypeScript / Vue3 + Vite + Pinia / better-sqlite3 / uiohook-napi（全局鼠标钩子）/ electron-updater；
-- **分发**：electron-builder + NSIS；安装页"开机自动启动"勾选框（**默认勾选**，默认值待定见附录 D）→ 写 HKCU Run 键；GitHub Releases 分发 + 自动更新；
+- **分发**：electron-builder + NSIS；安装页"开机自动启动"勾选框（**默认勾选**，已拍板）→ 写 HKCU Run 键；GitHub Releases 分发 + 自动更新；
 - **发布决策（非技术硬约束）**：代码签名类型与预算在首发前决策——EV 证书立即获得 SmartScreen 信誉（约 $200-500/年），OV 便宜但需时间积累信誉；不签名则安装转化被 SmartScreen 显著拦截；
 - **i18n**：英文为源语言，v1 同步上线 法/德/西/日/韩（vue-i18n，无硬编码文案）；
 - **隐私**：零内容遥测（划词与对话内容不出用户设备、直连所配 Provider）；仅 opt-in 匿名崩溃上报（Sentry）；隐私政策页；
@@ -297,8 +297,8 @@ settings(key, value_json, updated_at)
 ## 附录 D：待定项（Open Questions）
 
 - [ ] 产品最终命名核查：Promptly 与现有商标/产品（如 Promptly AI 等）的冲突风险与应对（名称、logo、域名）；
-- [ ] **开机自启默认值（需拍板）**：最初需求为"安装时默认勾选"；二轮评审建议改为默认 OFF + 首次启动提示一次（与 "Local-first / Respect user's machine" 品牌一致，避免海外用户视为流氓行为）。当前 SPEC 保留默认勾选，**发布前由 owner 决定**；
-- [ ] 产品主口号确认：**"Select anything. Ask any AI. Without giving us your data."**（二轮评审建议的记忆点口号，已应用到 README/界面文案，待确认）；
+- [x] **开机自启默认值**：已拍板（2026-08-29）——保持安装页**默认勾选**（尊重最初需求），在设置页与首启提示中提供一键关闭；
+- [x] **产品主口号**：已确认 **"Select anything. Ask any AI."**（"Without giving us your data." 降为隐私副文案，用于官网/商店页）；
 - [ ] Sentry 崩溃上报的隐私政策措辞；
 - [ ] 捐赠入口转化数据（决定捐赠制维持时长）；
 - [ ] v1.x 候选：**"重复上次动作"快捷键**（借鉴 Bragi，高频用户效率倍增器）；
