@@ -1,3 +1,5 @@
+export * from './providers'
+
 export interface AppInfo {
   name: string
   version: string
