@@ -30,7 +30,9 @@
     "helper": "辅助进程",
     "feedback": "反馈",
     "savedHiding": "已保存 — 正在隐藏窗口…",
-    "resetBall": "重置悬浮球"
+    "resetBall": "重置悬浮球",
+    "privacy": "隐私说明",
+    "stats": "匿名安装统计"
   },
   "toolbar": {
     "ask": "提问",
@@ -60,5 +62,20 @@
     "openChat": "打开聊天",
     "settings": "设置",
     "quit": "退出 Promptly"
+  },
+  "update": {
+    "check": "检查更新",
+    "checking": "正在检查更新…",
+    "upToDate": "已是最新版本",
+    "downloading": "正在下载 v{version}… {percent}%",
+    "ready": "v{version} 已就绪",
+    "install": "重启以更新",
+    "donateTitle": "支持 Promptly",
+    "wechat": "微信赞赏",
+    "alipay": "支付宝",
+    "afdian": "爱发电（月捐）",
+    "sponsors": "GitHub Sponsors",
+    "kofi": "Ko-fi（请杯咖啡）",
+    "thanks": "你的支持让 Promptly 保持免费、本地优先、BYOK。"
   }
 }

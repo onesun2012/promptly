@@ -30,7 +30,9 @@
     "helper": "Auxiliar",
     "feedback": "Comentarios",
     "savedHiding": "Guardado — ocultando ventana…",
-    "resetBall": "Restablecer burbuja"
+    "resetBall": "Restablecer burbuja",
+    "privacy": "Declaración de privacidad",
+    "stats": "Contador anónimo de instalaciones"
   },
   "toolbar": {
     "ask": "Preguntar",
@@ -60,5 +62,20 @@
     "openChat": "Abrir chat",
     "settings": "Ajustes",
     "quit": "Salir de Promptly"
+  },
+  "update": {
+    "check": "Buscar actualizaciones",
+    "checking": "Buscando actualizaciones…",
+    "upToDate": "Ya estás actualizado",
+    "downloading": "Descargando v{version}… {percent}%",
+    "ready": "v{version} lista",
+    "install": "Reiniciar para actualizar",
+    "donateTitle": "Apoyar Promptly",
+    "wechat": "WeChat",
+    "alipay": "Alipay",
+    "afdian": "Afdian (mensual)",
+    "sponsors": "GitHub Sponsors",
+    "kofi": "Ko-fi (un café)",
+    "thanks": "Promptly sigue siendo gratuito, local y BYOK gracias a tu apoyo."
   }
 }

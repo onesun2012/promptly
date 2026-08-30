@@ -36,12 +36,17 @@ declare global {
       windowDragStart: () => void
       windowDragEnd: () => void
       ballMenu: (pos: { x: number; y: number }) => void
-      getSettings: () => Promise<{ language: string; autostart: boolean }>
+      getSettings: () => Promise<{ language: string; autostart: boolean; statsEnabled: boolean }>
+      setStats: (enabled: boolean) => Promise<{ ok: boolean }>
       setLanguage: (locale: string) => Promise<{ ok: boolean }>
       setAutostart: (enabled: boolean) => Promise<{ ok: boolean }>
       openChat: () => void
       resetBall: () => Promise<{ ok: boolean }>
       onAppLocale: (callback: (locale: string) => void) => () => void
+      updateCheck: () => Promise<void>
+      updateInstall: () => void
+      onUpdateState: (callback: (data: { phase: string; version?: string; percent?: number }) => void) => () => void
+      onDonateOpen: (callback: () => void) => () => void
       hideMainWindow: () => void
       showMainWindow: () => void
       openFeedback: () => Promise<{ ok: boolean }>

@@ -30,7 +30,9 @@
     "helper": "Хелпер",
     "feedback": "Отзыв",
     "savedHiding": "Сохранено — окно закрывается…",
-    "resetBall": "Вернуть плавающий шар"
+    "resetBall": "Вернуть плавающий шар",
+    "privacy": "Заявление о конфиденциальности",
+    "stats": "Анонимный счётчик установок"
   },
   "toolbar": {
     "ask": "Спросить",
@@ -60,5 +62,20 @@
     "openChat": "Открыть чат",
     "settings": "Настройки",
     "quit": "Выйти из Promptly"
+  },
+  "update": {
+    "check": "Проверить обновления",
+    "checking": "Проверка обновлений…",
+    "upToDate": "У вас последняя версия",
+    "downloading": "Загрузка v{version}… {percent}%",
+    "ready": "v{version} готова",
+    "install": "Перезапустить для обновления",
+    "donateTitle": "Поддержать Promptly",
+    "wechat": "WeChat",
+    "alipay": "Alipay",
+    "afdian": "Afdian (ежемесячно)",
+    "sponsors": "GitHub Sponsors",
+    "kofi": "Ko-fi (кофе)",
+    "thanks": "Благодаря вашей поддержке Promptly остаётся бесплатным, локальным и BYOK."
   }
 }

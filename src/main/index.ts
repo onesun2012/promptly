@@ -26,6 +26,8 @@ import { applyFirstRunAutostart, loadSettings, saveSettings, setAutostart } from
 import { createBallWindow, initBallIpc, labelsFor, setBallLabels } from './ball'
 import { initTray, rebuildTrayMenu, resetBallPosition } from './tray'
 import { appIconPath } from './app-icon'
+import { initUpdater } from './updater'
+import { pingInstallOnce, initInstallPingIpc } from './install-ping'
 
 let mainWin: BrowserWindow | null = null
 
@@ -93,6 +95,9 @@ if (!gotLock) {
     createWindow()
     initBallIpc()
     initTray()
+    initUpdater()
+    initInstallPingIpc()
+    pingInstallOnce()
     setBallLabels(labelsFor(loadSettings().language))
     createBallWindow()
     const db = initSqliteDb(app.getPath('userData'))

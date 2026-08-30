@@ -5,6 +5,7 @@ import { useAppStore } from './stores/app'
 import type { LifecycleInfo, PipelineEvent } from '@shared'
 import type { ProviderProfile, ProviderView, TestConnectionResult } from '@shared'
 import { SUPPORTED_LOCALES, LOCALE_LABELS, applyLocale, type Locale } from './i18n'
+import { DONATE } from '@shared/config'
 
 const app = useAppStore()
 const { t, locale } = useI18n()
@@ -32,6 +33,16 @@ const testResult = ref<TestConnectionResult | null>(null)
 const saveMsg = ref('')
 const settingsLanguage = ref('en')
 const autostart = ref(false)
+const statsEnabled = ref(true)
+type UpdateState = { phase: string; version?: string; percent?: number }
+const updateState = ref<UpdateState>({ phase: 'idle' })
+let offUpdate: (() => void) | null = null
+const donateOpen = ref(false)
+let offDonate: (() => void) | null = null
+
+function openDonate(): void {
+  donateOpen.value = true
+}
 
 async function refreshProfiles(): Promise<void> {
   profiles.value = await window.promptly.listProviders()
@@ -46,6 +57,11 @@ async function loadSettings(): Promise<void> {
   const s = await window.promptly.getSettings()
   settingsLanguage.value = s.language
   autostart.value = s.autostart
+  statsEnabled.value = s.statsEnabled
+}
+
+async function onStatsChange(): Promise<void> {
+  await window.promptly.setStats(statsEnabled.value)
 }
 
 async function onLanguageChange(): Promise<void> {
@@ -101,6 +117,22 @@ function openFeedback(): void {
   void window.promptly.openFeedback()
 }
 
+function updateLine(): string {
+  const s = updateState.value
+  if (s.phase === 'checking') return t('update.checking')
+  if (s.phase === 'up-to-date') return t('update.upToDate')
+  if (s.phase === 'downloading') return t('update.downloading', { version: s.version ?? '', percent: s.percent ?? 0 })
+  if (s.phase === 'ready') return t('update.ready', { version: s.version ?? '' })
+  return ''
+}
+
+function updateCheck(): void {
+  void window.promptly.updateCheck()
+}
+function updateInstall(): void {
+  window.promptly.updateInstall()
+}
+
 onMounted(() => {
   void app.load()
   void refreshProfiles()
@@ -116,12 +148,18 @@ onMounted(() => {
     applyLocale(l)
     locale.value = l as Locale
   })
+  offUpdate = window.promptly.onUpdateState((s) => {
+    updateState.value = s
+  })
+  offDonate = window.promptly.onDonateOpen(() => openDonate())
 })
 
 onUnmounted(() => {
   offEvent?.()
   offLifecycle?.()
   offLocale?.()
+  offUpdate?.()
+  offDonate?.()
 })
 
 function snippet(env: PipelineEvent | null): string {
@@ -291,6 +329,14 @@ function snippet(env: PipelineEvent | null): string {
           >
           {{ t('app.autostart') }}
         </label>
+        <label class="check">
+          <input
+            v-model="statsEnabled"
+            type="checkbox"
+            @change="onStatsChange"
+          >
+          {{ t('app.stats') }}
+        </label>
       </div>
       <div class="actions">
         <button
@@ -300,14 +346,83 @@ function snippet(env: PipelineEvent | null): string {
           {{ t('app.openChat') }}
         </button>
         <button @click="resetBall">{{ t('app.resetBall') }}</button>
+        <a
+          class="muted"
+          href="#"
+          @click.prevent="openDonate"
+        >♥ {{ t('update.donateTitle') }}</a>
         <a class="muted" href="#" @click.prevent="openFeedback">✉ {{ t('app.feedback') }}</a>
         <a
           class="muted"
           href="#"
           @click.prevent
-        >{{ t('app.donate') }}</a>
+        >{{ t('app.privacy') }}</a>
       </div>
+      <p
+        v-if="updateLine()"
+        class="updateline"
+      >
+        {{ updateLine() }}
+        <button
+          v-if="updateState.phase === 'ready'"
+          class="mini"
+          @click="updateInstall"
+        >{{ t('update.install') }}</button>
+        <button
+          v-else-if="updateState.phase === 'idle' || updateState.phase === 'up-to-date'"
+          class="mini"
+          @click="updateCheck"
+        >{{ t('update.check') }}</button>
+      </p>
     </section>
+
+    <div
+      v-if="donateOpen"
+      class="overlay"
+      @click.self="donateOpen = false"
+    >
+      <div class="donate card">
+        <h2>♥ {{ t('update.donateTitle') }}</h2>
+        <p class="muted">{{ t('update.thanks') }}</p>
+        <div class="qrrow">
+          <figure>
+            <img
+              src="./assets/donate-wechat.png"
+              alt="WeChat"
+            >
+            <figcaption>{{ t('update.wechat') }}</figcaption>
+          </figure>
+          <figure>
+            <img
+              src="./assets/donate-alipay.png"
+              alt="Alipay"
+            >
+            <figcaption>{{ t('update.alipay') }}</figcaption>
+          </figure>
+        </div>
+        <div class="links">
+          <a
+            class="donbtn"
+            :href="DONATE.afdian"
+            target="_blank"
+          >{{ t('update.afdian') }}</a>
+          <a
+            class="donbtn"
+            :href="DONATE.sponsors"
+            target="_blank"
+          >{{ t('update.sponsors') }}</a>
+          <a
+            class="donbtn"
+            :href="DONATE.kofi"
+            target="_blank"
+          >{{ t('update.kofi') }}</a>
+        </div>
+        <button
+          class="mini"
+          @click="donateOpen = false"
+        >✕</button>
+      </div>
+    </div>
 
     <details
       v-if="lastEvent"
@@ -375,4 +490,15 @@ details.evcard summary { cursor: pointer; color: var(--text-2); font-size: 13px;
 .evline { display: flex; gap: 8px; margin: 8px 0; flex-wrap: wrap; }
 .evtype { background: var(--accent-soft); color: var(--accent); padding: 1px 8px; border-radius: 8px; font-size: 12px; }
 .evtext { margin: 0; font-size: 12px; color: var(--text-2); word-break: break-all; }
+.updateline { margin: 10px 0 0; font-size: 12px; color: var(--text-2); display: flex; align-items: center; gap: 8px; }
+.overlay { position: fixed; inset: 0; background: rgba(15, 17, 21, 0.45); display: flex; align-items: center; justify-content: center; z-index: 50; }
+.donate { max-width: 460px; width: 90%; text-align: center; }
+.donate h2 { margin: 0 0 6px; }
+.qrrow { display: flex; gap: 16px; justify-content: center; margin: 14px 0; }
+.qrrow figure { margin: 0; }
+.qrrow img { width: 160px; height: 160px; border: 1px solid var(--border); border-radius: var(--radius); }
+.qrrow figcaption { font-size: 12px; color: var(--text-2); margin-top: 4px; }
+.links { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 10px 0 14px; }
+.donbtn { font-size: 13px; padding: 6px 14px; border-radius: var(--radius-btn); background: var(--accent); color: #fff; text-decoration: none; }
+.donbtn:hover { background: var(--accent-hover); }
 </style>

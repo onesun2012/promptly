@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Promptly — Select anything. Ask any AI.</title>
+  <meta name="description" content="Windows 上最好用的 Local-first BYOK 划词 AI：任意应用选中文字，用你自己的 API key 直接问 AI。无账号、无中继、零内容遥测。" />
+  <style>
+    :root { --bg:#0f1115; --surface:#171a21; --surface2:#1e222b; --border:#2a2f3a; --text:#e8eaed; --muted:#8b93a1; --accent:#7c5cff; --accent-h:#8b6fff; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; line-height: 1.6; }
+    a { color: var(--accent-h); }
+    .wrap { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+    header { padding: 72px 0 48px; text-align: center; }
+    h1 { font-size: 44px; margin: 0; letter-spacing: -0.02em; }
+    h1 .spark { color: var(--accent); }
+    .tagline { font-size: 20px; color: var(--muted); margin: 12px 0 28px; }
+    .cta { display: flex; gap: 14px; justify-content: center; align-items: center; flex-wrap: wrap; }
+    .btn { display: inline-block; padding: 12px 28px; border-radius: 10px; background: var(--accent); color: #fff; font-size: 16px; font-weight: 600; text-decoration: none; }
+    .btn:hover { background: var(--accent-h); }
+    .btn.ghost { background: transparent; border: 1px solid var(--border); color: var(--text); font-weight: 400; font-size: 14px; }
+    .btn.ghost:hover { border-color: var(--muted); }
+    .dl-note { color: var(--muted); font-size: 13px; margin-top: 14px; }
+    .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; padding: 40px 0; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 22px; }
+    .card h3 { margin: 0 0 8px; font-size: 17px; }
+    .card p { margin: 0; color: var(--muted); font-size: 14px; }
+    .shot { width: 100%; border-radius: 10px; border: 1px solid var(--border); background: var(--surface2); min-height: 200px; }
+    .tut { padding: 32px 0 48px; }
+    .tut ol { color: var(--muted); max-width: 640px; margin: 12px auto 0; }
+    .tut li { margin: 8px 0; }
+    footer { border-top: 1px solid var(--border); padding: 32px 0 48px; text-align: center; color: var(--muted); font-size: 14px; }
+    footer .don { margin: 12px 0; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+    footer .don a { padding: 8px 18px; border-radius: 8px; background: var(--surface); border: 1px solid var(--border); text-decoration: none; color: var(--text); font-size: 14px; }
+    footer .don a:hover { border-color: var(--accent); color: var(--accent-h); }
+    .downloads { color: var(--accent-h); font-weight: 600; }
+  </style>
+</head>
+<body>
+  <header class="wrap">
+    <h1><span class="spark">✦</span> Promptly</h1>
+    <p class="tagline">Select anything. Ask any AI.</p>
+    <div class="cta">
+      <a class="btn" href="https://github.com/onesun2012/promptly/releases/latest" id="dl-btn">下载 Windows 版</a>
+      <a class="btn ghost" href="https://github.com/onesun2012/promptly">GitHub 开源</a>
+    </div>
+    <p class="dl-note">累计下载 <span class="downloads" id="dl-count">…</span> 次 · 免安装管理员 · Windows 10/11 x64 · MIT 开源</p>
+  </header>
+
+  <main class="wrap">
+    <section class="features">
+      <div class="card">
+        <img class="shot" src="img/toolbar.gif" alt="划词工具条" />
+        <h3>划词三态工具条</h3>
+        <p>任意应用选中文字即刻弹出：提问 / 翻译 / 改写 / 总结 / 解释，流式结果就地展示，一键复制。</p>
+      </div>
+      <div class="card">
+        <img class="shot" src="img/chat.png" alt="聊天窗" />
+        <h3>聊天窗追问 + 截图识别</h3>
+        <p>结果可带进聊天继续问；Ctrl+V 粘贴截图，视觉模型看图说话。</p>
+      </div>
+      <div class="card">
+        <img class="shot" src="img/ball.png" alt="悬浮球" />
+        <h3>悬浮球 · 全局待命</h3>
+        <p>低存在感常驻，可拖拽到任意位置，点击即开对话。</p>
+      </div>
+      <div class="card">
+        <h3>🔑 BYOK — 你的 key，你做主</h3>
+        <p>智谱 / OpenAI 兼容 / Anthropic / Gemini 三协议，填自己的 API key 直连官方，无中继无加价。</p>
+      </div>
+      <div class="card">
+        <h3>🔒 Local-first 隐私</h3>
+        <p>对话存本地 SQLite，key 经 Windows DPAPI 加密。零内容遥测——你问什么，我们永远不知道。</p>
+      </div>
+      <div class="card">
+        <h3>🌍 10 种语言</h3>
+        <p>English / Français / Deutsch / Español / 日本語 / 한국어 / 简体中文 / 繁體中文 / Русский / العربية。</p>
+      </div>
+    </section>
+
+    <section class="tut">
+      <h2 style="text-align:center;">三步上手</h2>
+      <ol>
+        <li>安装启动，悬浮球出现在屏幕右缘</li>
+        <li>托盘右键 → 设置 → Provider lab 填入你的 API Key（如智谱 <code>https://open.bigmodel.cn/api/paas/v4</code>）→ 测试连接 → 保存</li>
+        <li>任意应用里划选文字 → 工具条弹出 → 点「翻译」</li>
+      </ol>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <div class="don">
+        <a href="https://github.com/sponsors/onesun2012">♥ GitHub Sponsors</a>
+        <a href="https://ko-fi.com/">Ko-fi</a>
+        <a href="https://afdian.com/">爱发电（月捐）</a>
+      </div>
+      <p><a href="https://github.com/onesun2012/promptly/blob/main/PRIVACY.md">隐私说明</a> · <a href="https://github.com/onesun2012/promptly">GitHub</a> · MIT License</p>
+    </div>
+  </footer>
+
+  <script>
+    // live download count from GitHub API (sum of all release assets)
+    fetch('https://api.github.com/repos/onesun2012/promptly/releases')
+      .then(r => r.json())
+      .then(rels => {
+        const total = (Array.isArray(rels) ? rels : []).reduce((sum, r) =>
+          sum + (r.assets || []).reduce((s, a) => s + (a.download_count || 0), 0), 0)
+        document.getElementById('dl-count').textContent = total.toLocaleString()
+      })
+      .catch(() => { document.getElementById('dl-count').textContent = '0' })
+  </script>
+</body>
+</html>

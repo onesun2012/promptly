@@ -30,7 +30,9 @@
     "helper": "헬퍼",
     "feedback": "피드백",
     "savedHiding": "저장됨 — 창을 숨깁니다…",
-    "resetBall": "플로팅 볼 재설정"
+    "resetBall": "플로팅 볼 재설정",
+    "privacy": "개인정보 안내",
+    "stats": "익명 설치 카운터"
   },
   "toolbar": {
     "ask": "질문",
@@ -60,5 +62,20 @@
     "openChat": "채팅 열기",
     "settings": "설정",
     "quit": "Promptly 종료"
+  },
+  "update": {
+    "check": "업데이트 확인",
+    "checking": "업데이트 확인 중…",
+    "upToDate": "최신 버전입니다",
+    "downloading": "v{version} 다운로드 중… {percent}%",
+    "ready": "v{version} 준비됨",
+    "install": "다시 시작하여 업데이트",
+    "donateTitle": "Promptly 지원",
+    "wechat": "WeChat",
+    "alipay": "Alipay",
+    "afdian": "Afdian (월간)",
+    "sponsors": "GitHub Sponsors",
+    "kofi": "Ko-fi (커피 한 잔)",
+    "thanks": "여러분의 지원으로 Promptly는 무료·로컬 우선·BYOK를 유지합니다."
   }
 }

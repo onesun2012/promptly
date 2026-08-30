@@ -1,6 +1,6 @@
 {
   "name": "promptly",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "The best local-first BYOK selection-to-AI assistant for Windows",
   "main": "out/main/index.js",
   "author": "onesun2012",
@@ -15,7 +15,8 @@
     "start": "electron-vite preview",
     "dist:dir": "npm run build:helper && npm run gen:icon && npm run build && electron-builder --dir",
     "dist": "npm run build:helper && npm run gen:icon && npm run build && electron-builder --win",
-    "gen:icon": "node scripts/gen-app-icon.mjs"
+    "gen:icon": "node scripts/gen-app-icon.mjs",
+    "site:deploy": "npx gh-pages -d site -t true"
   },
   "engines": {
     "node": ">=20"
@@ -38,6 +39,7 @@
   "dependencies": {
     "better-sqlite3": "^13.0.3",
     "dompurify": "^3.4.14",
+    "electron-updater": "^6.8.9",
     "highlight.js": "^11.12.0",
     "marked": "^18.0.11",
     "pinia": "^4.0.3",

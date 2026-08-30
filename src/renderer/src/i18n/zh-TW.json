@@ -30,7 +30,9 @@
     "helper": "輔助程式",
     "feedback": "意見回饋",
     "savedHiding": "已儲存 — 正在隱藏視窗…",
-    "resetBall": "重設懸浮球"
+    "resetBall": "重設懸浮球",
+    "privacy": "隱私說明",
+    "stats": "匿名安裝統計"
   },
   "toolbar": {
     "ask": "提問",
@@ -60,5 +62,20 @@
     "openChat": "開啟聊天",
     "settings": "設定",
     "quit": "結束 Promptly"
+  },
+  "update": {
+    "check": "檢查更新",
+    "checking": "正在檢查更新…",
+    "upToDate": "已是最新版本",
+    "downloading": "正在下載 v{version}… {percent}%",
+    "ready": "v{version} 已就緒",
+    "install": "重新啟動以更新",
+    "donateTitle": "支持 Promptly",
+    "wechat": "微信讚賞",
+    "alipay": "支付寶",
+    "afdian": "愛發電（月捐）",
+    "sponsors": "GitHub Sponsors",
+    "kofi": "Ko-fi（請杯咖啡）",
+    "thanks": "你的支持讓 Promptly 保持免費、本地優先、BYOK。"
   }
 }

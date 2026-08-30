@@ -18,6 +18,14 @@ asar: true
 # Electron 44 embeds Node 24 — same ABI as our better-sqlite3 prebuild, no rebuild needed
 npmRebuild: false
 
+# hardening: block env/CLI injection paths into the packaged app
+# (embeddedAsarIntegrity left off: meaningful with code signing, planned v1.1)
+electronFuses:
+  runAsNode: false
+  enableNodeOptionsEnvironmentVariable: false
+  enableNodeCliInspectArguments: false
+  onlyLoadAppFromAsar: true
+
 extraResources:
   # native selection helper (compiled from src/helper by npm run build:helper)
   - from: build/helper
@@ -30,6 +38,12 @@ extraResources:
     to: icon.png
   - from: build/icon-small.png
     to: icon-small.png
+
+# electron-updater feed: releases + latest.yml live on GitHub Releases
+publish:
+  provider: github
+  owner: onesun2012
+  repo: promptly
 
 win:
   target:

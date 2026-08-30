@@ -13,7 +13,6 @@ const WHITE = [0xe8, 0xea, 0xed]
 const PURPLE = [0x7c, 0x5c, 0xff]
 
 const mix = (a, b, t) => a + (b - a) * t
-const mixRGB = (c1, c2, t) => [mix(c1[0], c2[0], t), mix(c1[1], c2[1], t), mix(c1[2], c2[2], t)]
 
 // signed distance to rounded-rect outline (negative inside)
 function rectSDF(px, py, x0, y0, x1, y1, r) {

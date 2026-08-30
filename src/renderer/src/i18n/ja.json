@@ -30,7 +30,9 @@
     "helper": "ヘルパー",
     "feedback": "フィードバック",
     "savedHiding": "保存しました — ウィンドウを隠します…",
-    "resetBall": "ボール位置をリセット"
+    "resetBall": "ボール位置をリセット",
+    "privacy": "プライバシーについて",
+    "stats": "匿名インストールカウンター"
   },
   "toolbar": {
     "ask": "質問",
@@ -60,5 +62,20 @@
     "openChat": "チャットを開く",
     "settings": "設定",
     "quit": "Promptly を終了"
+  },
+  "update": {
+    "check": "アップデートを確認",
+    "checking": "アップデートを確認中…",
+    "upToDate": "最新です",
+    "downloading": "v{version} をダウンロード中… {percent}%",
+    "ready": "v{version} 準備完了",
+    "install": "再起動して更新",
+    "donateTitle": "Promptly を支援",
+    "wechat": "WeChat",
+    "alipay": "Alipay",
+    "afdian": "Afdian（月額）",
+    "sponsors": "GitHub Sponsors",
+    "kofi": "Ko-fi（コーヒー1杯）",
+    "thanks": "あなたの支援で Promptly は無料・ローカル優先・BYOK のままでいます。"
   }
 }

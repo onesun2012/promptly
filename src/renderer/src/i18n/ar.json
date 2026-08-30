@@ -30,7 +30,9 @@
     "helper": "المساعد",
     "feedback": "ملاحظات",
     "savedHiding": "تم الحفظ — جارٍ إخفاء النافذة…",
-    "resetBall": "إعادة تعيين الكرة العائمة"
+    "resetBall": "إعادة تعيين الكرة العائمة",
+    "privacy": "بيان الخصوصية",
+    "stats": "عدّاد تثبيت مجهول"
   },
   "toolbar": {
     "ask": "اسأل",
@@ -60,5 +62,20 @@
     "openChat": "فتح الدردشة",
     "settings": "الإعدادات",
     "quit": "إنهاء Promptly"
+  },
+  "update": {
+    "check": "التحقق من التحديثات",
+    "checking": "جارٍ التحقق من التحديثات…",
+    "upToDate": "أنت محدَّث بالفعل",
+    "downloading": "تنزيل v{version}… {percent}%",
+    "ready": "v{version} جاهزة",
+    "install": "أعد التشغيل للتحديث",
+    "donateTitle": "دعم Promptly",
+    "wechat": "WeChat",
+    "alipay": "Alipay",
+    "afdian": "Afdian (شهري)",
+    "sponsors": "GitHub Sponsors",
+    "kofi": "Ko-fi (قهوة)",
+    "thanks": "بفضل دعمك، يبقى Promptly مجانيًا وأولوية محلية وبوابة BYOK."
   }
 }

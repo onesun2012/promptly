@@ -7,9 +7,12 @@ export interface AppSettings {
   autostart: boolean
   initialized: boolean
   ballPosition?: { x: number; y: number }
+  /** anonymous install counter (one ping per version, no content). */
+  statsEnabled: boolean
+  pingedVersion?: string
 }
 
-const DEFAULTS: AppSettings = { language: 'en', autostart: false, initialized: false }
+const DEFAULTS: AppSettings = { language: 'en', autostart: false, initialized: false, statsEnabled: true }
 let cache: AppSettings | null = null
 
 function file(): string {
@@ -49,4 +52,8 @@ export function applyFirstRunAutostart(): void {
 export function setAutostart(enabled: boolean): void {
   app.setLoginItemSettings({ openAtLogin: enabled })
   saveSettings({ autostart: enabled })
+}
+
+export function setStatsEnabled(enabled: boolean): void {
+  saveSettings({ statsEnabled: enabled })
 }
