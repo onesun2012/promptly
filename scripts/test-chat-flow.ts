@@ -9,7 +9,16 @@ import type { ChatChunk, ProviderProfile } from '../src/main/providers/types.ts'
 
 class MemoryDb implements DbLike {
   conversations: Array<{ id: string; title: string; provider_id: string; model: string; created_at: number; updated_at: number }> = []
-  messages: Array<{ conversation_id: string; role: string; content: string; created_at: number; image_data?: string | null }> = []
+  messages: Array<{
+    id: number
+    conversation_id: string
+    role: string
+    content: string
+    created_at: number
+    image_data?: string | null
+    status?: string | null
+  }> = []
+  private nextId = 1
 
   listConversations() {
     return this.conversations
@@ -24,10 +33,28 @@ class MemoryDb implements DbLike {
   getMessages(conversationId: string) {
     return this.messages
       .filter((m) => m.conversation_id === conversationId)
-      .map((m) => ({ role: m.role, content: m.content, image_data: m.image_data ?? null }))
+      .map((m) => ({ id: m.id, role: m.role, content: m.content, image_data: m.image_data ?? null }))
   }
-  insertMessage(m: { conversation_id: string; role: string; content: string; created_at: number; image_data?: string | null }) {
-    this.messages.push({ ...m, image_data: m.image_data ?? null })
+  updateMessageContent(id: number, content: string) {
+    const m = this.messages.find((x) => x.id === id)
+    if (m) m.content = content
+  }
+  updateMessageStatus(id: number, status: string) {
+    const m = this.messages.find((x) => x.id === id)
+    if (m) m.status = status
+  }
+  getMessageById(id: number) {
+    return this.messages.find((x) => x.id === id)
+  }
+  insertMessage(m: {
+    conversation_id: string
+    role: string
+    content: string
+    created_at: number
+    image_data?: string | null
+    status?: string | null
+  }) {
+    this.messages.push({ ...m, id: this.nextId++, image_data: m.image_data ?? null })
     return this.messages.length
   }
 }
@@ -86,6 +113,9 @@ server.listen(0, '127.0.0.1', async () => {
   if (!msgs1[0].content.includes('Translate the following text')) fail('action template not applied')
   if (!msgs1[0].content.includes('Hola mundo')) fail('selection not in template')
   if (msgs1[1].role !== 'assistant' || msgs1[1].content !== 'Hello from mock') fail('assistant reply wrong: ' + msgs1[1].content)
+  const asm = db.getMessageById(msgs1[1].id)
+  if (!asm || asm.status !== 'completed') fail('assistant status not completed: ' + (asm?.status ?? 'missing'))
+  if (typeof r1.messageId !== 'number') fail('messageId missing')
   const texts = chunks.filter((c) => c.chunk.type === 'text').map((c) => c.chunk.content).join('')
   if (texts !== 'Hello from mock') fail('chunk stream wrong: ' + texts)
   if (!chunks.some((c) => c.chunk.type === 'done')) fail('done chunk missing')

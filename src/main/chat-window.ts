@@ -48,6 +48,27 @@ export function openChatWithAction(actionId: string, selection: string): void {
   }
 }
 
+/** Open the chat window directly on an existing conversation (toolbar result). */
+export function openChatToConversation(conversationId: string): void {
+  const win = ensureChatWindow()
+  win.show()
+  win.focus()
+  const deliver = (): void => {
+    win.webContents.send('chat:open-conversation', { conversationId })
+  }
+  if (win.webContents.isLoading()) {
+    win.webContents.once('did-finish-load', deliver)
+  } else {
+    deliver()
+  }
+}
+
+export function openChatWindow(): void {
+  const win = ensureChatWindow()
+  win.show()
+  win.focus()
+}
+
 export function toggleChatWindow(): void {
   if (chat && !chat.isDestroyed() && chat.isVisible()) {
     chat.hide()

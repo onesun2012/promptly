@@ -159,6 +159,10 @@ window.promptly.onChatPreloadAction(({ actionId, selection }) => {
   runAction(actionId, selection)
 })
 
+window.promptly.onChatOpenConversation(({ conversationId }) => {
+  void openConversation(conversationId)
+})
+
 onMounted(async () => {
   await loadConversations()
 })

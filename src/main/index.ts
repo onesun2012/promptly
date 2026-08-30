@@ -3,11 +3,23 @@ import { join } from 'path'
 import type { AppInfo } from '../shared'
 import { HelperClient } from './selection/helper-client'
 import { SelectionMachine } from './selection/state-machine'
-import { getLastSelection, initToolbarIpc, hideToolbar, showToolbarForSelection } from './selection/toolbar'
+import {
+  getLastSelection,
+  initToolbarIpc,
+  sendToToolbar,
+  setToolbarMode,
+  showToolbarForSelection
+} from './selection/toolbar'
 import { initProviderIpc } from './providers/ipc'
 import { initSqliteDb } from './db'
 import { createChatService } from './chat-service'
-import { forwardChatChunk, initChatIpc, openChatWithAction, toggleChatWindow } from './chat-window'
+import {
+  forwardChatChunk,
+  initChatIpc,
+  openChatToConversation,
+  openChatWindow,
+  toggleChatWindow
+} from './chat-window'
 import * as secureStore from './secure-store'
 import { applyFirstRunAutostart, loadSettings, saveSettings, setAutostart } from './settings-store'
 import { createBallWindow, initBallIpc, labelsFor, setBallLabels } from './ball'
@@ -84,20 +96,63 @@ if (!gotLock) {
     const chat = createChatService({
       db,
       getActiveProvider: () => secureStore.getActive(),
-      onChunk: (cid, chunk) => forwardChatChunk(cid, chunk)
+      onChunk: (cid, chunk, surface) => {
+        if (surface === 'toolbar') sendToToolbar('toolbar:stream', { conversationId: cid, chunk })
+        else forwardChatChunk(cid, chunk)
+      }
     })
+    // Toolbar three-state run bookkeeping (action -> loading -> result).
+    let toolbarRun: {
+      actionId: string
+      selection: string
+      selectionSessionId: string
+      conversationId: string | null
+    } | null = null
+
+    function runToolbarAction(actionId: string, selection: string, selectionSessionId: string): void {
+      const requestId = 'req_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6)
+      toolbarRun = { actionId, selection, selectionSessionId, conversationId: null }
+      setToolbarMode('loading')
+      sendToToolbar('toolbar:phase', { phase: 'loading', actionId })
+      void chat
+        .send({
+          actionId,
+          selection,
+          selectionSessionId,
+          requestId,
+          surface: 'toolbar'
+        })
+        .then((r) => {
+          if (toolbarRun) toolbarRun.conversationId = r.conversationId
+        })
+    }
+
     initToolbarIpc(
       () => machine.transition('IDLE', machine.activeSessionId),
       (actionId) => {
         const sel = getLastSelection()
         if (!sel || !sel.text) return
         if (actionId === 'copy') return
-        hideToolbar()
-        openChatWithAction(actionId, sel.text)
+        machine.transition('TOOLBAR_VISIBLE', machine.activeSessionId)
+        runToolbarAction(actionId, sel.text, machine.activeSessionId ?? 'sess_' + Date.now())
       }
     )
     initChatIpc(db, (opts) => chat.send(opts), (id) => chat.stop(id))
     initProviderIpc()
+
+    ipcMain.on('toolbar:cancel', () => {
+      if (toolbarRun?.conversationId) chat.stop(toolbarRun.conversationId)
+      setToolbarMode('action')
+      sendToToolbar('toolbar:phase', { phase: 'action' })
+    })
+    ipcMain.on('toolbar:retry', () => {
+      if (!toolbarRun) return
+      runToolbarAction(toolbarRun.actionId, toolbarRun.selection, toolbarRun.selectionSessionId)
+    })
+    ipcMain.on('toolbar:open-in-chat', () => {
+      if (toolbarRun?.conversationId) openChatToConversation(toolbarRun.conversationId)
+      else openChatWindow()
+    })
 
     ipcMain.handle('settings:get', () => loadSettings())
     ipcMain.handle('settings:language', (_e, locale: string) => {

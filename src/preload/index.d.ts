@@ -25,6 +25,12 @@ declare global {
       chatPin: () => void
       chatClose: () => void
       runAction: (id: string) => void
+      toolbarCancel: () => void
+      toolbarRetry: () => void
+      toolbarOpenInChat: () => void
+      onToolbarPhase: (callback: (data: { phase: string; actionId?: string }) => void) => () => void
+      onToolbarStream: (callback: (data: { conversationId: string; chunk: { type: string; content?: string } }) => void) => () => void
+      onChatOpenConversation: (callback: (data: { conversationId: string }) => void) => () => void
       ballOpenChat: () => void
       ballDragStart: () => void
       ballDragEnd: () => void

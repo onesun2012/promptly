@@ -19,6 +19,10 @@ export interface MessageRow {
   content: string
   created_at: number
   image_data?: string | null
+  selection_session_id?: string | null
+  action_id?: string | null
+  status?: string | null
+  request_id?: string | null
 }
 
 export interface Db {
@@ -27,6 +31,9 @@ export interface Db {
   touchConversation(id: string, at: number): void
   deleteConversation(id: string): void
   getMessages(conversationId: string): MessageRow[]
+  updateMessageContent(id: number, content: string): void
+  updateMessageStatus(id: number, status: string): void
+  getMessageById(id: number): MessageRow | undefined
   insertMessage(m: Omit<MessageRow, 'id'>): number
 }
 
@@ -57,6 +64,14 @@ export function initSqliteDb(userDataPath: string): Db {
   } catch {
     // column already exists
   }
+  // migration: toolbar three-state streaming fields (Grok review)
+  for (const col of ['selection_session_id TEXT', 'action_id TEXT', 'status TEXT', 'request_id TEXT']) {
+    try {
+      db.exec('ALTER TABLE messages ADD COLUMN ' + col)
+    } catch {
+      // column already exists
+    }
+  }
 
   return {
     listConversations(): ConversationRow[] {
@@ -85,12 +100,31 @@ export function initSqliteDb(userDataPath: string): Db {
         )
         .all(conversationId) as MessageRow[]
     },
+    updateMessageContent(id: number, content: string): void {
+      db.prepare('UPDATE messages SET content = ? WHERE id = ?').run(content, id)
+    },
+    updateMessageStatus(id: number, status: string): void {
+      db.prepare('UPDATE messages SET status = ? WHERE id = ?').run(status, id)
+    },
+    getMessageById(id: number): MessageRow | undefined {
+      return db.prepare('SELECT * FROM messages WHERE id = ?').get(id) as MessageRow | undefined
+    },
     insertMessage(m: Omit<MessageRow, 'id'>): number {
       const r = db
         .prepare(
-          'INSERT INTO messages (conversation_id, role, content, created_at, image_data) VALUES (?, ?, ?, ?, ?)'
+          'INSERT INTO messages (conversation_id, role, content, created_at, image_data, selection_session_id, action_id, status, request_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
         )
-        .run(m.conversation_id, m.role, m.content, m.created_at, m.image_data ?? null)
+        .run(
+          m.conversation_id,
+          m.role,
+          m.content,
+          m.created_at,
+          m.image_data ?? null,
+          m.selection_session_id ?? null,
+          m.action_id ?? null,
+          m.status ?? null,
+          m.request_id ?? null
+        )
       return Number(r.lastInsertRowid)
     }
   }

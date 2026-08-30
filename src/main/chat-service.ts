@@ -1,5 +1,5 @@
-import type { ChatChunk, ProviderProfile } from '../shared/providers.ts'
 import { applyTemplate } from '../shared/actions.ts'
+import type { ChatChunk, ProviderProfile } from '../shared/providers.ts'
 import { getProvider } from './providers/factory.ts'
 
 export interface ChatSendOptions {
@@ -9,12 +9,18 @@ export interface ChatSendOptions {
   text?: string
   /** data:image/...;base64 — pasted screenshot for vision models. */
   imageDataUrl?: string
+  /** selection session this run belongs to (Retry reuses it). */
+  selectionSessionId?: string
+  /** one execution instance of an action; Retry mints a new one. */
+  requestId?: string
+  /** which window the stream renders in. Default: chat. */
+  surface?: 'toolbar' | 'chat'
 }
 
 export interface ChatDeps {
   db: DbLike
   getActiveProvider: () => ProviderProfile | null
-  onChunk: (conversationId: string, chunk: ChatChunk) => void
+  onChunk: (conversationId: string, chunk: ChatChunk, surface: 'toolbar' | 'chat') => void
 }
 
 /** Minimal DB surface the service needs (see src/main/db.ts). */
@@ -29,13 +35,23 @@ export interface DbLike {
     updated_at: number
   }): void
   touchConversation(id: string, at: number): void
-  getMessages(conversationId: string): { role: string; content: string; image_data?: string | null }[]
+  getMessages(conversationId: string): {
+    role: string
+    content: string
+    image_data?: string | null
+  }[]
+  updateMessageContent(id: number, content: string): void
+  updateMessageStatus(id: number, status: string): void
   insertMessage(m: {
     conversation_id: string
     role: string
     content: string
     created_at: number
     image_data?: string | null
+    selection_session_id?: string | null
+    action_id?: string | null
+    status?: string | null
+    request_id?: string | null
   }): number
 }
 
@@ -50,24 +66,25 @@ export function createChatService(deps: ChatDeps) {
 
   async function send(
     opts: ChatSendOptions
-  ): Promise<{ conversationId: string | null; error?: string }> {
+  ): Promise<{ conversationId: string | null; messageId: number | null; error?: string }> {
+    const surface = opts.surface ?? 'chat'
     const provider = deps.getActiveProvider()
     if (!provider) {
-      deps.onChunk('', { type: 'error', content: 'No provider configured. Open Provider lab and save one first.' })
-      return { conversationId: null, error: 'no provider' }
+      deps.onChunk('', { type: 'error', content: 'No provider configured. Open Provider lab and save one first.' }, surface)
+      return { conversationId: null, messageId: null, error: 'no provider' }
     }
 
     const userText = opts.actionId
       ? applyTemplate(opts.actionId, opts.selection ?? '')
       : (opts.text ?? opts.selection ?? '')
     if (!userText.trim() && !opts.imageDataUrl) {
-      return { conversationId: null, error: 'empty message' }
+      return { conversationId: null, messageId: null, error: 'empty message' }
     }
 
     const now = Date.now()
+    const requestId = opts.requestId ?? 'req_' + now.toString(36) + Math.random().toString(36).slice(2, 6)
     let conversationId = opts.conversationId ?? ''
-    const isNew = !conversationId
-    if (isNew) {
+    if (!conversationId) {
       conversationId = 'c_' + now.toString(36) + Math.random().toString(36).slice(2, 6)
       deps.db.createConversation({
         id: conversationId,
@@ -84,7 +101,8 @@ export function createChatService(deps: ChatDeps) {
       role: 'user',
       content: userText,
       created_at: now,
-      image_data: opts.imageDataUrl ?? null
+      image_data: opts.imageDataUrl ?? null,
+      selection_session_id: opts.selectionSessionId ?? null
     })
 
     let model = provider.model
@@ -96,8 +114,8 @@ export function createChatService(deps: ChatDeps) {
       }
     }
     if (!model) {
-      deps.onChunk(conversationId, { type: 'error', content: 'No model available from this endpoint.' })
-      return { conversationId, error: 'no model' }
+      deps.onChunk(conversationId, { type: 'error', content: 'No model available from this endpoint.' }, surface)
+      return { conversationId, messageId: null, error: 'no model' }
     }
 
     const history = deps.db
@@ -109,39 +127,66 @@ export function createChatService(deps: ChatDeps) {
         ...(m.image_data ? { imageDataUrl: m.image_data } : {})
       }))
 
+    // streaming upsert: the assistant row exists from the first token and is
+    // updated in place (Grok review: never wait until the end to insert).
+    const assistantId = deps.db.insertMessage({
+      conversation_id: conversationId,
+      role: 'assistant',
+      content: '',
+      created_at: Date.now(),
+      selection_session_id: opts.selectionSessionId ?? null,
+      action_id: opts.actionId ?? null,
+      status: 'streaming',
+      request_id: requestId
+    })
+
     const controller = new AbortController()
     aborts.set(conversationId, controller)
 
     let assistant = ''
     let errored = ''
+    let cancelled = false
     try {
       for await (const chunk of getProvider(provider.protocol).chat(provider, {
         model,
         messages: history,
         signal: controller.signal
       })) {
-        if (chunk.type === 'text') assistant += chunk.content ?? ''
+        if (chunk.type === 'text') {
+          assistant += chunk.content ?? ''
+          deps.db.updateMessageContent(assistantId, assistant)
+        }
         if (chunk.type === 'error') errored = chunk.content ?? 'stream error'
-        deps.onChunk(conversationId, chunk)
+        deps.onChunk(conversationId, chunk, surface)
       }
     } catch (e) {
-      errored = String((e as Error)?.message ?? e)
+      if (controller.signal.aborted) {
+        cancelled = true
+      } else {
+        errored = String((e as Error)?.message ?? e)
+      }
     } finally {
       aborts.delete(conversationId)
     }
 
-    if (errored) {
-      if (assistant) {
-        deps.db.insertMessage({ conversation_id: conversationId, role: 'assistant', content: assistant, created_at: Date.now() })
-      }
-      deps.onChunk(conversationId, { type: 'error', content: errored })
-      return { conversationId, error: errored }
+    if (cancelled) {
+      deps.db.updateMessageStatus(assistantId, 'cancelled')
+      deps.onChunk(conversationId, { type: 'done' }, surface)
+      return { conversationId, messageId: assistantId }
     }
 
-    deps.db.insertMessage({ conversation_id: conversationId, role: 'assistant', content: assistant, created_at: Date.now() })
+    if (errored) {
+      deps.db.updateMessageStatus(assistantId, 'failed')
+      if (assistant) deps.db.updateMessageContent(assistantId, assistant)
+      deps.onChunk(conversationId, { type: 'error', content: errored }, surface)
+      return { conversationId, messageId: assistantId, error: errored }
+    }
+
+    deps.db.updateMessageContent(assistantId, assistant)
+    deps.db.updateMessageStatus(assistantId, 'completed')
     deps.db.touchConversation(conversationId, Date.now())
-    deps.onChunk(conversationId, { type: 'done' })
-    return { conversationId }
+    deps.onChunk(conversationId, { type: 'done' }, surface)
+    return { conversationId, messageId: assistantId }
   }
 
   return { send, stop }

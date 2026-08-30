@@ -17,6 +17,19 @@ export function getLastSelection(): { env: PipelineEvent; text: string } | null 
   return pending
 }
 
+export function sendToToolbar(channel: string, data: unknown): void {
+  if (toolbar && !toolbar.isDestroyed()) toolbar.webContents.send(channel, data)
+}
+
+/** Loading/result states suspend the 8s auto-hide so streams can finish. */
+export function setToolbarMode(mode: 'action' | 'loading' | 'result'): void {
+  if (mode === 'action') resetAutoHide()
+  else if (autoHideTimer) {
+    clearTimeout(autoHideTimer)
+    autoHideTimer = null
+  }
+}
+
 export function initToolbarIpc(onHide: () => void, onAction: (actionId: string) => void): void {
   onHideCallback = onHide
   onActionCallback = onAction
