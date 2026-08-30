@@ -51,13 +51,15 @@ export function initToolbarIpc(onHide: () => void, onAction: (actionId: string) 
   })
 }
 
-/** SPEC A1 POSITION_TOOLBAR: place near cursor with edge/multi-display awareness. */
+/** SPEC A1 POSITION_TOOLBAR: place near cursor with edge/multi-display awareness.
+ * Uses Electron's own cursor (DIP) — same coordinate space as setPosition —
+ * instead of the helper's physical pixels, which mis-place the toolbar on
+ * scaled displays. */
 export function showToolbarForSelection(env: PipelineEvent): void {
-  const payload = env.payload as { text?: unknown; cursor?: { x: number; y: number } }
+  const payload = env.payload as { text?: unknown }
   const text = typeof payload.text === 'string' ? payload.text : ''
-  const cursor = payload.cursor ?? { x: 0, y: 0 }
 
-  const dip = screen.screenToDipPoint({ x: cursor.x, y: cursor.y })
+  const dip = screen.getCursorScreenPoint()
   const display = screen.getDisplayNearestPoint(dip)
   const wa = display.workArea
 
