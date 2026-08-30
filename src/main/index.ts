@@ -213,6 +213,9 @@ if (!gotLock) {
           showToolbarForSelection(env)
           machine.transition('TOOLBAR_VISIBLE', env.sessionId)
         }
+      } else if (env.type === 'state') {
+        const sp = env.payload as { state?: unknown }
+        if (sp.state === 'IDLE') hideIfClickOutside()
       } else if (env.type === 'captureFailed') {
         const payload = env.payload as { reason?: unknown }
         machine.transition('NO_ACTION', env.sessionId, String(payload.reason ?? ''))

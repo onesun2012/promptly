@@ -17,6 +17,15 @@ export function getLastSelection(): { env: PipelineEvent; text: string } | null 
   return pending
 }
 
+/** Doubao-style: any click outside the toolbar dismisses it immediately
+ * (helper already classifies non-selection clicks as state IDLE). */
+export function hideIfClickOutside(): void {
+  if (!toolbar || toolbar.isDestroyed() || !toolbar.isVisible()) return
+  const c = screen.getCursorScreenPoint()
+  const b = toolbar.getBounds()
+  if (c.x < b.x || c.x > b.x + b.width || c.y < b.y || c.y > b.y + b.height) hideToolbar()
+}
+
 export function sendToToolbar(channel: string, data: unknown): void {
   if (toolbar && !toolbar.isDestroyed()) toolbar.webContents.send(channel, data)
 }
