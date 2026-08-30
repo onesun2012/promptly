@@ -29,7 +29,8 @@
     "events": "Eventos",
     "helper": "Auxiliar",
     "feedback": "Comentarios",
-    "savedHiding": "Guardado — ocultando ventana…"
+    "savedHiding": "Guardado — ocultando ventana…",
+    "resetBall": "Restablecer burbuja"
   },
   "toolbar": {
     "ask": "Preguntar",

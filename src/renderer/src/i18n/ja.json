@@ -29,7 +29,8 @@
     "events": "イベント",
     "helper": "ヘルパー",
     "feedback": "フィードバック",
-    "savedHiding": "保存しました — ウィンドウを隠します…"
+    "savedHiding": "保存しました — ウィンドウを隠します…",
+    "resetBall": "ボール位置をリセット"
   },
   "toolbar": {
     "ask": "質問",

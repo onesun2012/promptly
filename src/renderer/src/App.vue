@@ -89,6 +89,10 @@ async function removeProvider(id: string): Promise<void> {
   await refreshProfiles()
 }
 
+async function resetBall(): Promise<void> {
+  await window.promptly.resetBall()
+}
+
 function openChat(): void {
   window.promptly.openChat()
 }
@@ -295,6 +299,7 @@ function snippet(env: PipelineEvent | null): string {
         >
           {{ t('app.openChat') }}
         </button>
+        <button @click="resetBall">{{ t('app.resetBall') }}</button>
         <a class="muted" href="#" @click.prevent="openFeedback">✉ {{ t('app.feedback') }}</a>
         <a
           class="muted"

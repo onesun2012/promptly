@@ -33,6 +33,7 @@ declare global {
       setLanguage: (locale: string) => Promise<{ ok: boolean }>
       setAutostart: (enabled: boolean) => Promise<{ ok: boolean }>
       openChat: () => void
+      resetBall: () => Promise<{ ok: boolean }>
       onAppLocale: (callback: (locale: string) => void) => () => void
       hideMainWindow: () => void
       showMainWindow: () => void

@@ -29,7 +29,8 @@
     "events": "Événements",
     "helper": "Assistant",
     "feedback": "Commentaires",
-    "savedHiding": "Enregistré — fermeture de la fenêtre…"
+    "savedHiding": "Enregistré — fermeture de la fenêtre…",
+    "resetBall": "Réinitialiser la bulle"
   },
   "toolbar": {
     "ask": "Demander",

@@ -29,7 +29,8 @@
     "events": "Events",
     "helper": "Helper",
     "feedback": "Feedback",
-    "savedHiding": "Saved — hiding window…"
+    "savedHiding": "Saved — hiding window…",
+    "resetBall": "Reset floating ball"
   },
   "toolbar": {
     "ask": "Ask",

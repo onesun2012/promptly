@@ -154,3 +154,19 @@ export function relocateBallForDisplay(): void {
   const ny = Math.min(Math.max(by, wa.y - BALL_SIZE + 8), wa.y + wa.height - 8)
   if (nx !== bx || ny !== by) ball.setPosition(nx, ny)
 }
+
+/** Un-hide the ball (tray safety net when the user "loses" it). */
+export function showBall(): void {
+  if (!ball || ball.isDestroyed()) {
+    createBallWindow()
+    return
+  }
+  if (!ball.isVisible()) ball.show()
+}
+
+/** Move the ball to an explicit position and persist it. */
+export function placeBall(x: number, y: number): void {
+  if (!ball || ball.isDestroyed()) return
+  ball.setPosition(x, y)
+  saveSettings({ ballPosition: { x, y } })
+}

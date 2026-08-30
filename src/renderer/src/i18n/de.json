@@ -29,7 +29,8 @@
     "events": "Ereignisse",
     "helper": "Helfer",
     "feedback": "Feedback",
-    "savedHiding": "Gespeichert — Fenster wird ausgeblendet…"
+    "savedHiding": "Gespeichert — Fenster wird ausgeblendet…",
+    "resetBall": "Blase zurücksetzen"
   },
   "toolbar": {
     "ask": "Fragen",

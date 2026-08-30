@@ -29,7 +29,8 @@
     "events": "이벤트",
     "helper": "헬퍼",
     "feedback": "피드백",
-    "savedHiding": "저장됨 — 창을 숨깁니다…"
+    "savedHiding": "저장됨 — 창을 숨깁니다…",
+    "resetBall": "플로팅 볼 재설정"
   },
   "toolbar": {
     "ask": "질문",

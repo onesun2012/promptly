@@ -39,6 +39,7 @@ const api = {
   setLanguage: (locale: string) => ipcRenderer.invoke('settings:language', locale),
   setAutostart: (enabled: boolean) => ipcRenderer.invoke('settings:autostart', enabled),
   openChat: () => ipcRenderer.send('chat:toggle'),
+  resetBall: () => ipcRenderer.invoke('ball:reset'),
   onAppLocale: subscriber<string>('app:locale'),
   hideMainWindow: () => ipcRenderer.send('main:hide'),
   showMainWindow: () => ipcRenderer.send('main:show'),

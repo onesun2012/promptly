@@ -24,6 +24,8 @@ extraResources:
     to: helper
     filter:
       - "*.exe"
+  - from: build/tray.png
+    to: tray.png
 
 win:
   target:

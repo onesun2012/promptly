@@ -11,6 +11,7 @@ import { forwardChatChunk, initChatIpc, openChatWithAction, toggleChatWindow } f
 import * as secureStore from './secure-store'
 import { applyFirstRunAutostart, loadSettings, saveSettings, setAutostart } from './settings-store'
 import { createBallWindow, initBallIpc, labelsFor, setBallLabels } from './ball'
+import { initTray, rebuildTrayMenu, resetBallPosition } from './tray'
 
 let mainWin: BrowserWindow | null = null
 
@@ -76,6 +77,7 @@ if (!gotLock) {
     applyFirstRunAutostart()
     createWindow()
     initBallIpc()
+    initTray()
     setBallLabels(labelsFor(loadSettings().language))
     createBallWindow()
     const db = initSqliteDb(app.getPath('userData'))
@@ -101,6 +103,7 @@ if (!gotLock) {
     ipcMain.handle('settings:language', (_e, locale: string) => {
       saveSettings({ language: String(locale) })
       setBallLabels(labelsFor(String(locale)))
+      rebuildTrayMenu()
       for (const w of BrowserWindow.getAllWindows()) w.webContents.send('app:locale', String(locale))
       return { ok: true }
     })
@@ -109,6 +112,10 @@ if (!gotLock) {
       return { ok: true }
     })
     ipcMain.on('chat:toggle', () => toggleChatWindow())
+    ipcMain.handle('ball:reset', () => {
+      resetBallPosition()
+      return { ok: true }
+    })
     ipcMain.on('main:hide', () => mainWin?.hide())
     ipcMain.on('main:show', () => {
       if (!mainWin || mainWin.isDestroyed()) createWindow()
