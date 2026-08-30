@@ -26,12 +26,18 @@ extraResources:
       - "*.exe"
   - from: build/tray.png
     to: tray.png
+  - from: build/icon.png
+    to: icon.png
+  - from: build/icon-small.png
+    to: icon-small.png
 
 win:
   target:
     - target: nsis
       arch:
         - x64
+  # png ≥256px; electron-builder converts to .ico for exe/installer
+  icon: build/icon.png
 
 nsis:
   # per-user install into %LOCALAPPDATA%\Programs, no admin required (SPEC constraint)

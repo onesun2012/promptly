@@ -1,0 +1,40 @@
+/*
+ * Promptly design tokens — single source of truth for all surfaces.
+ * Tool surfaces (toolbar / ball / chat) are dark; the settings window is
+ * light (add class "theme-light" on <html> there). Sync with the spec in
+ * docs when changing values.
+ */
+:root {
+  /* dark tool surfaces */
+  --bg: #0f1115;
+  --surface: #171a21;
+  --surface-2: #1e222b;
+  --border: #2a2f3a;
+  --border-subtle: #23262f;
+  --text: #e8eaed;
+  --text-2: #8b93a1;
+  --text-3: #6b7280;
+  --accent: #7c5cff;
+  --accent-hover: #8b6fff;
+  --accent-muted: #5b45c4;
+  --accent-soft: rgba(124, 92, 255, 0.15);
+  --success: #22c55e;
+  --danger: #ef4444;
+  --radius: 10px;
+  --radius-btn: 6px;
+  --shadow-toolbar: 0 4px 16px rgba(0, 0, 0, 0.35);
+  --shadow-ball: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-ball-drag: 0 6px 18px rgba(0, 0, 0, 0.5);
+}
+.theme-light {
+  /* light settings surface */
+  --bg: #f7f8fa;
+  --surface: #ffffff;
+  --surface-2: #f0f1f4;
+  --border: #e5e7eb;
+  --border-subtle: #eef0f3;
+  --text: #111827;
+  --text-2: #6b7280;
+  --text-3: #9ca3af;
+  /* accent stays identical across themes */
+}

@@ -1,3 +1,5 @@
+import '../theme.css'
+
 // Floating ball: the whole ball is interactive. Dragging is manual (main
 // process polls the cursor between drag-start/drag-end), a press that never
 // moves beyond a few pixels counts as a click (open chat), and right-click
@@ -13,8 +15,9 @@ ball.addEventListener('mousedown', (e) => {
   if (e.button !== 0) return
   pressed = true
   dragged = false
+  ball.classList.add('dragging')
   down = { x: e.clientX, y: e.clientY }
-  window.promptly.ballDragStart()
+  window.promptly.windowDragStart()
   e.preventDefault()
 })
 
@@ -28,7 +31,8 @@ window.addEventListener('mousemove', (e) => {
 window.addEventListener('mouseup', (e) => {
   if (!pressed || e.button !== 0) return
   pressed = false
-  window.promptly.ballDragEnd()
+  ball.classList.remove('dragging')
+  window.promptly.windowDragEnd()
   if (!dragged && down) {
     // a press that stayed put is a click
     window.promptly.ballOpenChat()

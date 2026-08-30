@@ -9,7 +9,7 @@ export interface AppSettings {
   ballPosition?: { x: number; y: number }
 }
 
-const DEFAULTS: AppSettings = { language: 'en', autostart: true, initialized: false }
+const DEFAULTS: AppSettings = { language: 'en', autostart: false, initialized: false }
 let cache: AppSettings | null = null
 
 function file(): string {
@@ -37,12 +37,12 @@ export function saveSettings(patch: Partial<AppSettings>): AppSettings {
   return merged
 }
 
-/** SPEC D9: autostart defaults to ON at first run; user can turn it off. */
+/** Autostart defaults to OFF (UI spec v0.3: opt-in, not silent); the settings
+ * checkbox turns it on. */
 export function applyFirstRunAutostart(): void {
   const s = loadSettings()
   if (!s.initialized) {
-    app.setLoginItemSettings({ openAtLogin: true })
-    saveSettings({ autostart: true, initialized: true })
+    saveSettings({ initialized: true })
   }
 }
 

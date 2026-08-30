@@ -7,6 +7,7 @@
       content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:"
     />
     <title>Promptly</title>
+    <link rel="stylesheet" href="/src/theme.css" />
     <style>
       * {
         box-sizing: border-box;
@@ -16,41 +17,52 @@
         margin: 0;
         background: transparent;
         overflow: hidden;
+        /* keep in sync with WINDOW_SIZE in src/main/ball.ts */
+        width: 64px;
+        height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
       .ball {
-        width: 48px;
-        height: 48px;
+        width: 44px;
+        height: 44px;
         border-radius: 50%;
-        background: #171a21;
-        border: 1px solid #2a2f3a;
+        background: var(--surface);
+        /* Doubao-style light ring: keeps the dark ball readable on dark backgrounds */
+        border: 2.5px solid rgba(255, 255, 255, 0.9);
+        /* subtle 3D bevel — inset shadows stay inside the circle */
         box-shadow:
-          0 0 14px rgba(124, 92, 255, 0.35),
-          0 2px 8px rgba(0, 0, 0, 0.5);
+          inset 0 2px 3px rgba(255, 255, 255, 0.16),
+          inset 0 -3px 6px rgba(0, 0, 0, 0.55);
         display: flex;
         align-items: center;
         justify-content: center;
         user-select: none;
         cursor: grab;
-        opacity: 0.92;
+        /* idle: low presence (design spec) */
+        opacity: 0.7;
         transition:
-          transform 0.15s ease,
           opacity 0.15s ease,
+          filter 0.15s ease,
           box-shadow 0.15s ease;
       }
       .ball:hover {
         opacity: 1;
-        transform: scale(1.08);
+        filter: brightness(1.25);
         box-shadow:
-          0 0 20px rgba(124, 92, 255, 0.55),
-          0 2px 10px rgba(0, 0, 0, 0.5);
+          inset 0 2px 3px rgba(255, 255, 255, 0.16),
+          inset 0 -3px 6px rgba(0, 0, 0, 0.55),
+          0 0 10px var(--accent-soft);
       }
-      .ball:active {
+      .ball.dragging {
         cursor: grabbing;
-        transform: scale(0.96);
+        opacity: 1;
+        box-shadow: var(--shadow-ball-drag);
       }
       .mark {
-        width: 34px;
-        height: 34px;
+        width: 30px;
+        height: 30px;
         pointer-events: none;
       }
     </style>

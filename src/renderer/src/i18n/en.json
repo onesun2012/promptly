@@ -40,7 +40,10 @@
     "copy": "Copy",
     "close": "Close",
     "safe": "Safe",
-    "rewrite": "Rewrite"
+    "rewrite": "Rewrite",
+    "cancel": "Cancel",
+    "retry": "Retry",
+    "processing": "Processing selection…"
   },
   "chat": {
     "newChat": "New chat",

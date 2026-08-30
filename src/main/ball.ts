@@ -3,7 +3,11 @@ import { join } from 'node:path'
 import { loadSettings, saveSettings } from './settings-store'
 import { toggleChatWindow } from './chat-window'
 
-const BALL_SIZE = 48
+const BALL_SIZE = 44
+// Hover glow headroom: window is slightly larger than the ball so the hover
+// halo isn't clipped square. Keep in sync with body size in ball.html.
+const GLOW_PAD = 10
+const WINDOW_SIZE = BALL_SIZE + GLOW_PAD * 2
 
 let ball: BrowserWindow | null = null
 
@@ -12,8 +16,8 @@ function persistIfChanged(): void {
   const [bx, by] = ball.getPosition()
   const display = screen.getDisplayNearestPoint({ x: bx, y: by })
   const wa = display.workArea
-  const cx = Math.min(Math.max(bx, wa.x), wa.x + wa.width - BALL_SIZE)
-  const cy = Math.min(Math.max(by, wa.y), wa.y + wa.height - BALL_SIZE)
+  const cx = Math.min(Math.max(bx, wa.x), wa.x + wa.width - WINDOW_SIZE)
+  const cy = Math.min(Math.max(by, wa.y), wa.y + wa.height - WINDOW_SIZE)
   if (cx !== bx || cy !== by) {
     ball.setPosition(cx, cy)
     return
@@ -31,7 +35,11 @@ const MENU_LABELS: Record<string, { openChat: string; settings: string; quit: st
   de: { openChat: 'Chat öffnen', settings: 'Einstellungen', quit: 'Promptly beenden' },
   es: { openChat: 'Abrir chat', settings: 'Ajustes', quit: 'Salir de Promptly' },
   ja: { openChat: 'チャットを開く', settings: '設定', quit: 'Promptly を終了' },
-  ko: { openChat: '채팅 열기', settings: '설정', quit: 'Promptly 종료' }
+  ko: { openChat: '채팅 열기', settings: '설정', quit: 'Promptly 종료' },
+  'zh-CN': { openChat: '打开聊天', settings: '设置', quit: '退出 Promptly' },
+  'zh-TW': { openChat: '開啟聊天', settings: '設定', quit: '結束 Promptly' },
+  ru: { openChat: 'Открыть чат', settings: 'Настройки', quit: 'Выйти из Promptly' },
+  ar: { openChat: 'فتح الدردشة', settings: 'الإعدادات', quit: 'إنهاء Promptly' }
 }
 
 export function labelsFor(locale: string): { openChat: string; settings: string; quit: string } {
@@ -47,12 +55,12 @@ export function createBallWindow(): BrowserWindow {
 
   const saved = loadSettings().ballPosition
   const wa = screen.getPrimaryDisplay().workArea
-  const x = saved?.x ?? wa.x + wa.width - BALL_SIZE - 8
-  const y = saved?.y ?? wa.y + Math.round(wa.height / 2 - BALL_SIZE / 2)
+  const x = saved?.x ?? wa.x + wa.width - WINDOW_SIZE - 8
+  const y = saved?.y ?? wa.y + Math.round(wa.height / 2 - WINDOW_SIZE / 2)
 
   ball = new BrowserWindow({
-    width: BALL_SIZE,
-    height: BALL_SIZE,
+    width: WINDOW_SIZE,
+    height: WINDOW_SIZE,
     x,
     y,
     frame: false,
@@ -96,31 +104,37 @@ export function createBallWindow(): BrowserWindow {
 export function initBallIpc(): void {
   ipcMain.on('ball:open-chat', () => toggleChatWindow())
 
-  // Manual drag: renderer signals start/end, we track the cursor here (DIP
-  // coordinates from screen.getCursorScreenPoint are reliable across DPI).
+  // Manual drag, generalized: whichever renderer window sends drag-start
+  // (floating ball or the frameless chat window titlebar) is the one that
+  // moves. We track the cursor here (DIP coordinates from
+  // screen.getCursorScreenPoint are reliable across DPI).
+  let dragWindow: BrowserWindow | null = null
   let dragOffset: { x: number; y: number } | null = null
   let dragTimer: NodeJS.Timeout | null = null
 
-  ipcMain.on('ball:drag-start', () => {
-    if (!ball || ball.isDestroyed()) return
+  ipcMain.on('window:drag-start', (e) => {
+    const win = BrowserWindow.fromWebContents(e.sender)
+    if (!win || win.isDestroyed()) return
+    dragWindow = win
     const cursor = screen.getCursorScreenPoint()
-    const [bx, by] = ball.getPosition()
+    const [bx, by] = win.getPosition()
     dragOffset = { x: cursor.x - bx, y: cursor.y - by }
     if (dragTimer) clearInterval(dragTimer)
     dragTimer = setInterval(() => {
-      if (!ball || ball.isDestroyed() || !dragOffset) return
+      if (!dragWindow || dragWindow.isDestroyed() || !dragOffset) return
       const c = screen.getCursorScreenPoint()
-      ball.setPosition(c.x - dragOffset.x, c.y - dragOffset.y)
+      dragWindow.setPosition(c.x - dragOffset.x, c.y - dragOffset.y)
     }, 16)
   })
 
-  ipcMain.on('ball:drag-end', () => {
+  ipcMain.on('window:drag-end', (e) => {
     if (dragTimer) {
       clearInterval(dragTimer)
       dragTimer = null
     }
     dragOffset = null
-    persistIfChanged()
+    dragWindow = null
+    if (BrowserWindow.fromWebContents(e.sender) === ball) persistIfChanged()
   })
 
   ipcMain.on('ball:menu', (_e, position: { x: number; y: number }) => {
@@ -150,8 +164,8 @@ export function relocateBallForDisplay(): void {
   const [bx, by] = ball.getPosition()
   const display = screen.getDisplayNearestPoint({ x: bx, y: by })
   const wa = display.workArea
-  const nx = Math.min(Math.max(bx, wa.x - BALL_SIZE + 8), wa.x + wa.width - 8)
-  const ny = Math.min(Math.max(by, wa.y - BALL_SIZE + 8), wa.y + wa.height - 8)
+  const nx = Math.min(Math.max(bx, wa.x - WINDOW_SIZE + GLOW_PAD), wa.x + wa.width - GLOW_PAD)
+  const ny = Math.min(Math.max(by, wa.y - WINDOW_SIZE + GLOW_PAD), wa.y + wa.height - GLOW_PAD)
   if (nx !== bx || ny !== by) ball.setPosition(nx, ny)
 }
 

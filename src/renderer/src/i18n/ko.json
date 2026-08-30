@@ -40,7 +40,10 @@
     "copy": "복사",
     "close": "닫기",
     "safe": "안전",
-    "rewrite": "다시 쓰기"
+    "rewrite": "다시 쓰기",
+    "cancel": "취소",
+    "retry": "다시 시도",
+    "processing": "선택 항목 처리 중…"
   },
   "chat": {
     "newChat": "새 채팅",

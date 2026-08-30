@@ -207,18 +207,29 @@ namespace Promptly.Helper
             try
             {
                 AutomationElement focused = null;
-                try { focused = AutomationElement.FocusedElement; } catch { }
+                // WPS/Office may not have their UIA tree ready at MOUSE_UP;
+                // retry the focused-element query once after a short wait.
+                for (int attempt = 0; attempt < 2 && focused == null; attempt++)
+                {
+                    try { focused = AutomationElement.FocusedElement; } catch { }
+                    if (focused == null && attempt == 0) Thread.Sleep(40);
+                }
 
                 if (focused == null)
                 {
+                    Log("uia: no focused element (after retry)");
                     decision = "unknown";
                     return;
                 }
 
-                // Focus must still belong to the window we locked at MOUSE_DOWN,
-                // otherwise the session context is stale (focus moved elsewhere).
-                if (focused.Current.ProcessId != (int)session.LockedPid)
+                // Focus must still belong to the app we locked at MOUSE_DOWN.
+                // Strict pid equality breaks WPS-style multi-process suites: the
+                // locked window is the launcher process, the focused document
+                // element lives in a per-document child process. Accept same
+                // pid, same process name, or a parent/child link (2 hops).
+                if (!IsTrustedFocus(session, focused.Current.ProcessId, focused))
                 {
+                    Log("uia: focus pid mismatch focused=" + focused.Current.ProcessId + " locked=" + session.LockedPid + " app=" + session.ProcessName);
                     decision = "unknown";
                     return;
                 }
@@ -257,8 +268,121 @@ namespace Promptly.Helper
             }
         }
 
-        private static bool IsSensitive(AutomationElement element)
+        // ---- trusted focus (multi-process suites) ------------------------------
+
+        private static bool IsTrustedFocus(SelectionSession session, int focusedPid, AutomationElement focused)
         {
+            int locked = (int)session.LockedPid;
+            if (focusedPid == locked) return true;
+
+            // Window ownership first (correct semantics for multi-process suites
+            // like WPS: the focused element's root owner window must be the
+            // window we locked, regardless of which process renders it).
+            try
+            {
+                IntPtr focusHwnd = (IntPtr)focused.Current.NativeWindowHandle;
+                if (focusHwnd != IntPtr.Zero && session.Hwnd != IntPtr.Zero)
+                {
+                    IntPtr a = GetAncestor(focusHwnd, 2); // GA_ROOT
+                    IntPtr b = GetAncestor(session.Hwnd, 2);
+                    Log("uia: hwnd check focusRoot=" + a + " lockedRoot=" + b);
+                    if (a == b && a != IntPtr.Zero) return true;
+                }
+            }
+            catch (Exception ex) { Log("uia: hwnd check error " + ex.Message); }
+
+            try
+            {
+                string ln = Process.GetProcessById(locked).ProcessName;
+                string fn = Process.GetProcessById(focusedPid).ProcessName;
+                if (string.Equals(ln, fn, StringComparison.OrdinalIgnoreCase))
+                {
+                    Log("uia: trusted by process name (" + fn + ")");
+                    return true;
+                }
+            }
+            catch { }
+            // WPS children may be service-brokered with no kinship at all.
+            if (SharesAncestor(locked, focusedPid, 3))
+            {
+                Log("uia: trusted by shared ancestor focused=" + focusedPid + " locked=" + locked);
+                return true;
+            }
+            return false;
+        }
+
+        private static HashSet<int> AncestorsOf(int pid, int hops)
+        {
+            HashSet<int> set = new HashSet<int>();
+            int cur = pid;
+            for (int i = 0; i < hops; i++)
+            {
+                int? p = ParentPid(cur);
+                if (p == null || p.Value <= 0) break;
+                set.Add(p.Value);
+                cur = p.Value;
+            }
+            return set;
+        }
+
+        private static bool SharesAncestor(int a, int b, int hops)
+        {
+            HashSet<int> anc = AncestorsOf(a, hops);
+            if (anc.Count == 0) return false;
+            foreach (int p in AncestorsOf(b, hops))
+            {
+                if (anc.Contains(p)) return true;
+            }
+            return false;
+        }
+
+        private static int? ParentPid(int pid)
+        {
+            IntPtr snap = CreateToolhelp32Snapshot(0x2, 0); // TH32CS_SNAPPROCESS
+            if (snap == new IntPtr(-1)) return null;
+            try
+            {
+                PROCESSENTRY32 pe = new PROCESSENTRY32();
+                pe.dwSize = (uint)Marshal.SizeOf(typeof(PROCESSENTRY32));
+                if (!Process32First(snap, pe)) return null;
+                do
+                {
+                    if (pe.th32ProcessID == (uint)pid) return (int)pe.th32ParentProcessID;
+                } while (Process32Next(snap, pe));
+                return null;
+            }
+            finally { CloseHandle(snap); }
+        }
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr GetAncestor(IntPtr hwnd, uint flags);
+
+        [StructLayout(LayoutKind.Sequential)]
+        private class PROCESSENTRY32
+        {
+            public uint dwSize;
+            public uint cntUsage;
+            public uint th32ProcessID;
+            public UIntPtr th32DefaultHeapID;
+            public uint th32ModuleID;
+            public uint cntThreads;
+            public uint th32ParentProcessID;
+            public long pcPriClassBase;
+            public uint dwFlags;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
+            public string szExeFile;
+        }
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern IntPtr CreateToolhelp32Snapshot(uint flags, uint pid);
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
+        private static extern bool Process32First(IntPtr snapshot, PROCESSENTRY32 entry);
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
+        private static extern bool Process32Next(IntPtr snapshot, PROCESSENTRY32 entry);
+
+        private static bool IsSensitive(AutomationElement element)        {
             try
             {
                 AutomationElement el = element;
@@ -388,9 +512,14 @@ namespace Promptly.Helper
             ReleaseIfDown(VK_MENU);
             ReleaseIfDown(VK_CONTROL);
             Thread.Sleep(15);
+            // gaps between events: WPS (Office suites generally) drops synthetic
+            // key combos that arrive back-to-back in the same instant
             SendKey(VK_CONTROL, false);
+            Thread.Sleep(25);
             SendKey(VK_C, false);
+            Thread.Sleep(25);
             SendKey(VK_C, true);
+            Thread.Sleep(25);
             SendKey(VK_CONTROL, true);
         }
 

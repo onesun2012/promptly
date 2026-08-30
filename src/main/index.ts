@@ -25,6 +25,7 @@ import * as secureStore from './secure-store'
 import { applyFirstRunAutostart, loadSettings, saveSettings, setAutostart } from './settings-store'
 import { createBallWindow, initBallIpc, labelsFor, setBallLabels } from './ball'
 import { initTray, rebuildTrayMenu, resetBallPosition } from './tray'
+import { appIconPath } from './app-icon'
 
 let mainWin: BrowserWindow | null = null
 
@@ -39,6 +40,7 @@ function createWindow(): void {
     autoHideMenuBar: true,
     title: 'Promptly',
     backgroundColor: '#ffffff',
+    icon: appIconPath(),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: true

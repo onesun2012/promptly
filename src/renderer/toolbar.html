@@ -4,21 +4,15 @@
     <meta charset="UTF-8" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:"
+      content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:"
     />
     <title>Promptly</title>
+    <link rel="stylesheet" href="/src/theme.css" />
     <style>
       * {
         box-sizing: border-box;
       }
       :root {
-        /* Promptly design tokens (UI v0.2) */
-        --bg: #0f1115;
-        --surface: #171a21;
-        --border: #2a2f3a;
-        --text: #e8eaed;
-        --muted: #8b93a1;
-        --accent: #7c5cff;
         font-family: 'Segoe UI', system-ui, sans-serif;
         color: var(--text);
       }
@@ -30,13 +24,25 @@
       .toolbar {
         background: var(--surface);
         border: 1px solid var(--border);
-        border-radius: 12px;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow-toolbar);
         padding: 8px 10px;
-        height: 100vh;
         display: flex;
         flex-direction: column;
         gap: 6px;
+      }
+      .toolbar.appear {
+        animation: appear 0.12s ease-out;
+      }
+      @keyframes appear {
+        from {
+          opacity: 0;
+          transform: translateY(3px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
       }
       .head {
         display: flex;
@@ -60,7 +66,7 @@
       }
       .badge {
         font-size: 10px;
-        color: #3fb950;
+        color: var(--success);
         display: flex;
         align-items: center;
         gap: 3px;
@@ -71,19 +77,19 @@
       .iconbtn {
         border: none;
         background: transparent;
-        color: var(--muted);
+        color: var(--text-2);
         font-size: 12px;
         cursor: pointer;
-        padding: 1px 4px;
+        padding: 2px 5px;
         border-radius: 5px;
       }
       .iconbtn:hover {
         color: var(--text);
-        background: #21262f;
+        background: var(--surface-2);
       }
       .snippet {
         font-size: 11px;
-        color: var(--muted);
+        color: var(--text-2);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -93,23 +99,58 @@
         display: flex;
         gap: 5px;
       }
+      /* primary action: solid accent */
       .airow .ai {
         flex: 1;
         font-size: 12px;
         padding: 5px 4px;
-        background: #1d222b;
+        border-radius: var(--radius-btn);
+        background: var(--accent);
+        border: 1px solid var(--accent);
+        color: #ffffff;
+        cursor: pointer;
+      }
+      .airow .ai:hover {
+        background: var(--accent-hover);
+        border-color: var(--accent-hover);
+      }
+      /* secondary action: ghost/outline */
+      .airow .ai.ghost {
+        background: transparent;
         border: 1px solid var(--border);
+        color: var(--text-2);
+      }
+      .airow .ai.ghost:hover {
+        background: var(--surface-2);
         color: var(--text);
       }
-      .airow .ai.primary {
-        border-color: var(--accent);
-        color: #c9b8ff;
+      /* result header copy button: highest weight */
+      .copybtn {
+        font-size: 11px;
+        padding: 3px 10px;
+        border-radius: var(--radius-btn);
+        background: var(--accent);
+        border: 1px solid var(--accent);
+        color: #ffffff;
+        cursor: pointer;
+      }
+      .copybtn:hover {
+        background: var(--accent-hover);
       }
       .loading {
-        flex: 1;
         display: flex;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
+        gap: 8px;
+        padding: 10px 0 2px;
+      }
+      .loading .hint {
+        font-size: 11px;
+        color: var(--text-2);
+      }
+      .dots {
+        display: flex;
         gap: 5px;
       }
       .dot {
@@ -136,22 +177,52 @@
           transform: translateY(-3px);
         }
       }
+      ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 5px;
+        border: 2px solid transparent;
+        background-clip: content-box;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: var(--text-3);
+        background-clip: content-box;
+      }
       .resultwrap {
-        flex: 1;
         overflow-y: auto;
+        max-height: 240px;
         font-size: 12px;
         line-height: 1.5;
         white-space: pre-wrap;
         user-select: text;
+        padding: 0 2px;
       }
       .err {
-        color: #f85149;
+        color: var(--danger);
       }
-      .airow .ai:hover {
-        background: #262c38;
+      .foot {
+        display: flex;
+        align-items: center;
+        gap: 5px;
       }
-      .airow .ai.primary:hover {
-        background: #2a2440;
+      .ghostbtn {
+        font-size: 11px;
+        padding: 3px 10px;
+        border-radius: var(--radius-btn);
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--text-2);
+        cursor: pointer;
+      }
+      .ghostbtn:hover {
+        background: var(--surface-2);
+        color: var(--text);
       }
     </style>
   </head>

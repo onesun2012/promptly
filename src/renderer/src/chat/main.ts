@@ -1,5 +1,6 @@
 import { createApp } from 'vue'
 import ChatApp from './ChatApp.vue'
+import '../theme.css'
 import { createAppI18n } from '../i18n'
 
 const i18n = createAppI18n()

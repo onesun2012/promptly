@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { useAppStore } from './stores/app'
 import type { LifecycleInfo, PipelineEvent } from '@shared'
 import type { ProviderProfile, ProviderView, TestConnectionResult } from '@shared'
-import { SUPPORTED_LOCALES, applyLocale, type Locale } from './i18n'
+import { SUPPORTED_LOCALES, LOCALE_LABELS, applyLocale, type Locale } from './i18n'
 
 const app = useAppStore()
 const { t, locale } = useI18n()
@@ -31,7 +31,7 @@ const testing = ref(false)
 const testResult = ref<TestConnectionResult | null>(null)
 const saveMsg = ref('')
 const settingsLanguage = ref('en')
-const autostart = ref(true)
+const autostart = ref(false)
 
 async function refreshProfiles(): Promise<void> {
   profiles.value = await window.promptly.listProviders()
@@ -135,7 +135,7 @@ function snippet(env: PipelineEvent | null): string {
 <template>
   <div class="shell">
     <header class="brand">
-      <h1>Promptly</h1>
+      <h1><span class="spark">✦</span> Promptly</h1>
       <p class="tagline">
         {{ t('app.tagline') }}
       </p>
@@ -280,7 +280,7 @@ function snippet(env: PipelineEvent | null): string {
               v-for="l in locales"
               :key="l"
               :value="l"
-            >{{ l.toUpperCase() }}</option>
+            >{{ LOCALE_LABELS[l] }}</option>
           </select>
         </label>
         <label class="check">
@@ -309,11 +309,11 @@ function snippet(env: PipelineEvent | null): string {
       </div>
     </section>
 
-    <section
+    <details
       v-if="lastEvent"
-      class="card"
+      class="evcard"
     >
-      <h2>{{ t('app.events') }}</h2>
+      <summary>{{ t('app.events') }} · {{ eventCount }}</summary>
       <p class="evline">
         <code class="evtype">{{ lastEvent.type }}</code>
         <code>{{ lastEvent.sessionId }}</code>
@@ -321,50 +321,58 @@ function snippet(env: PipelineEvent | null): string {
       <p class="evtext">
         {{ snippet(lastEvent) }}
       </p>
-    </section>
+    </details>
   </div>
 </template>
 
 <style>
 :root {
   font-family: 'Segoe UI', system-ui, sans-serif;
-  color: #1f2328;
+  color: var(--text);
 }
 * { box-sizing: border-box; }
-body { margin: 0; background: #f6f8fa; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 5px; border: 2px solid transparent; background-clip: content-box; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-3); background-clip: content-box; }
+body { margin: 0; background: var(--bg); color: var(--text); }
 .shell { max-width: 620px; margin: 6vh auto 0; padding: 0 24px 40px; }
-.brand h1 { margin: 0; font-size: 28px; letter-spacing: -0.02em; }
-.tagline { margin: 4px 0 28px; color: #57606a; }
+.brand h1 { margin: 0; font-size: 26px; letter-spacing: -0.02em; display: flex; align-items: center; gap: 8px; }
+.brand h1 .spark { color: var(--accent); font-size: 20px; }
+.tagline { margin: 4px 0 28px; color: var(--text-2); }
 .card {
-  background: #fff;
-  border: 1px solid #d0d7de;
-  border-radius: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   padding: 20px 24px;
   margin-bottom: 16px;
 }
 .card h2 { margin: 0 0 12px; font-size: 16px; }
 .meta { list-style: none; margin: 0; padding: 0; }
-.meta li { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #eff2f5; }
-.meta li span { color: #57606a; }
+.meta li { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border-subtle); }
+.meta li span { color: var(--text-2); }
 .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; }
-label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #57606a; }
+label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--text-2); }
 label.check { flex-direction: row; align-items: center; gap: 8px; font-size: 13px; padding-top: 20px; }
-input, select { font-size: 13px; padding: 6px 8px; border: 1px solid #d0d7de; border-radius: 6px; }
-.actions { display: flex; gap: 10px; align-items: center; margin-top: 14px; }
-button { font-size: 13px; padding: 6px 16px; border-radius: 6px; border: 1px solid #d0d7de; background: #f6f8fa; cursor: pointer; }
-button.primary { background: #1f883d; border-color: #1f883d; color: #fff; }
+input, select { font-size: 13px; padding: 6px 8px; border: 1px solid var(--border); border-radius: var(--radius-btn); background: var(--surface); color: var(--text); }
+.actions { display: flex; gap: 10px; align-items: center; margin-top: 14px; flex-wrap: wrap; }
+button { font-size: 13px; padding: 6px 16px; border-radius: var(--radius-btn); border: 1px solid var(--border); background: var(--surface-2); color: var(--text); cursor: pointer; }
+button:hover { border-color: var(--text-3); }
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+button.primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
 button:disabled { opacity: 0.6; }
 button.mini { padding: 2px 8px; font-size: 11px; margin-left: auto; }
-.muted { color: #57606a; font-size: 12px; }
+.muted { color: var(--text-2); font-size: 12px; }
 .warn { color: #bf8700; font-size: 12px; }
-.result { margin-top: 12px; padding: 10px 12px; border-radius: 6px; font-size: 13px; }
-.result.ok { background: #dafbe1; color: #1a7f37; }
-.result.bad { background: #ffebe9; color: #cf222e; }
+.result { margin-top: 12px; padding: 10px 12px; border-radius: var(--radius-btn); font-size: 13px; }
+.result.ok { background: rgba(34, 197, 94, 0.12); color: #15803d; }
+.result.bad { background: rgba(239, 68, 68, 0.1); color: #b91c1c; }
 .saved h3 { font-size: 13px; margin: 16px 0 6px; }
 .saved ul { list-style: none; margin: 0; padding: 0; }
 .row { display: flex; flex-direction: row; align-items: center; gap: 8px; padding: 4px 0; }
 .pname { font-weight: 600; }
-.evline { display: flex; gap: 8px; margin: 0 0 8px; flex-wrap: wrap; }
-.evtype { background: #ddf4ff; color: #0969da; padding: 1px 8px; border-radius: 8px; font-size: 12px; }
-.evtext { margin: 0; font-size: 12px; color: #57606a; word-break: break-all; }
+details.evcard summary { cursor: pointer; color: var(--text-2); font-size: 13px; }
+.evline { display: flex; gap: 8px; margin: 8px 0; flex-wrap: wrap; }
+.evtype { background: var(--accent-soft); color: var(--accent); padding: 1px 8px; border-radius: 8px; font-size: 12px; }
+.evtext { margin: 0; font-size: 12px; color: var(--text-2); word-break: break-all; }
 </style>

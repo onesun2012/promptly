@@ -40,7 +40,10 @@
     "copy": "Kopieren",
     "close": "Schließen",
     "safe": "Sicher",
-    "rewrite": "Umschreiben"
+    "rewrite": "Umschreiben",
+    "cancel": "Abbrechen",
+    "retry": "Erneut versuchen",
+    "processing": "Auswahl wird verarbeitet…"
   },
   "chat": {
     "newChat": "Neuer Chat",

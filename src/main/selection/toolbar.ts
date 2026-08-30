@@ -4,10 +4,11 @@ import type { PipelineEvent } from '../../shared'
 import { loadSettings } from '../settings-store'
 
 const TOOLBAR_WIDTH = 320
-const TOOLBAR_HEIGHT = 132
+const TOOLBAR_MIN_HEIGHT = 88
 const AUTO_HIDE_MS = 8000
 
 let toolbar: BrowserWindow | null = null
+let toolbarHeight = 132
 let pending: { env: PipelineEvent; text: string } | null = null
 let autoHideTimer: NodeJS.Timeout | null = null
 let onHideCallback: (() => void) | null = null
@@ -50,6 +51,18 @@ export function initToolbarIpc(onHide: () => void, onAction: (actionId: string) 
     }
   })
   ipcMain.on('toolbar:hide', () => hideToolbar())
+  // Renderer measured its natural height (action ≈110, loading ≈96, result up
+  // to ~320 with the 240px body cap); resize keeping the top-left fixed.
+  ipcMain.on('toolbar:resize', (_e, h: unknown) => {
+    if (!toolbar || toolbar.isDestroyed()) return
+    const height = Math.min(Math.max(Math.round(Number(h) || 0), TOOLBAR_MIN_HEIGHT), 480)
+    if (height === toolbarHeight) return
+    toolbarHeight = height
+    const [x, y] = toolbar.getPosition()
+    const wa = screen.getDisplayNearestPoint({ x, y }).workArea
+    const yClamped = Math.min(y, wa.y + wa.height - height)
+    toolbar.setBounds({ x, y: yClamped, width: TOOLBAR_WIDTH, height })
+  })
   ipcMain.on('toolbar:action', (_e, actionId: unknown) => {
     if (typeof actionId === 'string' && onActionCallback) onActionCallback(actionId)
   })
@@ -73,14 +86,18 @@ export function showToolbarForSelection(env: PipelineEvent): void {
   const wa = display.workArea
 
   let x = Math.round(dip.x + 14)
-  const y = Math.round(dip.y + 18)
   if (x + TOOLBAR_WIDTH > wa.x + wa.width) x = Math.round(dip.x - TOOLBAR_WIDTH - 14)
-  const yClamped = Math.min(Math.max(y, wa.y), wa.y + wa.height - TOOLBAR_HEIGHT)
+  // Doubao-style placement: ABOVE the selection by default (bottom edge 8px
+  // above the cursor line so it never covers the just-selected text); flip
+  // below the cursor only when there is no room above.
+  let y = Math.round(dip.y - toolbarHeight - 8)
+  if (y < wa.y + 8) y = Math.round(dip.y + 18)
+  const yClamped = Math.min(Math.max(y, wa.y), wa.y + wa.height - toolbarHeight)
 
   pending = { env, text }
   const win = ensureToolbar()
   if (!win) return
-  win.setBounds({ x, y: yClamped, width: TOOLBAR_WIDTH, height: TOOLBAR_HEIGHT })
+  win.setBounds({ x, y: yClamped, width: TOOLBAR_WIDTH, height: toolbarHeight })
   win.showInactive()
 
   // First display: data is delivered on the renderer's toolbar:ready handshake.
@@ -113,8 +130,10 @@ function ensureToolbar(): BrowserWindow | null {
   if (toolbar && !toolbar.isDestroyed()) return toolbar
   toolbar = new BrowserWindow({
     width: TOOLBAR_WIDTH,
-    height: TOOLBAR_HEIGHT,
+    height: toolbarHeight,
     frame: false,
+    transparent: true,
+    hasShadow: false,
     alwaysOnTop: true,
     skipTaskbar: true,
     resizable: false,

@@ -1,6 +1,7 @@
 import { BrowserWindow, ipcMain, screen } from 'electron'
 import { join } from 'node:path'
 import { loadSettings } from './settings-store'
+import { appIconPath } from './app-icon'
 import type { Db } from './db'
 import type { ChatSendOptions } from './chat-service'
 import type { ChatChunk } from '../shared/providers.ts'
@@ -100,6 +101,7 @@ function ensureChatWindow(): BrowserWindow {
     backgroundColor: '#0f1115',
     autoHideMenuBar: true,
     title: 'Promptly',
+    icon: appIconPath(),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: true

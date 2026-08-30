@@ -13,8 +13,9 @@
     "lint": "eslint .",
     "build": "electron-vite build",
     "start": "electron-vite preview",
-    "dist:dir": "npm run build:helper && npm run build && electron-builder --dir",
-    "dist": "npm run build:helper && npm run build && electron-builder --win"
+    "dist:dir": "npm run build:helper && npm run gen:icon && npm run build && electron-builder --dir",
+    "dist": "npm run build:helper && npm run gen:icon && npm run build && electron-builder --win",
+    "gen:icon": "node scripts/gen-app-icon.mjs"
   },
   "engines": {
     "node": ">=20"

@@ -165,6 +165,11 @@ window.promptly.onChatOpenConversation(({ conversationId }) => {
 
 onMounted(async () => {
   await loadConversations()
+  // Conversations can be created outside this window (toolbar selection
+  // actions), so re-pull the list every time the window gets focus/shown.
+  window.addEventListener('focus', () => {
+    void loadConversations()
+  })
 })
 
 function onInputKeydown(e: KeyboardEvent): void {
@@ -194,6 +199,40 @@ function closeWindow(): void {
   window.promptly.chatClose()
 }
 
+// Frameless window drag: -webkit-app-region is unreliable on Electron 44
+// (same reason the floating ball uses manual dragging), so the titlebar
+// signals the main process, which moves the window from cursor position.
+function titlebarDragStart(e: MouseEvent): void {
+  if (e.button !== 0) return
+  if ((e.target as HTMLElement).closest('button')) return
+  window.promptly.windowDragStart()
+}
+function titlebarDragEnd(): void {
+  window.promptly.windowDragEnd()
+}
+
+// Resizable sidebar: drag the sash between the panes. Width persists in
+// localStorage so the user's proportion survives restarts.
+const SIDEBAR_MIN = 160
+const SIDEBAR_MAX = 420
+const sidebarWidth = ref(Number(localStorage.getItem('chat.sidebarWidth')) || 224)
+function startSashResize(e: MouseEvent): void {
+  if (e.button !== 0) return
+  e.preventDefault()
+  const startX = e.clientX
+  const startW = sidebarWidth.value
+  const onMove = (ev: MouseEvent): void => {
+    sidebarWidth.value = Math.min(Math.max(startW + ev.clientX - startX, SIDEBAR_MIN), SIDEBAR_MAX)
+  }
+  const onUp = (): void => {
+    localStorage.setItem('chat.sidebarWidth', String(sidebarWidth.value))
+    window.removeEventListener('mousemove', onMove)
+    window.removeEventListener('mouseup', onUp)
+  }
+  window.addEventListener('mousemove', onMove)
+  window.addEventListener('mouseup', onUp)
+}
+
 function stopStreaming(): void {
   window.promptly.chatStop(activeId.value ?? '')
 }
@@ -201,7 +240,11 @@ function stopStreaming(): void {
 
 <template>
   <div class="chat">
-    <header class="titlebar">
+    <header
+      class="titlebar"
+      @mousedown="titlebarDragStart"
+      @mouseup="titlebarDragEnd"
+    >
       <button
         class="bar-btn"
         :title="$t('chat.newChat')"
@@ -241,7 +284,10 @@ function stopStreaming(): void {
     </header>
 
     <div class="layout">
-      <aside class="sessions">
+      <aside
+        class="sessions"
+        :style="{ width: sidebarWidth + 'px' }"
+      >
         <button
           v-for="c in conversations"
           :key="c.id"
@@ -262,6 +308,12 @@ function stopStreaming(): void {
           No conversations yet
         </div>
       </aside>
+
+      <div
+        class="sash"
+        title=""
+        @mousedown="startSashResize"
+      ></div>
 
       <main class="main">
         <div
@@ -376,14 +428,14 @@ body {
   gap: 6px;
   padding: 6px 10px;
   border-bottom: 1px solid #2a2f3a;
-  -webkit-app-region: drag;
+  cursor: move;
+  user-select: none;
   background: #171a21;
 }
 .title {
   font-size: 13px;
   font-weight: 600;
   flex: 1;
-  -webkit-app-region: no-drag;
   color: #e8eaed;
 }
 .bar-btn {
@@ -408,11 +460,43 @@ body {
 }
 
 .sessions {
-  width: 140px;
-  border-right: 1px solid #2a2f3a;
+  min-width: 160px;
+  max-width: 420px;
+  border-right: 1px solid var(--border);
   overflow-y: auto;
   padding: 6px;
-  background: #171a21;
+  background: var(--surface);
+}
+.sash {
+  width: 5px;
+  margin: 0 -2px;
+  cursor: col-resize;
+  z-index: 1;
+  flex: none;
+}
+.sash:hover {
+  background: var(--accent-soft);
+}
+/* unified dark scrollbars (token palette) across the chat window */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 5px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-3);
+  background-clip: content-box;
+}
+::-webkit-scrollbar-corner {
+  background: transparent;
 }
 .session {
   display: flex;

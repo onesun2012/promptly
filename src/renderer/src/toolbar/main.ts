@@ -1,3 +1,4 @@
+import '../theme.css'
 import { createAppI18n } from '../i18n'
 
 const i18n = createAppI18n()
@@ -29,6 +30,7 @@ const SECONDARY_ACTIONS: Array<{ id: string; labelKey: string }> = [
 
 let current: ViewData | null = null
 let phase: Phase = 'action'
+let renderedPhase: Phase | null = null
 let lastActionId = 'ask'
 let resultText = ''
 let resultError = false
@@ -47,20 +49,32 @@ function render(): void {
   if (!app) return
   if (!current) {
     app.innerHTML = ''
+    renderedPhase = null
     return
   }
+  // appear animation only on phase transitions — replaying it on every
+  // streamed token made the toolbar flicker
+  const animate = phase !== renderedPhase
+  renderedPhase = phase
+  const animCls = animate ? ' appear' : ''
 
   if (phase === 'loading') {
     app.innerHTML = `
-      <div class="toolbar">
+      <div class="toolbar${animCls}">
         <div class="head">
           <span class="brand"><span class="spark">✦</span> ${escapeHtml(actionLabel(lastActionId))}…</span>
-          <span class="spacer"></span>
-          <button class="iconbtn" id="cancel">${escapeHtml(t('toolbar.cancel'))}</button>
         </div>
-        <div class="loading"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+        <div class="loading">
+          <div class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+          <div class="hint">${escapeHtml(t('toolbar.processing'))}</div>
+        </div>
+        <div class="foot">
+          <span class="spacer"></span>
+          <button class="ghostbtn" id="cancel">${escapeHtml(t('toolbar.cancel'))}</button>
+        </div>
       </div>`
     document.getElementById('cancel')?.addEventListener('click', () => window.promptly.toolbarCancel())
+    reportHeight()
     return
   }
 
@@ -70,16 +84,19 @@ function render(): void {
       ? `<div class="err">⚠ ${escapeHtml(resultText)}</div>`
       : `<div class="resultbody">${escapeHtml(resultText)}</div>`
     app.innerHTML = `
-      <div class="toolbar">
+      <div class="toolbar${animCls}">
         <div class="head">
           <span class="brand"><span class="spark">✦</span> ${title}</span>
           <span class="spacer"></span>
-          ${resultError ? '' : `<button class="iconbtn" id="copy" title="${escapeHtml(t('toolbar.copy'))}">⧉</button>`}
-          <button class="iconbtn" id="retry" title="${escapeHtml(t('toolbar.retry'))}">↻</button>
-          <button class="iconbtn" id="openchat" title="${escapeHtml(t('app.openChat'))}">💬</button>
+          ${resultError ? '' : `<button class="copybtn" id="copy">${escapeHtml(t('toolbar.copy'))}</button>`}
           <button class="iconbtn" id="close" title="${escapeHtml(t('toolbar.close'))}">✕</button>
         </div>
         <div class="resultwrap">${body}</div>
+        <div class="foot">
+          <button class="ghostbtn" id="openchat">${escapeHtml(t('app.openChat'))}</button>
+          <span class="spacer"></span>
+          <button class="iconbtn" id="retry" title="${escapeHtml(t('toolbar.retry'))}">↻</button>
+        </div>
       </div>`
     document.getElementById('copy')?.addEventListener('click', () => {
       void window.promptly.copySelection(resultText)
@@ -87,21 +104,21 @@ function render(): void {
     document.getElementById('retry')?.addEventListener('click', () => window.promptly.toolbarRetry())
     document.getElementById('openchat')?.addEventListener('click', () => window.promptly.toolbarOpenInChat())
     document.getElementById('close')?.addEventListener('click', () => window.promptly.hideToolbar())
+    reportHeight()
     return
   }
 
   // action state
   const snippet = current.text.length > 46 ? current.text.slice(0, 46) + '…' : current.text
   const button = (a: { id: string; labelKey: string }, primary: boolean): string =>
-    `<button class="ai${primary ? ' primary' : ''}" data-action="${a.id}">${escapeHtml(t(a.labelKey))}</button>`
+    `<button class="ai${primary ? '' : ' ghost'}" data-action="${a.id}">${escapeHtml(t(a.labelKey))}</button>`
 
   app.innerHTML = `
-    <div class="toolbar">
+    <div class="toolbar${animCls}">
       <div class="head">
         <span class="brand"><span class="spark">✦</span> Promptly</span>
         <span class="spacer"></span>
         <span class="badge">✓ ${escapeHtml(t('toolbar.safe'))}</span>
-        <button class="iconbtn" id="copy" title="${escapeHtml(t('toolbar.copy'))}">⧉</button>
         <button class="iconbtn" id="close" title="${escapeHtml(t('toolbar.close'))}">✕</button>
       </div>
       <div class="snippet" title="${escapeHtml(current.text)}">“${escapeHtml(snippet)}”</div>
@@ -118,10 +135,28 @@ function render(): void {
       window.promptly.runAction(a.id)
     })
   }
-  document.getElementById('copy')?.addEventListener('click', () => {
-    if (current) void window.promptly.copySelection(current.text)
-  })
   document.getElementById('close')?.addEventListener('click', () => window.promptly.hideToolbar())
+  reportHeight()
+}
+
+/** Tell the main process our natural height so the window hugs the content
+ * (action ≈110px, loading ≈96px, result grows up to the 240px body cap). */
+let heightTimer: ReturnType<typeof setTimeout> | null = null
+let lastReportedHeight = 0
+function reportHeight(): void {
+  if (heightTimer) clearTimeout(heightTimer)
+  // debounce: streaming grows the content every token; resizing the window
+  // on each token made it flicker
+  heightTimer = setTimeout(() => {
+    heightTimer = null
+    const el = document.querySelector('.toolbar')
+    if (!el) return
+    const h = Math.ceil(el.getBoundingClientRect().height)
+    if (h > 0 && Math.abs(h - lastReportedHeight) > 2) {
+      lastReportedHeight = h
+      window.promptly.toolbarResize(h)
+    }
+  }, 150)
 }
 
 window.promptly.onToolbarData(({ env, text }) => {

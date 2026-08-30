@@ -9,6 +9,7 @@ declare global {
       onPipelineLifecycle: (callback: (info: LifecycleInfo) => void) => () => void
       onToolbarData: (callback: (data: { env: PipelineEvent; text: string }) => void) => () => void
       toolbarReady: () => void
+      toolbarResize: (h: number) => void
       hideToolbar: () => void
       copySelection: (text: string) => Promise<boolean>
       listProviders: () => Promise<ProviderView[]>
@@ -32,8 +33,8 @@ declare global {
       onToolbarStream: (callback: (data: { conversationId: string; chunk: { type: string; content?: string } }) => void) => () => void
       onChatOpenConversation: (callback: (data: { conversationId: string }) => void) => () => void
       ballOpenChat: () => void
-      ballDragStart: () => void
-      ballDragEnd: () => void
+      windowDragStart: () => void
+      windowDragEnd: () => void
       ballMenu: (pos: { x: number; y: number }) => void
       getSettings: () => Promise<{ language: string; autostart: boolean }>
       setLanguage: (locale: string) => Promise<{ ok: boolean }>
