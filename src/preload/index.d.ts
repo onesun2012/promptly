@@ -26,6 +26,8 @@ declare global {
       chatClose: () => void
       runAction: (id: string) => void
       ballOpenChat: () => void
+      ballDragStart: () => void
+      ballDragEnd: () => void
       ballMenu: (pos: { x: number; y: number }) => void
       getSettings: () => Promise<{ language: string; autostart: boolean }>
       setLanguage: (locale: string) => Promise<{ ok: boolean }>

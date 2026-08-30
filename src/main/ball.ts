@@ -6,6 +6,23 @@ import { toggleChatWindow } from './chat-window'
 const BALL_SIZE = 48
 
 let ball: BrowserWindow | null = null
+
+function persistIfChanged(): void {
+  if (!ball || ball.isDestroyed()) return
+  const [bx, by] = ball.getPosition()
+  const display = screen.getDisplayNearestPoint({ x: bx, y: by })
+  const wa = display.workArea
+  const cx = Math.min(Math.max(bx, wa.x), wa.x + wa.width - BALL_SIZE)
+  const cy = Math.min(Math.max(by, wa.y), wa.y + wa.height - BALL_SIZE)
+  if (cx !== bx || cy !== by) {
+    ball.setPosition(cx, cy)
+    return
+  }
+  const s = loadSettings()
+  if (!s.ballPosition || s.ballPosition.x !== cx || s.ballPosition.y !== cy) {
+    saveSettings({ ballPosition: { x: cx, y: cy } })
+  }
+}
 let menuLabels = { openChat: 'Open chat', settings: 'Settings', quit: 'Quit Promptly' }
 
 const MENU_LABELS: Record<string, { openChat: string; settings: string; quit: string }> = {
@@ -57,27 +74,8 @@ export function createBallWindow(): BrowserWindow {
   ball.setVisibleOnAllWorkspaces(true)
 
   // Persist ball position (SPEC: draggable, position survives restarts).
-  // Belt and braces: listen for 'move' AND poll bounds — app-region dragging
-  // has quirks where neither event may fire, but bounds never lie.
-  // Clamp keeps the ball fully visible inside the work area (user request:
-  // the icon must never hang half off the screen edge).
-  let lastPos = { x, y }
-  const persistIfChanged = (): void => {
-    if (!ball || ball.isDestroyed()) return
-    const [bx, by] = ball.getPosition()
-    const display = screen.getDisplayNearestPoint({ x: bx, y: by })
-    const wa = display.workArea
-    const cx = Math.min(Math.max(bx, wa.x), wa.x + wa.width - BALL_SIZE)
-    const cy = Math.min(Math.max(by, wa.y), wa.y + wa.height - BALL_SIZE)
-    if (cx !== bx || cy !== by) {
-      ball.setPosition(cx, cy)
-      return // move event will re-trigger persist with the clamped position
-    }
-    if (cx !== lastPos.x || cy !== lastPos.y) {
-      lastPos = { x: cx, y: cy }
-      saveSettings({ ballPosition: lastPos })
-    }
-  }
+  // Belt and braces: 'move' events AND a periodic poll, plus clamping so the
+  // ball never hangs half off the screen edge.
   ball.on('move', () => persistIfChanged())
   const poll = setInterval(persistIfChanged, 3000)
   ball.on('closed', () => clearInterval(poll))
@@ -97,6 +95,33 @@ export function createBallWindow(): BrowserWindow {
 
 export function initBallIpc(): void {
   ipcMain.on('ball:open-chat', () => toggleChatWindow())
+
+  // Manual drag: renderer signals start/end, we track the cursor here (DIP
+  // coordinates from screen.getCursorScreenPoint are reliable across DPI).
+  let dragOffset: { x: number; y: number } | null = null
+  let dragTimer: NodeJS.Timeout | null = null
+
+  ipcMain.on('ball:drag-start', () => {
+    if (!ball || ball.isDestroyed()) return
+    const cursor = screen.getCursorScreenPoint()
+    const [bx, by] = ball.getPosition()
+    dragOffset = { x: cursor.x - bx, y: cursor.y - by }
+    if (dragTimer) clearInterval(dragTimer)
+    dragTimer = setInterval(() => {
+      if (!ball || ball.isDestroyed() || !dragOffset) return
+      const c = screen.getCursorScreenPoint()
+      ball.setPosition(c.x - dragOffset.x, c.y - dragOffset.y)
+    }, 16)
+  })
+
+  ipcMain.on('ball:drag-end', () => {
+    if (dragTimer) {
+      clearInterval(dragTimer)
+      dragTimer = null
+    }
+    dragOffset = null
+    persistIfChanged()
+  })
 
   ipcMain.on('ball:menu', (_e, position: { x: number; y: number }) => {
     const menu = Menu.buildFromTemplate([

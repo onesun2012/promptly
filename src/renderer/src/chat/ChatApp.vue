@@ -349,23 +349,39 @@ function stopStreaming(): void {
 <style>
 :root {
   font-family: 'Segoe UI', system-ui, sans-serif;
-  color: #1f2328;
+  color: #e8eaed;
 }
-* { box-sizing: border-box; }
-body { margin: 0; overflow: hidden; }
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  overflow: hidden;
+  background: #0f1115;
+}
 
-.chat { display: flex; flex-direction: column; height: 100vh; }
+.chat {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
 
 .titlebar {
   display: flex;
   align-items: center;
   gap: 6px;
   padding: 6px 10px;
-  border-bottom: 1px solid #d0d7de;
+  border-bottom: 1px solid #2a2f3a;
   -webkit-app-region: drag;
-  background: #f6f8fa;
+  background: #171a21;
 }
-.title { font-size: 13px; font-weight: 600; flex: 1; -webkit-app-region: no-drag; }
+.title {
+  font-size: 13px;
+  font-weight: 600;
+  flex: 1;
+  -webkit-app-region: no-drag;
+  color: #e8eaed;
+}
 .bar-btn {
   -webkit-app-region: no-drag;
   border: none;
@@ -374,17 +390,25 @@ body { margin: 0; overflow: hidden; }
   cursor: pointer;
   padding: 3px 8px;
   border-radius: 6px;
+  color: #8b93a1;
 }
-.bar-btn:hover { background: #eaeef2; }
+.bar-btn:hover {
+  background: #21262f;
+  color: #e8eaed;
+}
 
-.layout { display: flex; flex: 1; min-height: 0; }
+.layout {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
 
 .sessions {
   width: 140px;
-  border-right: 1px solid #d0d7de;
+  border-right: 1px solid #2a2f3a;
   overflow-y: auto;
   padding: 6px;
-  background: #fbfcfd;
+  background: #171a21;
 }
 .session {
   display: flex;
@@ -398,17 +422,54 @@ body { margin: 0; overflow: hidden; }
   font-size: 12px;
   cursor: pointer;
   gap: 4px;
+  color: #e8eaed;
 }
-.session:hover { background: #eaeef2; }
-.session.active { background: #ddf4ff; }
-.stitle { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.del { opacity: 0.5; font-size: 11px; }
-.del:hover { opacity: 1; color: #cf222e; }
-.muted { color: #57606a; font-size: 12px; padding: 6px; }
+.session:hover {
+  background: #21262f;
+}
+.session.active {
+  background: #2a2440;
+}
+.stitle {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.del {
+  opacity: 0.5;
+  font-size: 11px;
+}
+.del:hover {
+  opacity: 1;
+  color: #f85149;
+}
+.muted {
+  color: #8b93a1;
+  font-size: 12px;
+  padding: 6px;
+}
 
-.main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
-.messages { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
-.empty { color: #57606a; font-size: 13px; text-align: center; margin-top: 40%; }
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.empty {
+  color: #8b93a1;
+  font-size: 13px;
+  text-align: center;
+  margin-top: 40%;
+}
 
 .bubble {
   max-width: 92%;
@@ -418,23 +479,48 @@ body { margin: 0; overflow: hidden; }
   line-height: 1.5;
   word-break: break-word;
 }
-.user { align-self: flex-end; background: #ddf4ff; white-space: pre-wrap; }
-.assistant { align-self: flex-start; background: #f6f8fa; border: 1px solid #e4e9ed; }
-.assistant.err { background: #ffebe9; border-color: #ffc1bd; }
+.user {
+  align-self: flex-end;
+  background: #7c5cff;
+  color: #ffffff;
+  white-space: pre-wrap;
+}
+.assistant {
+  align-self: flex-start;
+  background: #171a21;
+  border: 1px solid #2a2f3a;
+}
+.assistant.err {
+  background: #2d1a1c;
+  border-color: #6e2a26;
+}
 .reasoning {
   font-size: 11px;
-  color: #8b949e;
-  border-left: 2px solid #d0d7de;
+  color: #8b93a1;
+  border-left: 2px solid #2a2f3a;
   padding-left: 8px;
   margin-bottom: 6px;
   white-space: pre-wrap;
 }
-.cursor { animation: blink 1s infinite; color: #0969da; }
-@keyframes blink { 50% { opacity: 0; } }
+.cursor {
+  animation: blink 1s infinite;
+  color: #7c5cff;
+}
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
 
-.md :first-child { margin-top: 0; }
-.md :last-child { margin-bottom: 0; }
-.md p { margin: 6px 0; }
+.md :first-child {
+  margin-top: 0;
+}
+.md :last-child {
+  margin-bottom: 0;
+}
+.md p {
+  margin: 6px 0;
+}
 .md pre {
   background: #0d1117;
   color: #e6edf3;
@@ -442,16 +528,30 @@ body { margin: 0; overflow: hidden; }
   border-radius: 8px;
   overflow-x: auto;
   font-size: 12px;
+  border: 1px solid #2a2f3a;
 }
-.md code { background: #eff2f5; padding: 1px 5px; border-radius: 4px; font-size: 12px; }
-.md pre code { background: transparent; padding: 0; }
+.md code {
+  background: #2a2f3a;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+.md pre code {
+  background: transparent;
+  padding: 0;
+}
+.md a {
+  color: #c9b8ff;
+}
+.md table {
+  border-collapse: collapse;
+}
+.md th,
+.md td {
+  border: 1px solid #2a2f3a;
+  padding: 4px 8px;
+}
 
-.inputbar {
-  display: flex;
-  gap: 8px;
-  padding: 10px;
-  border-top: 1px solid #d0d7de;
-}
 .pending {
   position: relative;
   padding: 0 10px;
@@ -460,7 +560,7 @@ body { margin: 0; overflow: hidden; }
   max-height: 72px;
   max-width: 140px;
   border-radius: 8px;
-  border: 1px solid #d0d7de;
+  border: 1px solid #2a2f3a;
 }
 .pending .rm {
   position: absolute;
@@ -471,8 +571,8 @@ body { margin: 0; overflow: hidden; }
   height: 20px;
   padding: 0;
   font-size: 10px;
-  background: #57606a;
-  color: #fff;
+  background: #58657a;
+  color: #ffffff;
   border: none;
 }
 .user .shot {
@@ -482,23 +582,42 @@ body { margin: 0; overflow: hidden; }
   border-radius: 8px;
   margin-bottom: 6px;
 }
+
+.inputbar {
+  display: flex;
+  gap: 8px;
+  padding: 10px;
+  border-top: 1px solid #2a2f3a;
+}
 textarea {
   flex: 1;
   resize: none;
   font-family: inherit;
   font-size: 13px;
   padding: 8px;
-  border: 1px solid #d0d7de;
+  border: 1px solid #2a2f3a;
   border-radius: 8px;
+  background: #171a21;
+  color: #e8eaed;
+}
+textarea::placeholder {
+  color: #8b93a1;
 }
 .send {
   align-self: flex-end;
-  background: #1f883d;
-  border: 1px solid #1f883d;
-  color: #fff;
+  background: #7c5cff;
+  border: 1px solid #7c5cff;
+  color: #ffffff;
   border-radius: 8px;
   padding: 8px 14px;
   cursor: pointer;
 }
-.send.stop { background: #cf222e; border-color: #cf222e; }
+.send:hover {
+  background: #6d4be0;
+}
+.send.stop {
+  background: #cf222e;
+  border-color: #cf222e;
+}
 </style>
+

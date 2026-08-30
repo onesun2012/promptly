@@ -8,11 +8,19 @@
     />
     <title>Promptly</title>
     <style>
-      :root {
-        font-family: 'Segoe UI', system-ui, sans-serif;
-      }
       * {
         box-sizing: border-box;
+      }
+      :root {
+        /* Promptly design tokens (UI v0.2) */
+        --bg: #0f1115;
+        --surface: #171a21;
+        --border: #2a2f3a;
+        --text: #e8eaed;
+        --muted: #8b93a1;
+        --accent: #7c5cff;
+        font-family: 'Segoe UI', system-ui, sans-serif;
+        color: var(--text);
       }
       body {
         margin: 0;
@@ -20,93 +28,88 @@
         user-select: none;
       }
       .toolbar {
-        background: #ffffff;
-        border: 1px solid #d0d7de;
-        border-radius: 10px;
-        box-shadow: 0 8px 24px rgba(31, 35, 40, 0.18);
-        padding: 10px 12px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
+        padding: 8px 10px;
         height: 100vh;
         display: flex;
         flex-direction: column;
-        gap: 8px;
+        gap: 6px;
       }
       .head {
         display: flex;
-        justify-content: space-between;
         align-items: center;
-        gap: 8px;
+        gap: 6px;
       }
-      .app {
+      .brand {
         font-size: 12px;
         font-weight: 600;
-        color: #57606a;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-      .badges {
+        color: var(--text);
         display: flex;
+        align-items: center;
         gap: 4px;
-        flex-shrink: 0;
+      }
+      .spark {
+        color: var(--accent);
+        font-size: 11px;
+      }
+      .spacer {
+        flex: 1;
       }
       .badge {
         font-size: 10px;
-        padding: 1px 6px;
-        border-radius: 8px;
-        background: #eff2f5;
-        color: #57606a;
+        color: #3fb950;
+        display: flex;
+        align-items: center;
+        gap: 3px;
       }
-      .badge.ok {
-        background: #dafbe1;
-        color: #1a7f37;
+      .badge.warn {
+        color: #d29922;
       }
-      .text {
-        flex: 1;
+      .iconbtn {
+        border: none;
+        background: transparent;
+        color: var(--muted);
         font-size: 12px;
-        line-height: 1.45;
-        color: #1f2328;
+        cursor: pointer;
+        padding: 1px 4px;
+        border-radius: 5px;
+      }
+      .iconbtn:hover {
+        color: var(--text);
+        background: #21262f;
+      }
+      .snippet {
+        font-size: 11px;
+        color: var(--muted);
+        white-space: nowrap;
         overflow: hidden;
-        user-select: text;
+        text-overflow: ellipsis;
+        padding: 0 2px;
       }
       .airow {
         display: flex;
-        gap: 6px;
+        gap: 5px;
       }
       .airow .ai {
         flex: 1;
         font-size: 12px;
         padding: 5px 4px;
-        background: #f6f8fa;
+        background: #1d222b;
+        border: 1px solid var(--border);
+        color: var(--text);
+      }
+      .airow .ai.primary {
+        border-color: var(--accent);
+        color: #c9b8ff;
       }
       .airow .ai:hover {
-        background: #ddf4ff;
-        border-color: #0969da;
-        color: #0969da;
+        background: #262c38;
       }
-      .actions {
-        display: flex;
-        gap: 8px;
-        justify-content: flex-end;
-      }
-      button {
-        font-size: 12px;
-        padding: 4px 14px;
-        border-radius: 6px;
-        border: 1px solid #d0d7de;
-        background: #f6f8fa;
-        color: #1f2328;
-        cursor: pointer;
-      }
-      button:hover {
-        background: #eef1f4;
-      }
-      #copy {
-        background: #1f883d;
-        border-color: #1f883d;
-        color: #fff;
-      }
-      #copy:hover {
-        background: #1a7f37;
+      .airow .ai.primary:hover {
+        background: #2a2440;
       }
     </style>
   </head>

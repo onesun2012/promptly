@@ -17,6 +17,12 @@ export const BUILTIN_ACTIONS: ActionDef[] = [
       'Translate the following text into English, preserving formatting and meaning. If it is already in English, translate it into Chinese instead.\n\n{text}'
   },
   {
+    id: 'rewrite',
+    name: 'Rewrite',
+    template:
+      'Rewrite the following text so it is clear, professional and well-structured. Keep the original language and meaning.\n\n{text}'
+  },
+  {
     id: 'summarize',
     name: 'Summarize',
     template: 'Summarize the following text in 3 concise bullet points:\n\n{text}'

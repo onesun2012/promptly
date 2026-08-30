@@ -3,8 +3,8 @@ import { join } from 'node:path'
 import type { PipelineEvent } from '../../shared'
 import { loadSettings } from '../settings-store'
 
-const TOOLBAR_WIDTH = 360
-const TOOLBAR_HEIGHT = 196
+const TOOLBAR_WIDTH = 320
+const TOOLBAR_HEIGHT = 132
 const AUTO_HIDE_MS = 8000
 
 let toolbar: BrowserWindow | null = null

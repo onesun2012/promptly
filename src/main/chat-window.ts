@@ -76,7 +76,7 @@ function ensureChatWindow(): BrowserWindow {
     minHeight: 460,
     frame: false,
     show: false,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#0f1115',
     autoHideMenuBar: true,
     title: 'Promptly',
     webPreferences: {
