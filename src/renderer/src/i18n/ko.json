@@ -37,7 +37,9 @@
     "summarize": "요약",
     "explain": "설명",
     "copy": "복사",
-    "close": "닫기"
+    "close": "닫기",
+    "safe": "안전",
+    "rewrite": "다시 쓰기"
   },
   "chat": {
     "newChat": "새 채팅",

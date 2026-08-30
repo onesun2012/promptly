@@ -37,7 +37,9 @@
     "summarize": "Résumer",
     "explain": "Expliquer",
     "copy": "Copier",
-    "close": "Fermer"
+    "close": "Fermer",
+    "safe": "Sûr",
+    "rewrite": "Réécrire"
   },
   "chat": {
     "newChat": "Nouveau chat",

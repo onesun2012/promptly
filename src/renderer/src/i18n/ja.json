@@ -37,7 +37,9 @@
     "summarize": "要約",
     "explain": "解説",
     "copy": "コピー",
-    "close": "閉じる"
+    "close": "閉じる",
+    "safe": "安全",
+    "rewrite": "書き換え"
   },
   "chat": {
     "newChat": "新規チャット",
