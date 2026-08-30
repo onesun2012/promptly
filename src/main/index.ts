@@ -5,6 +5,7 @@ import { HelperClient } from './selection/helper-client'
 import { SelectionMachine } from './selection/state-machine'
 import {
   getLastSelection,
+  hideIfClickOutside,
   initToolbarIpc,
   sendToToolbar,
   setToolbarMode,
