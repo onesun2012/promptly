@@ -71,7 +71,7 @@
     "conversation": "대화",
     "pin": "고정",
     "close": "닫기",
-    "noConversations": "아직 대화가 없습니다",
+    "noConversations": "대화가 없습니다",
     "emptyHint": "어디서든 텍스트를 선택하거나 아래에 입력하세요.",
     "inputPlaceholder": "무엇이든 물어보세요… (Enter로 전송)",
     "send": "보내기",

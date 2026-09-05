@@ -71,7 +71,7 @@
     "conversation": "对话",
     "pin": "置顶",
     "close": "关闭",
-    "noConversations": "还没有对话",
+    "noConversations": "暂无会话",
     "emptyHint": "在任意位置选中文字，或在下方输入。",
     "inputPlaceholder": "随便问点什么…（Enter 发送）",
     "send": "发送",
