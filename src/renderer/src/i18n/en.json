@@ -35,7 +35,13 @@
     "savedHiding": "Saved — hiding window…",
     "resetBall": "Reset floating ball",
     "privacy": "Privacy statement",
-    "stats": "Anonymous install counter"
+    "stats": "Anonymous install counter",
+    "blacklist": "App blacklist",
+    "blacklistHint": "Skip selection toolbar in these apps (process name, with or without .exe).",
+    "blacklistPlaceholder": "e.g. steam, League of Legends",
+    "blacklistAdd": "Add",
+    "blacklistRemove": "Remove",
+    "blacklistEmpty": "No apps blacklisted."
   },
   "toolbar": {
     "ask": "Ask",

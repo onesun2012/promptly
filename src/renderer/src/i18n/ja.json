@@ -35,7 +35,13 @@
     "savedHiding": "保存しました — ウィンドウを隠します…",
     "resetBall": "ボール位置をリセット",
     "privacy": "プライバシーについて",
-    "stats": "匿名インストールカウンター"
+    "stats": "匿名インストールカウンター",
+    "blacklist": "アプリのブラックリスト",
+    "blacklistHint": "これらのアプリでは選択ツールバーを出しません（プロセス名。.exe の有無どちらでも可）。",
+    "blacklistPlaceholder": "例: steam, League of Legends",
+    "blacklistAdd": "追加",
+    "blacklistRemove": "削除",
+    "blacklistEmpty": "ブラックリストは空です。"
   },
   "toolbar": {
     "ask": "質問",

@@ -20,9 +20,25 @@ export class HelperClient extends EventEmitter {
   private degraded = false
   private stopped = false
   private watchdog: NodeJS.Timeout | null = null
+  private blacklist: string[] = []
+  /** Soft respawn when config changes — must not count toward DEGRADED. */
+  private respawningForConfig = false
 
-  constructor(private readonly blacklist: string[] = []) {
+  constructor(blacklist: string[] = []) {
     super()
+    this.blacklist = [...blacklist]
+  }
+
+  setBlacklist(list: string[]): void {
+    this.blacklist = [...list]
+    if (this.stopped || !this.proc) return
+    this.respawningForConfig = true
+    try {
+      this.proc.kill()
+    } catch {
+      this.respawningForConfig = false
+      this.spawnHelper()
+    }
   }
 
   get isDegraded(): boolean {
@@ -95,10 +111,14 @@ export class HelperClient extends EventEmitter {
 
     this.proc.on('exit', () => {
       this.proc = null
-      if (!this.stopped) {
-        this.emitLifecycle({ state: 'crashed', attempt: this.restartAttempts + 1 })
-        this.scheduleRestart()
+      if (this.stopped) return
+      if (this.respawningForConfig) {
+        this.respawningForConfig = false
+        this.spawnHelper()
+        return
       }
+      this.emitLifecycle({ state: 'crashed', attempt: this.restartAttempts + 1 })
+      this.scheduleRestart()
     })
   }
 

@@ -22,7 +22,7 @@ import {
   toggleChatWindow
 } from './chat-window'
 import * as secureStore from './secure-store'
-import { applyFirstRunAutostart, loadSettings, saveSettings, setAutostart, setSelectionMode } from './settings-store'
+import { applyFirstRunAutostart, loadSettings, saveSettings, setAutostart, setBlacklist, setSelectionMode } from './settings-store'
 import { seedProviderFromEnv } from './seed-from-env'
 import { createBallWindow, initBallIpc, labelsFor, setBallLabels } from './ball'
 import { initTray, rebuildTrayMenu, resetBallPosition } from './tray'
@@ -70,7 +70,7 @@ ipcMain.handle('app:getInfo', (): AppInfo => ({
   platform: process.platform
 }))
 
-const helper = new HelperClient([])
+const helper = new HelperClient(loadSettings().blacklist)
 const machine = new SelectionMachine((msg) => console.log(msg))
 
 function broadcast(channel: string, data: unknown): void {
@@ -181,6 +181,11 @@ if (!gotLock) {
     ipcMain.handle('settings:selectionMode', (_e, mode: unknown) => {
       setSelectionMode(mode === 'hotkey' ? 'hotkey' : 'auto')
       return { ok: true }
+    })
+    ipcMain.handle('settings:blacklist', (_e, list: unknown) => {
+      const blacklist = setBlacklist(list)
+      helper.setBlacklist(blacklist)
+      return { ok: true, blacklist }
     })
     ipcMain.handle('app:privacy', async () => {
       const candidates = [

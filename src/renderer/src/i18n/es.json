@@ -35,7 +35,13 @@
     "savedHiding": "Guardado — ocultando ventana…",
     "resetBall": "Restablecer burbuja",
     "privacy": "Declaración de privacidad",
-    "stats": "Contador anónimo de instalaciones"
+    "stats": "Contador anónimo de instalaciones",
+    "blacklist": "Lista negra de apps",
+    "blacklistHint": "No mostrar la barra de selección en estas apps (nombre de proceso, con o sin .exe).",
+    "blacklistPlaceholder": "p. ej. steam, League of Legends",
+    "blacklistAdd": "Añadir",
+    "blacklistRemove": "Quitar",
+    "blacklistEmpty": "Ninguna app en la lista negra."
   },
   "toolbar": {
     "ask": "Preguntar",

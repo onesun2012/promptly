@@ -35,7 +35,13 @@
     "savedHiding": "Gespeichert — Fenster wird ausgeblendet…",
     "resetBall": "Blase zurücksetzen",
     "privacy": "Datenschutzerklärung",
-    "stats": "Anonymer Installationszähler"
+    "stats": "Anonymer Installationszähler",
+    "blacklist": "App-Blacklist",
+    "blacklistHint": "In diesen Apps keine Auswahl-Toolbar (Prozessname, mit/ohne .exe).",
+    "blacklistPlaceholder": "z. B. steam, League of Legends",
+    "blacklistAdd": "Hinzufügen",
+    "blacklistRemove": "Entfernen",
+    "blacklistEmpty": "Keine Apps auf der Blacklist."
   },
   "toolbar": {
     "ask": "Fragen",

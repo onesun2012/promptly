@@ -47,6 +47,7 @@ const api = {
   setLanguage: (locale: string) => ipcRenderer.invoke('settings:language', locale),
   setAutostart: (enabled: boolean) => ipcRenderer.invoke('settings:autostart', enabled),
   setSelectionMode: (mode: 'auto' | 'hotkey') => ipcRenderer.invoke('settings:selectionMode', mode),
+  setBlacklist: (list: string[]) => ipcRenderer.invoke('settings:blacklist', list),
   openChat: () => ipcRenderer.send('chat:toggle'),
   resetBall: () => ipcRenderer.invoke('ball:reset'),
   onAppLocale: subscriber<string>('app:locale'),

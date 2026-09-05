@@ -35,7 +35,13 @@
     "savedHiding": "Enregistré — fermeture de la fenêtre…",
     "resetBall": "Réinitialiser la bulle",
     "privacy": "Déclaration de confidentialité",
-    "stats": "Compteur d installations anonyme"
+    "stats": "Compteur d installations anonyme",
+    "blacklist": "Liste noire d’applis",
+    "blacklistHint": "Pas de barre de sélection dans ces applis (nom de processus, avec ou sans .exe).",
+    "blacklistPlaceholder": "ex. steam, League of Legends",
+    "blacklistAdd": "Ajouter",
+    "blacklistRemove": "Retirer",
+    "blacklistEmpty": "Aucune appli en liste noire."
   },
   "toolbar": {
     "ask": "Demander",

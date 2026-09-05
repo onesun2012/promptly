@@ -36,11 +36,12 @@ declare global {
       windowDragStart: () => void
       windowDragEnd: () => void
       ballMenu: (pos: { x: number; y: number }) => void
-      getSettings: () => Promise<{ language: string; autostart: boolean; statsEnabled: boolean; selectionMode: 'auto' | 'hotkey' }>
+      getSettings: () => Promise<{ language: string; autostart: boolean; statsEnabled: boolean; selectionMode: 'auto' | 'hotkey'; blacklist: string[] }>
       setStats: (enabled: boolean) => Promise<{ ok: boolean }>
       setLanguage: (locale: string) => Promise<{ ok: boolean }>
       setAutostart: (enabled: boolean) => Promise<{ ok: boolean }>
   setSelectionMode: (mode: 'auto' | 'hotkey') => Promise<{ ok: boolean }>
+      setBlacklist: (list: string[]) => Promise<{ ok: boolean; blacklist: string[] }>
       openChat: () => void
       resetBall: () => Promise<{ ok: boolean }>
       onAppLocale: (callback: (locale: string) => void) => () => void

@@ -35,7 +35,13 @@
     "savedHiding": "تم الحفظ — جارٍ إخفاء النافذة…",
     "resetBall": "إعادة تعيين الكرة العائمة",
     "privacy": "بيان الخصوصية",
-    "stats": "عدّاد تثبيت مجهول"
+    "stats": "عدّاد تثبيت مجهول",
+    "blacklist": "القائمة السوداء للتطبيقات",
+    "blacklistHint": "لا تُظهر شريط التحديد في هذه التطبيقات (اسم العملية مع أو بدون .exe).",
+    "blacklistPlaceholder": "مثل steam أو League of Legends",
+    "blacklistAdd": "إضافة",
+    "blacklistRemove": "إزالة",
+    "blacklistEmpty": "لا تطبيقات في القائمة السوداء."
   },
   "toolbar": {
     "ask": "اسأل",

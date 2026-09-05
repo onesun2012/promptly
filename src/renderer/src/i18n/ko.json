@@ -35,7 +35,13 @@
     "savedHiding": "저장됨 — 창을 숨깁니다…",
     "resetBall": "플로팅 볼 재설정",
     "privacy": "개인정보 안내",
-    "stats": "익명 설치 카운터"
+    "stats": "익명 설치 카운터",
+    "blacklist": "앱 블랙리스트",
+    "blacklistHint": "이 앱에서는 선택 도구 모음을 표시하지 않습니다(프로세스 이름, .exe 유무 무관).",
+    "blacklistPlaceholder": "예: steam, League of Legends",
+    "blacklistAdd": "추가",
+    "blacklistRemove": "제거",
+    "blacklistEmpty": "블랙리스트가 비어 있습니다."
   },
   "toolbar": {
     "ask": "질문",

@@ -35,7 +35,13 @@
     "savedHiding": "已保存 — 正在隐藏窗口…",
     "resetBall": "重置悬浮球",
     "privacy": "隐私说明",
-    "stats": "匿名安装统计"
+    "stats": "匿名安装统计",
+    "blacklist": "应用黑名单",
+    "blacklistHint": "这些应用中不弹出划词工具条（进程名，可带或不带 .exe）。",
+    "blacklistPlaceholder": "例如 steam、League of Legends",
+    "blacklistAdd": "添加",
+    "blacklistRemove": "移除",
+    "blacklistEmpty": "暂无黑名单应用。"
   },
   "toolbar": {
     "ask": "提问",

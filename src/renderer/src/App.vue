@@ -34,6 +34,8 @@ const saveMsg = ref('')
 const settingsLanguage = ref('en')
 const autostart = ref(false)
 const selectionMode = ref<'auto' | 'hotkey'>('auto')
+const blacklist = ref<string[]>([])
+const blacklistInput = ref('')
 const statsEnabled = ref(true)
 type UpdateState = { phase: string; version?: string; percent?: number }
 const updateState = ref<UpdateState>({ phase: 'idle' })
@@ -59,6 +61,7 @@ async function loadSettings(): Promise<void> {
   settingsLanguage.value = s.language
   autostart.value = s.autostart
   selectionMode.value = s.selectionMode === 'hotkey' ? 'hotkey' : 'auto'
+  blacklist.value = Array.isArray(s.blacklist) ? [...s.blacklist] : []
   statsEnabled.value = s.statsEnabled
 }
 
@@ -77,6 +80,25 @@ async function onAutostartChange(): Promise<void> {
 
 async function onSelectionModeChange(): Promise<void> {
   await window.promptly.setSelectionMode(selectionMode.value)
+}
+
+async function persistBlacklist(): Promise<void> {
+  const r = await window.promptly.setBlacklist(blacklist.value)
+  if (r?.blacklist) blacklist.value = [...r.blacklist]
+}
+
+async function addBlacklistEntry(): Promise<void> {
+  const raw = blacklistInput.value.trim()
+  if (!raw) return
+  const parts = raw.split(/[,\n;]+/).map((s) => s.trim()).filter(Boolean)
+  blacklist.value = [...blacklist.value, ...parts]
+  blacklistInput.value = ''
+  await persistBlacklist()
+}
+
+async function removeBlacklistEntry(name: string): Promise<void> {
+  blacklist.value = blacklist.value.filter((x) => x !== name)
+  await persistBlacklist()
 }
 
 async function openPrivacy(): Promise<void> {
@@ -357,6 +379,43 @@ function snippet(env: PipelineEvent | null): string {
           >
           {{ t('app.stats') }}
         </label>
+      </div>
+      <div class="blacklist">
+        <div class="blacklist-title">{{ t('app.blacklist') }}</div>
+        <p class="hint">{{ t('app.blacklistHint') }}</p>
+        <div class="blacklist-add">
+          <input
+            v-model="blacklistInput"
+            type="text"
+            :placeholder="t('app.blacklistPlaceholder')"
+            @keydown.enter.prevent="addBlacklistEntry"
+          >
+          <button
+            type="button"
+            class="ghost"
+            @click="addBlacklistEntry"
+          >{{ t('app.blacklistAdd') }}</button>
+        </div>
+        <ul
+          v-if="blacklist.length"
+          class="blacklist-list"
+        >
+          <li
+            v-for="name in blacklist"
+            :key="name"
+          >
+            <code>{{ name }}</code>
+            <button
+              type="button"
+              class="ghost danger"
+              @click="removeBlacklistEntry(name)"
+            >{{ t('app.blacklistRemove') }}</button>
+          </li>
+        </ul>
+        <p
+          v-else
+          class="hint"
+        >{{ t('app.blacklistEmpty') }}</p>
       </div>
       <div class="actions">
         <button
