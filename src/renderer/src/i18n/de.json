@@ -73,9 +73,13 @@
     "close": "Schließen",
     "noConversations": "Noch keine Unterhaltungen",
     "emptyHint": "Markiere überall Text oder tippe unten.",
-    "inputPlaceholder": "Frag anything… (Enter zum Senden)",
+    "inputPlaceholder": "Frag irgendetwas…",
     "send": "Senden",
-    "stop": "Stopp"
+    "stop": "Stopp",
+    "copy": "Kopieren",
+    "copied": "Kopiert",
+    "retry": "Erneut",
+    "inputHint": "Enter senden · Shift+Enter neue Zeile"
   },
   "ball": {
     "openChat": "Chat öffnen",

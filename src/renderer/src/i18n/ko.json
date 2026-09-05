@@ -73,9 +73,13 @@
     "close": "닫기",
     "noConversations": "대화가 없습니다",
     "emptyHint": "어디서든 텍스트를 선택하거나 아래에 입력하세요.",
-    "inputPlaceholder": "무엇이든 물어보세요… (Enter로 전송)",
+    "inputPlaceholder": "무엇이든 물어보세요…",
     "send": "보내기",
-    "stop": "중지"
+    "stop": "중지",
+    "copy": "복사",
+    "copied": "복사됨",
+    "retry": "다시 시도",
+    "inputHint": "Enter 전송 · Shift+Enter 줄바꿈"
   },
   "ball": {
     "openChat": "채팅 열기",

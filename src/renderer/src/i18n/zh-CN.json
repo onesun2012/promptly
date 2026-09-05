@@ -73,9 +73,13 @@
     "close": "关闭",
     "noConversations": "暂无会话",
     "emptyHint": "在任意位置选中文字，或在下方输入。",
-    "inputPlaceholder": "随便问点什么…（Enter 发送）",
+    "inputPlaceholder": "随便问点什么…",
     "send": "发送",
-    "stop": "停止"
+    "stop": "停止",
+    "copy": "复制",
+    "copied": "已复制",
+    "retry": "重试",
+    "inputHint": "Enter 发送 · Shift+Enter 换行"
   },
   "ball": {
     "openChat": "打开聊天",

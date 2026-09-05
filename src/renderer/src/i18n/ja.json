@@ -73,9 +73,13 @@
     "close": "閉じる",
     "noConversations": "会話はまだありません",
     "emptyHint": "テキストを選択するか、下に入力してください。",
-    "inputPlaceholder": "何でも質問…（Enter で送信）",
+    "inputPlaceholder": "何でも聞いてください…",
     "send": "送信",
-    "stop": "停止"
+    "stop": "停止",
+    "copy": "コピー",
+    "copied": "コピー済み",
+    "retry": "再試行",
+    "inputHint": "Enter で送信 · Shift+Enter で改行"
   },
   "ball": {
     "openChat": "チャットを開く",

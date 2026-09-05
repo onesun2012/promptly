@@ -73,9 +73,13 @@
     "close": "Fermer",
     "noConversations": "Aucune conversation",
     "emptyHint": "Sélectionnez du texte n'importe où, ou saisissez ci-dessous.",
-    "inputPlaceholder": "Posez votre question… (Entrée pour envoyer)",
+    "inputPlaceholder": "Demandez ce que vous voulez…",
     "send": "Envoyer",
-    "stop": "Arrêter"
+    "stop": "Arrêter",
+    "copy": "Copier",
+    "copied": "Copié",
+    "retry": "Réessayer",
+    "inputHint": "Entrée pour envoyer · Maj+Entrée pour une nouvelle ligne"
   },
   "ball": {
     "openChat": "Ouvrir le chat",

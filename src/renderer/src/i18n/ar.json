@@ -73,9 +73,13 @@
     "close": "إغلاق",
     "noConversations": "لا محادثات بعد",
     "emptyHint": "حدِّد نصًا في أي مكان، أو اكتب أدناه.",
-    "inputPlaceholder": "اسأل أي شيء… (Enter للإرسال)",
+    "inputPlaceholder": "اسأل أي شيء…",
     "send": "إرسال",
-    "stop": "إيقاف"
+    "stop": "إيقاف",
+    "copy": "نسخ",
+    "copied": "تم النسخ",
+    "retry": "إعادة المحاولة",
+    "inputHint": "Enter للإرسال · Shift+Enter لسطر جديد"
   },
   "ball": {
     "openChat": "فتح الدردشة",

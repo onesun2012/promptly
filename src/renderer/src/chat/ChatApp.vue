@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { nextTick, onMounted, ref } from 'vue'
+import { computed, nextTick, onMounted, ref } from 'vue'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 import hljs from 'highlight.js/lib/common'
@@ -27,6 +27,82 @@ const streaming = ref(false)
 const bodyEl = ref<HTMLElement | null>(null)
 const pendingImage = ref<string | null>(null)
 
+const activeTitle = computed(() => {
+  if (!activeId.value) return ''
+  return conversations.value.find((c) => c.id === activeId.value)?.title ?? ''
+})
+
+const copyFlash = ref<Record<number, boolean>>({})
+
+async function copyPlain(text: string, key?: number): Promise<void> {
+  const t = text.replace(/^\u26a0\s*/, '').replace(/^⚠\s*/, '').trim()
+  if (!t) return
+  try {
+    await navigator.clipboard.writeText(t)
+  } catch {
+    const ta = document.createElement('textarea')
+    ta.value = t
+    document.body.appendChild(ta)
+    ta.select()
+    document.execCommand('copy')
+    ta.remove()
+  }
+  if (key !== undefined) {
+    copyFlash.value = { ...copyFlash.value, [key]: true }
+    window.setTimeout(() => {
+      const next = { ...copyFlash.value }
+      delete next[key]
+      copyFlash.value = next
+    }, 1200)
+  }
+}
+
+function retryFailed(index: number): void {
+  if (streaming.value) return
+  const msg = messages.value[index]
+  if (!msg || msg.role !== 'assistant' || !msg.error) return
+  let userIdx = -1
+  for (let i = index - 1; i >= 0; i--) {
+    if (messages.value[i].role === 'user') {
+      userIdx = i
+      break
+    }
+  }
+  if (userIdx < 0) return
+  const user = messages.value[userIdx]
+  messages.value.splice(index, 1)
+  void start({
+    conversationId: activeId.value ?? undefined,
+    text: user.content || undefined,
+    imageDataUrl: user.imageDataUrl
+  })
+}
+
+function enhanceCodeBlocks(rootEl: HTMLElement): void {
+  rootEl.querySelectorAll('pre').forEach((pre) => {
+    const el = pre as HTMLElement
+    if (el.dataset.copyReady) return
+    el.dataset.copyReady = '1'
+    el.classList.add('has-copy')
+    const btn = document.createElement('button')
+    btn.type = 'button'
+    btn.className = 'code-copy'
+    btn.textContent = 'Copy'
+    btn.addEventListener('click', (ev) => {
+      ev.preventDefault()
+      ev.stopPropagation()
+      const code = el.querySelector('code')?.textContent ?? el.textContent ?? ''
+      void copyPlain(code).then(() => {
+        btn.textContent = 'Copied'
+        window.setTimeout(() => {
+          btn.textContent = 'Copy'
+        }, 1200)
+      })
+    })
+    el.appendChild(btn)
+  })
+}
+
 marked.setOptions({ breaks: true, gfm: true })
 
 function renderMarkdown(content: string): string {
@@ -41,6 +117,7 @@ function highlight(el: HTMLElement): void {
       ;(block as HTMLElement).dataset.hl = '1'
     }
   })
+  enhanceCodeBlocks(el)
 }
 
 function scrollBottom(): void {
@@ -252,7 +329,7 @@ function stopStreaming(): void {
       >
         ＋
       </button>
-      <span class="title">{{ activeId ? $t('chat.conversation') : $t('chat.newChat') }}</span>
+      <span class="title">{{ activeTitle || $t('chat.newChat') }}</span>
       <button
         class="bar-btn"
         :title="$t('app.settings')"
@@ -362,6 +439,22 @@ function stopStreaming(): void {
                 v-if="m.streaming && !m.content"
                 class="cursor"
               >▍</span>
+              <div
+                v-if="!m.streaming && m.content"
+                class="bubble-actions"
+              >
+                <button
+                  type="button"
+                  class="act"
+                  @click="copyPlain(m.content, i)"
+                >{{ copyFlash[i] ? $t('chat.copied') : $t('chat.copy') }}</button>
+                <button
+                  v-if="m.error"
+                  type="button"
+                  class="act"
+                  @click="retryFailed(i)"
+                >{{ $t('chat.retry') }}</button>
+              </div>
             </div>
           </template>
         </div>
@@ -372,28 +465,31 @@ function stopStreaming(): void {
             ✕
           </button>
         </div>
-        <div class="inputbar">
-          <textarea
-            v-model="input"
-            rows="2"
-            :placeholder="$t('chat.inputPlaceholder')"
-            @keydown="onInputKeydown"
-            @paste="onPaste"
-          />
-          <button
-            v-if="!streaming"
-            class="send"
-            @click="sendText"
-          >
-            {{ $t('chat.send') }}
-          </button>
-          <button
-            v-else
-            class="send stop"
-            @click="stopStreaming"
-          >
-            {{ $t('chat.stop') }}
-          </button>
+        <div class="composer">
+          <div class="inputbar">
+            <textarea
+              v-model="input"
+              rows="2"
+              :placeholder="$t('chat.inputPlaceholder')"
+              @keydown="onInputKeydown"
+              @paste="onPaste"
+            />
+            <button
+              v-if="!streaming"
+              class="send"
+              @click="sendText"
+            >
+              {{ $t('chat.send') }}
+            </button>
+            <button
+              v-else
+              class="send stop"
+              @click="stopStreaming"
+            >
+              {{ $t('chat.stop') }}
+            </button>
+          </div>
+          <div class="input-hint">{{ $t('chat.inputHint') }}</div>
         </div>
       </main>
     </div>
@@ -750,4 +846,58 @@ textarea::placeholder { color: var(--text-2); }
   box-shadow: none;
 }
 .send.stop:hover { filter: brightness(1.05); }
+
+.bubble-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+.bubble-actions .act {
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.03);
+  color: var(--text-2);
+  border-radius: var(--radius-pill);
+  padding: 3px 10px;
+  font-size: 11px;
+  cursor: pointer;
+}
+.bubble-actions .act:hover {
+  color: var(--text);
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.composer {
+  border-top: 1px solid var(--border);
+  background:
+    linear-gradient(0deg, rgba(0,0,0,0.22), transparent),
+    var(--surface);
+}
+.composer .inputbar {
+  border-top: none;
+  background: transparent;
+  padding-bottom: 6px;
+}
+.input-hint {
+  padding: 0 14px 12px;
+  font-size: 11px;
+  color: var(--text-3);
+}
+.md pre.has-copy { position: relative; padding-top: 28px; }
+.md pre .code-copy {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-2);
+  border-radius: 8px;
+  padding: 2px 8px;
+  font-size: 11px;
+  cursor: pointer;
+}
+.md pre .code-copy:hover {
+  color: var(--text);
+  border-color: var(--accent);
+}
 </style>

@@ -73,9 +73,13 @@
     "close": "關閉",
     "noConversations": "尚無對話",
     "emptyHint": "在任意位置選取文字，或在下方輸入。",
-    "inputPlaceholder": "隨便問點什麼…（Enter 送出）",
+    "inputPlaceholder": "隨便問點什麼…",
     "send": "送出",
-    "stop": "停止"
+    "stop": "停止",
+    "copy": "複製",
+    "copied": "已複製",
+    "retry": "重試",
+    "inputHint": "Enter 傳送 · Shift+Enter 換行"
   },
   "ball": {
     "openChat": "開啟聊天",

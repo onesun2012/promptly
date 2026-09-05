@@ -73,9 +73,13 @@
     "close": "Close",
     "noConversations": "No conversations yet",
     "emptyHint": "Select text anywhere, or type below.",
-    "inputPlaceholder": "Ask anything… (Enter to send)",
+    "inputPlaceholder": "Ask anything…",
     "send": "Send",
-    "stop": "Stop"
+    "stop": "Stop",
+    "copy": "Copy",
+    "copied": "Copied",
+    "retry": "Retry",
+    "inputHint": "Enter to send · Shift+Enter for new line"
   },
   "ball": {
     "openChat": "Open chat",

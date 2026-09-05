@@ -73,9 +73,13 @@
     "close": "Cerrar",
     "noConversations": "Aún no hay conversaciones",
     "emptyHint": "Selecciona texto en cualquier lugar o escribe abajo.",
-    "inputPlaceholder": "Pregunta lo que quieras… (Entrar para enviar)",
+    "inputPlaceholder": "Pregunta lo que quieras…",
     "send": "Enviar",
-    "stop": "Detener"
+    "stop": "Detener",
+    "copy": "Copiar",
+    "copied": "Copiado",
+    "retry": "Reintentar",
+    "inputHint": "Enter para enviar · Shift+Enter para nueva línea"
   },
   "ball": {
     "openChat": "Abrir chat",

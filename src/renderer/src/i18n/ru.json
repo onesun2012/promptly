@@ -73,9 +73,13 @@
     "close": "Закрыть",
     "noConversations": "Пока нет бесед",
     "emptyHint": "Выделите текст где угодно или введите ниже.",
-    "inputPlaceholder": "Спросите что угодно… (Enter — отправить)",
+    "inputPlaceholder": "Спросите что угодно…",
     "send": "Отправить",
-    "stop": "Стоп"
+    "stop": "Стоп",
+    "copy": "Копировать",
+    "copied": "Скопировано",
+    "retry": "Повторить",
+    "inputHint": "Enter — отправить · Shift+Enter — новая строка"
   },
   "ball": {
     "openChat": "Открыть чат",
