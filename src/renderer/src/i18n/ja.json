@@ -42,6 +42,8 @@
     "blacklistAdd": "追加",
     "blacklistRemove": "削除",
     "blacklistEmpty": "ブラックリストは空です。",
+    "blacklistSaved": "settings.json に保存しました。",
+    "blacklistSaveFailed": "保存に失敗しました。Promptly を完全に終了（トレイアイコンを確認）してから再起動し、もう一度お試しください。",
     "helperDegradedTitle": "選択機能が一時利用不可",
     "helperDegradedBody": "選択ヘルパーが繰り返し失敗しました。チャットとホットキーは使えます。下のボタンで再試行できます。",
     "helperDegraded": "選択不可",

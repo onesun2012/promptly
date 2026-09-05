@@ -42,6 +42,8 @@
     "blacklistAdd": "추가",
     "blacklistRemove": "제거",
     "blacklistEmpty": "블랙리스트가 비어 있습니다.",
+    "blacklistSaved": "settings.json에 저장했습니다.",
+    "blacklistSaveFailed": "저장에 실패했습니다. Promptly를 완전히 종료(트레이 아이콘 확인)한 후 다시 시작하고 다시 시도해 주세요.",
     "helperDegradedTitle": "선택 기능 일시 사용 불가",
     "helperDegradedBody": "선택 헬퍼가 반복해서 실패했습니다. 채팅과 단축키는 계속 사용할 수 있습니다. 아래에서 다시 시도하세요.",
     "helperDegraded": "선택 불가",

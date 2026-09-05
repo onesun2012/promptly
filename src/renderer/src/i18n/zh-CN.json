@@ -42,6 +42,8 @@
     "blacklistAdd": "添加",
     "blacklistRemove": "移除",
     "blacklistEmpty": "暂无黑名单应用。",
+    "blacklistSaved": "已保存到 settings.json。",
+    "blacklistSaveFailed": "保存失败——请完全退出 Promptly（注意托盘图标）后重新启动再试。",
     "helperDegradedTitle": "划词暂不可用",
     "helperDegradedBody": "取词辅助进程多次失败。聊天和快捷键仍可用，可点下方按钮重试。",
     "helperDegraded": "划词暂不可用",

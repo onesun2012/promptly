@@ -42,6 +42,8 @@
     "blacklistAdd": "Ajouter",
     "blacklistRemove": "Retirer",
     "blacklistEmpty": "Aucune appli en liste noire.",
+    "blacklistSaved": "Enregistré dans settings.json.",
+    "blacklistSaveFailed": "Échec de l'enregistrement — quittez complètement Promptly (vérifiez la zone de notification), relancez puis réessayez.",
     "helperDegradedTitle": "Sélection temporairement indisponible",
     "helperDegradedBody": "L'assistant de sélection a échoué plusieurs fois. Le chat et les raccourcis fonctionnent toujours. Réessayez ci-dessous.",
     "helperDegraded": "Sélection indisponible",

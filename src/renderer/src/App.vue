@@ -44,6 +44,8 @@ const autostart = ref(false)
 const selectionMode = ref<'auto' | 'hotkey'>('auto')
 const blacklist = ref<string[]>([])
 const blacklistInput = ref('')
+const blacklistMsg = ref('')
+const blacklistMsgOk = ref(false)
 const statsEnabled = ref(true)
 type UpdateState = { phase: string; version?: string; percent?: number }
 const updateState = ref<UpdateState>({ phase: 'idle' })
@@ -91,8 +93,22 @@ async function onSelectionModeChange(): Promise<void> {
 }
 
 async function persistBlacklist(): Promise<void> {
-  const r = await window.promptly.setBlacklist(blacklist.value)
-  if (r?.blacklist) blacklist.value = [...r.blacklist]
+  blacklistMsg.value = ''
+  try {
+    // blacklist.value is a reactive Proxy — ipcRenderer structured clone
+    // rejects Proxies ("An object could not be cloned"), so send a plain copy.
+    const r = await window.promptly.setBlacklist([...blacklist.value])
+    // Main returns { ok: true, blacklist }; a missing/old handler or a write
+    // failure surfaces as a rejection or an unexpected shape — both must show.
+    if (!r?.ok || !Array.isArray(r.blacklist)) throw new Error('bad blacklist response')
+    blacklist.value = [...r.blacklist]
+    blacklistMsgOk.value = true
+    blacklistMsg.value = t('app.blacklistSaved')
+  } catch (e) {
+    console.error('[blacklist] persist failed:', e)
+    blacklistMsgOk.value = false
+    blacklistMsg.value = t('app.blacklistSaveFailed') + ' (' + String((e as Error)?.message ?? e) + ')'
+  }
 }
 
 async function addBlacklistEntry(): Promise<void> {
@@ -439,7 +455,12 @@ function snippet(env: PipelineEvent | null): string {
           </li>
         </ul>
         <p
-          v-else
+          v-if="blacklistMsg"
+          class="blacklist-msg"
+          :class="blacklistMsgOk ? 'ok' : 'bad'"
+        >{{ blacklistMsg }}</p>
+        <p
+          v-else-if="!blacklist.length"
           class="hint"
         >{{ t('app.blacklistEmpty') }}</p>
       </div>
@@ -613,4 +634,7 @@ details.evcard summary { cursor: pointer; color: var(--text-2); font-size: 13px;
 }
 .degraded-banner h2 { margin: 0 0 6px; color: #9a3412; font-size: 16px; }
 .degraded-banner p { margin: 0 0 10px; color: #9a3412; font-size: 13px; }
+.blacklist-msg { margin: 8px 0 0; font-size: 12px; }
+.blacklist-msg.ok { color: #15803d; }
+.blacklist-msg.bad { color: #b91c1c; }
 </style>

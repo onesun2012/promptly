@@ -42,6 +42,8 @@
     "blacklistAdd": "إضافة",
     "blacklistRemove": "إزالة",
     "blacklistEmpty": "لا تطبيقات في القائمة السوداء.",
+    "blacklistSaved": "تم الحفظ في settings.json.",
+    "blacklistSaveFailed": "فشل الحفظ — أغلق Promptly بالكامل (تحقق من أيقونة شريط المهام) وأعد تشغيله ثم حاول مرة أخرى.",
     "helperDegradedTitle": "التحديد غير متاح مؤقتًا",
     "helperDegradedBody": "فشل مساعد التحديد مرارًا. الدردشة والاختصارات ما زالت تعمل. يمكنك إعادة المحاولة أدناه.",
     "helperDegraded": "التحديد غير متاح",

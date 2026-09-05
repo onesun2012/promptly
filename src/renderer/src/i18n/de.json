@@ -42,6 +42,8 @@
     "blacklistAdd": "Hinzufügen",
     "blacklistRemove": "Entfernen",
     "blacklistEmpty": "Keine Apps auf der Blacklist.",
+    "blacklistSaved": "In settings.json gespeichert.",
+    "blacklistSaveFailed": "Speichern fehlgeschlagen — Promptly vollständig beenden (auch Tray-Symbol) und neu starten, dann erneut versuchen.",
     "helperDegradedTitle": "Auswahl vorübergehend nicht verfügbar",
     "helperDegradedBody": "Der Auswahl-Helper ist mehrfach fehlgeschlagen. Chat und Hotkeys funktionieren weiter. Unten erneut versuchen.",
     "helperDegraded": "Auswahl nicht verfügbar",
