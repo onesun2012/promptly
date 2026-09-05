@@ -25,7 +25,7 @@ import * as secureStore from './secure-store'
 import { applyFirstRunAutostart, loadSettings, saveSettings, setAutostart, setBlacklist, setSelectionMode } from './settings-store'
 import { seedProviderFromEnv } from './seed-from-env'
 import { createBallWindow, initBallIpc, labelsFor, setBallLabels } from './ball'
-import { initTray, rebuildTrayMenu, resetBallPosition } from './tray'
+import { initTray, rebuildTrayMenu, resetBallPosition, setTrayHelperLifecycle } from './tray'
 import { appIconPath } from './app-icon'
 import { initUpdater } from './updater'
 import { pingInstallOnce, initInstallPingIpc } from './install-ping'
@@ -247,6 +247,12 @@ if (!gotLock) {
     helper.on('lifecycle', (info) => {
       console.log('[helper-lifecycle]', JSON.stringify(info))
       broadcast('pipeline:lifecycle', info)
+      setTrayHelperLifecycle(info.state, () => helper.recoverFromDegraded())
+    })
+    setTrayHelperLifecycle('ready', () => helper.recoverFromDegraded())
+    ipcMain.handle('helper:recover', () => {
+      helper.recoverFromDegraded()
+      return { ok: true }
     })
 
     helper.on('event', (env) => {

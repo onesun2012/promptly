@@ -41,7 +41,14 @@
     "blacklistPlaceholder": "e.g. steam, League of Legends",
     "blacklistAdd": "Add",
     "blacklistRemove": "Remove",
-    "blacklistEmpty": "No apps blacklisted."
+    "blacklistEmpty": "No apps blacklisted.",
+    "helperDegradedTitle": "Selection temporarily unavailable",
+    "helperDegradedBody": "The selection helper failed repeatedly. Chat and hotkeys still work. You can retry the helper below.",
+    "helperDegraded": "Selection unavailable",
+    "helperRestarting": "Restarting helper…",
+    "helperReady": "Ready",
+    "helperUnknown": "…",
+    "helperRetry": "Retry selection helper"
   },
   "toolbar": {
     "ask": "Ask",

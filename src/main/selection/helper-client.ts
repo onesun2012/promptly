@@ -45,6 +45,26 @@ export class HelperClient extends EventEmitter {
     return this.degraded
   }
 
+  /** Clear DEGRADED and try spawning the helper again (user-initiated). */
+  recoverFromDegraded(): void {
+    this.degraded = false
+    this.restartAttempts = 0
+    this.stopped = false
+    if (this.proc) {
+      this.respawningForConfig = true
+      try {
+        this.proc.kill()
+      } catch {
+        this.respawningForConfig = false
+        this.emitLifecycle({ state: 'restarting', attempt: 1 })
+        this.spawnHelper()
+      }
+      return
+    }
+    this.emitLifecycle({ state: 'restarting', attempt: 1 })
+    this.spawnHelper()
+  }
+
   start(): void {
     this.stopped = false
     this.spawnHelper()

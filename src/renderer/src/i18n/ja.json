@@ -41,7 +41,14 @@
     "blacklistPlaceholder": "例: steam, League of Legends",
     "blacklistAdd": "追加",
     "blacklistRemove": "削除",
-    "blacklistEmpty": "ブラックリストは空です。"
+    "blacklistEmpty": "ブラックリストは空です。",
+    "helperDegradedTitle": "選択機能が一時利用不可",
+    "helperDegradedBody": "選択ヘルパーが繰り返し失敗しました。チャットとホットキーは使えます。下のボタンで再試行できます。",
+    "helperDegraded": "選択不可",
+    "helperRestarting": "ヘルパー再起動中…",
+    "helperReady": "準備完了",
+    "helperUnknown": "…",
+    "helperRetry": "選択ヘルパーを再試行"
   },
   "toolbar": {
     "ask": "質問",

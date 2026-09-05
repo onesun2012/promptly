@@ -41,7 +41,14 @@
     "blacklistPlaceholder": "例如 steam、League of Legends",
     "blacklistAdd": "添加",
     "blacklistRemove": "移除",
-    "blacklistEmpty": "暂无黑名单应用。"
+    "blacklistEmpty": "暂无黑名单应用。",
+    "helperDegradedTitle": "划词暂不可用",
+    "helperDegradedBody": "取词辅助进程多次失败。聊天和快捷键仍可用，可点下方按钮重试。",
+    "helperDegraded": "划词暂不可用",
+    "helperRestarting": "正在重启辅助进程…",
+    "helperReady": "正常",
+    "helperUnknown": "…",
+    "helperRetry": "重试划词辅助进程"
   },
   "toolbar": {
     "ask": "提问",

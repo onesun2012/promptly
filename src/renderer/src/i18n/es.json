@@ -41,7 +41,14 @@
     "blacklistPlaceholder": "p. ej. steam, League of Legends",
     "blacklistAdd": "Añadir",
     "blacklistRemove": "Quitar",
-    "blacklistEmpty": "Ninguna app en la lista negra."
+    "blacklistEmpty": "Ninguna app en la lista negra.",
+    "helperDegradedTitle": "Selección temporalmente no disponible",
+    "helperDegradedBody": "El ayudante de selección falló varias veces. El chat y los atajos siguen funcionando. Puedes reintentar abajo.",
+    "helperDegraded": "Selección no disponible",
+    "helperRestarting": "Reiniciando ayudante…",
+    "helperReady": "Listo",
+    "helperUnknown": "…",
+    "helperRetry": "Reintentar ayudante de selección"
   },
   "toolbar": {
     "ask": "Preguntar",

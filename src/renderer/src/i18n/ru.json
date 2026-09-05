@@ -41,7 +41,14 @@
     "blacklistPlaceholder": "напр. steam, League of Legends",
     "blacklistAdd": "Добавить",
     "blacklistRemove": "Удалить",
-    "blacklistEmpty": "Чёрный список пуст."
+    "blacklistEmpty": "Чёрный список пуст.",
+    "helperDegradedTitle": "Выделение временно недоступно",
+    "helperDegradedBody": "Вспомогательный процесс выделения несколько раз сбойнул. Чат и горячие клавиши работают. Можно повторить ниже.",
+    "helperDegraded": "Выделение недоступно",
+    "helperRestarting": "Перезапуск помощника…",
+    "helperReady": "Готово",
+    "helperUnknown": "…",
+    "helperRetry": "Повторить помощник выделения"
   },
   "toolbar": {
     "ask": "Спросить",

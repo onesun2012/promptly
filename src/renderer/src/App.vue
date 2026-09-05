@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAppStore } from './stores/app'
 import type { LifecycleInfo, PipelineEvent } from '@shared'
@@ -13,6 +13,14 @@ const { t, locale } = useI18n()
 const lastEvent = ref<PipelineEvent | null>(null)
 const eventCount = ref(0)
 const lifecycle = ref<LifecycleInfo | null>(null)
+const isDegraded = computed(() => lifecycle.value?.state === 'degraded')
+const helperStatusLabel = computed(() => {
+  const s = lifecycle.value?.state
+  if (s === 'degraded') return t('app.helperDegraded')
+  if (s === 'restarting' || s === 'crashed') return t('app.helperRestarting')
+  if (s === 'ready') return t('app.helperReady')
+  return t('app.helperUnknown')
+})
 let offEvent: (() => void) | null = null
 let offLifecycle: (() => void) | null = null
 let offLocale: (() => void) | null = null
@@ -103,6 +111,10 @@ async function removeBlacklistEntry(name: string): Promise<void> {
 
 async function openPrivacy(): Promise<void> {
   await window.promptly.openPrivacy()
+}
+
+async function recoverHelper(): Promise<void> {
+  await window.promptly.recoverHelper()
 }
 
 async function testProvider(): Promise<void> {
@@ -221,7 +233,7 @@ function snippet(env: PipelineEvent | null): string {
           </li>
           <li>
             <span>{{ t('app.helper') }}</span>
-            <code>{{ lifecycle ? lifecycle.state : '…' }}</code>
+            <code>{{ helperStatusLabel }}</code>
           </li>
           <li>
             <span>{{ t('app.events') }}</span>
@@ -335,6 +347,20 @@ function snippet(env: PipelineEvent | null): string {
           </li>
         </ul>
       </div>
+    </section>
+
+    <section
+      v-if="isDegraded"
+      class="card degraded-banner"
+      role="alert"
+    >
+      <h2>{{ t('app.helperDegradedTitle') }}</h2>
+      <p>{{ t('app.helperDegradedBody') }}</p>
+      <button
+        type="button"
+        class="ghost"
+        @click="recoverHelper"
+      >{{ t('app.helperRetry') }}</button>
     </section>
 
     <section class="card">
@@ -580,4 +606,11 @@ details.evcard summary { cursor: pointer; color: var(--text-2); font-size: 13px;
 .links { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 10px 0 14px; }
 .donbtn { font-size: 13px; padding: 6px 14px; border-radius: var(--radius-btn); background: var(--accent); color: #fff; text-decoration: none; }
 .donbtn:hover { background: var(--accent-hover); }
+
+.degraded-banner {
+  border-color: #b45309;
+  background: #fff7ed;
+}
+.degraded-banner h2 { margin: 0 0 6px; color: #9a3412; font-size: 16px; }
+.degraded-banner p { margin: 0 0 10px; color: #9a3412; font-size: 13px; }
 </style>

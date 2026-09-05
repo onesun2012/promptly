@@ -41,7 +41,14 @@
     "blacklistPlaceholder": "예: steam, League of Legends",
     "blacklistAdd": "추가",
     "blacklistRemove": "제거",
-    "blacklistEmpty": "블랙리스트가 비어 있습니다."
+    "blacklistEmpty": "블랙리스트가 비어 있습니다.",
+    "helperDegradedTitle": "선택 기능 일시 사용 불가",
+    "helperDegradedBody": "선택 헬퍼가 반복해서 실패했습니다. 채팅과 단축키는 계속 사용할 수 있습니다. 아래에서 다시 시도하세요.",
+    "helperDegraded": "선택 불가",
+    "helperRestarting": "헬퍼 재시작 중…",
+    "helperReady": "정상",
+    "helperUnknown": "…",
+    "helperRetry": "선택 헬퍼 다시 시도"
   },
   "toolbar": {
     "ask": "질문",

@@ -53,6 +53,7 @@ declare global {
       showMainWindow: () => void
       openFeedback: () => Promise<{ ok: boolean }>
   openPrivacy: () => Promise<{ ok: boolean }>
+      recoverHelper: () => Promise<{ ok: boolean }>
       onChatChunk: (callback: (data: { conversationId: string; chunk: { type: string; content?: string } }) => void) => () => void
       onChatPreloadAction: (callback: (data: { actionId: string; selection: string }) => void) => () => void
     }

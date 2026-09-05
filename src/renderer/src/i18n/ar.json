@@ -41,7 +41,14 @@
     "blacklistPlaceholder": "مثل steam أو League of Legends",
     "blacklistAdd": "إضافة",
     "blacklistRemove": "إزالة",
-    "blacklistEmpty": "لا تطبيقات في القائمة السوداء."
+    "blacklistEmpty": "لا تطبيقات في القائمة السوداء.",
+    "helperDegradedTitle": "التحديد غير متاح مؤقتًا",
+    "helperDegradedBody": "فشل مساعد التحديد مرارًا. الدردشة والاختصارات ما زالت تعمل. يمكنك إعادة المحاولة أدناه.",
+    "helperDegraded": "التحديد غير متاح",
+    "helperRestarting": "جارٍ إعادة تشغيل المساعد…",
+    "helperReady": "جاهز",
+    "helperUnknown": "…",
+    "helperRetry": "إعادة محاولة مساعد التحديد"
   },
   "toolbar": {
     "ask": "اسأل",

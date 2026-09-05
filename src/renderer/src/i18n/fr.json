@@ -41,7 +41,14 @@
     "blacklistPlaceholder": "ex. steam, League of Legends",
     "blacklistAdd": "Ajouter",
     "blacklistRemove": "Retirer",
-    "blacklistEmpty": "Aucune appli en liste noire."
+    "blacklistEmpty": "Aucune appli en liste noire.",
+    "helperDegradedTitle": "Sélection temporairement indisponible",
+    "helperDegradedBody": "L'assistant de sélection a échoué plusieurs fois. Le chat et les raccourcis fonctionnent toujours. Réessayez ci-dessous.",
+    "helperDegraded": "Sélection indisponible",
+    "helperRestarting": "Redémarrage de l'assistant…",
+    "helperReady": "Prêt",
+    "helperUnknown": "…",
+    "helperRetry": "Réessayer l'assistant de sélection"
   },
   "toolbar": {
     "ask": "Demander",

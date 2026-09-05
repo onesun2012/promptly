@@ -41,7 +41,14 @@
     "blacklistPlaceholder": "例如 steam、League of Legends",
     "blacklistAdd": "新增",
     "blacklistRemove": "移除",
-    "blacklistEmpty": "目前沒有黑名單應用。"
+    "blacklistEmpty": "目前沒有黑名單應用。",
+    "helperDegradedTitle": "劃詞暫不可用",
+    "helperDegradedBody": "取詞輔助程式多次失敗。聊天與快捷鍵仍可用，可點下方按鈕重試。",
+    "helperDegraded": "劃詞暫不可用",
+    "helperRestarting": "正在重啟輔助程式…",
+    "helperReady": "正常",
+    "helperUnknown": "…",
+    "helperRetry": "重試劃詞輔助程式"
   },
   "toolbar": {
     "ask": "提問",

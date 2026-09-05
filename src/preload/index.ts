@@ -59,6 +59,7 @@ const api = {
   showMainWindow: () => ipcRenderer.send('main:show'),
   openFeedback: () => ipcRenderer.invoke('app:feedback'),
   openPrivacy: () => ipcRenderer.invoke('app:privacy'),
+  recoverHelper: () => ipcRenderer.invoke('helper:recover'),
   onChatChunk: subscriber<{ conversationId: string; chunk: { type: string; content?: string } }>('chat:chunk'),
   onChatPreloadAction: subscriber<{ actionId: string; selection: string }>('chat:preload-action'),
 }

@@ -19,6 +19,30 @@ const TRAY_LABELS: Record<string, { openChat: string; showBall: string; settings
 }
 
 let tray: Tray | null = null
+let helperLifecycle: 'ready' | 'restarting' | 'crashed' | 'degraded' = 'ready'
+let onRetryHelper: (() => void) | null = null
+
+type TrayExtra = { degraded: string; retryHelper: string; tooltipOk: string; tooltipDegraded: string }
+const TRAY_EXTRA: Record<string, TrayExtra> = {
+  en: { degraded: 'Selection unavailable (helper failed)', retryHelper: 'Retry selection helper', tooltipOk: 'Promptly', tooltipDegraded: 'Promptly — selection unavailable' },
+  'zh-CN': { degraded: '划词暂不可用（辅助进程失败）', retryHelper: '重试划词辅助进程', tooltipOk: 'Promptly', tooltipDegraded: 'Promptly — 划词暂不可用' },
+  'zh-TW': { degraded: '劃詞暫不可用（輔助程式失敗）', retryHelper: '重試劃詞輔助程式', tooltipOk: 'Promptly', tooltipDegraded: 'Promptly — 劃詞暫不可用' }
+}
+
+function trayExtra(): TrayExtra {
+  const lang = loadSettings().language
+  return TRAY_EXTRA[lang] ?? TRAY_EXTRA.en
+}
+
+export function setTrayHelperLifecycle(
+  state: 'ready' | 'restarting' | 'crashed' | 'degraded',
+  retry?: () => void
+): void {
+  helperLifecycle = state
+  if (retry) onRetryHelper = retry
+  rebuildTrayMenu()
+}
+
 
 function showMainWindow(): void {
   for (const w of BrowserWindow.getAllWindows()) {
@@ -51,18 +75,29 @@ export function initTray(): void {
 export function rebuildTrayMenu(): void {
   if (!tray) return
   const t = TRAY_LABELS[loadSettings().language] ?? TRAY_LABELS.en
-  tray.setContextMenu(
-    Menu.buildFromTemplate([
-      { label: t.openChat, click: () => toggleChatWindow() },
-      { label: t.showBall, click: () => resetBallPosition() },
-      { type: 'separator' },
-      { label: t.settings, click: showMainWindow },
-      { label: t.support, click: openDonate },
-      { label: t.checkUpdate, click: () => checkForUpdateNow() },
-      { type: 'separator' },
-      { label: t.quit, click: () => app.quit() }
-    ])
+  const extra = trayExtra()
+  const degraded = helperLifecycle === 'degraded'
+  tray.setToolTip(degraded ? extra.tooltipDegraded : extra.tooltipOk)
+  const items: Electron.MenuItemConstructorOptions[] = [
+    { label: t.openChat, click: () => toggleChatWindow() },
+    { label: t.showBall, click: () => resetBallPosition() },
+    { type: 'separator' }
+  ]
+  if (degraded) {
+    items.push(
+      { label: extra.degraded, enabled: false },
+      { label: extra.retryHelper, click: () => { onRetryHelper?.() } },
+      { type: 'separator' }
+    )
+  }
+  items.push(
+    { label: t.settings, click: showMainWindow },
+    { label: t.support, click: openDonate },
+    { label: t.checkUpdate, click: () => checkForUpdateNow() },
+    { type: 'separator' },
+    { label: t.quit, click: () => app.quit() }
   )
+  tray.setContextMenu(Menu.buildFromTemplate(items))
 }
 
 /** Open the settings window on the donate dialog. */
