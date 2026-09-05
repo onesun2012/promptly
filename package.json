@@ -16,7 +16,7 @@
     "dist:dir": "npm run build:helper && npm run gen:icon && npm run build && electron-builder --dir",
     "dist": "npm run build:helper && npm run gen:icon && npm run build && electron-builder --win",
     "gen:icon": "node scripts/gen-app-icon.mjs",
-    "site:deploy": "npx gh-pages -d site -t true"
+    "site:deploy": "npx gh-pages -d site -t"
   },
   "engines": {
     "node": ">=20"
