@@ -1,0 +1,33 @@
+# ==== Promptly ====
+
+# Dependencies
+node_modules/
+
+# Build output
+out/
+dist/
+build/release/
+build/helper/
+*.exe
+*.msi
+*.appx
+
+# Third-party reference code (read-only study material, never shipped)
+references/
+
+# Logs & local state
+*.log
+*.local
+*.tsbuildinfo
+.DS_Store
+Thumbs.db
+
+# Environment & secrets (never commit API keys)
+.env
+.env.*
+*.key
+
+# Editor / IDE
+.idea/
+.vscode/
+!.vscode/extensions.json
