@@ -63,7 +63,7 @@ npm run typecheck && npm run lint
 npm run dist       # NSIS 安装包 → dist/
 ```
 
-- 产品规格：[SPEC.md](SPEC.md)（中文）· 架构与交接：[docs/交接文档-Promptly.md](docs/交接文档-Promptly.md)
+- Product spec: [SPEC.md](SPEC.md)
 - CN 网络镜像：`ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/`
 
 ## 📄 License

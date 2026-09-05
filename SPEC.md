@@ -31,9 +31,9 @@
 | 来源 | 结论 |
 |---|---|
 | 本机豆包逆向观察 | 自研 Chromium 壳（非 Electron）+ Web UI + **原生辅助进程群**（gwps.exe 等）。可借鉴**架构思想**（Web UI 与原生能力分离、辅助进程隔离），不可复制代码 |
-| `docs/chatgpt分析.md` | 一轮评审 82/100。吸收：Selection 状态机、Native 辅助进程 + IPC 协议、SensitiveFieldDetector（Unknown→不动作）、剪贴板完整性、Provider 能力模型、Test Connection、误触发率主指标、里程碑制路线图、定位收窄 |
-| `docs/chatgpt对spec的分析.md` | 二轮评审 89/100。吸收：**状态机三分架构**（Selection / Action / Helper Lifecycle + 全局不变量）、IDENTIFY_TARGET、敏感判定三态化、sessionId 全链路、剪贴板竞态规则、IPC 统一信封、EV 证书降为发布决策 |
-| [bragi](https://github.com/isyuricunha/bragi)（开源） | 同类极简实现：Windows 全系统划词 + BYOK + DPAPI + 剪贴板回退还原 + 全局快捷键。**验证技术路线现实可行**；精读笔记见 `docs/bragi精读笔记.md` |
+| ChatGPT review notes (removed from repo) | 一轮评审 82/100。吸收：Selection 状态机、Native 辅助进程 + IPC 协议、SensitiveFieldDetector（Unknown→不动作）、剪贴板完整性、Provider 能力模型、Test Connection、误触发率主指标、里程碑制路线图、定位收窄 |
+| ChatGPT SPEC review notes (removed from repo) | 二轮评审 89/100。吸收：**状态机三分架构**（Selection / Action / Helper Lifecycle + 全局不变量）、IDENTIFY_TARGET、敏感判定三态化、sessionId 全链路、剪贴板竞态规则、IPC 统一信封、EV 证书降为发布决策 |
+| [bragi](https://github.com/isyuricunha/bragi)（开源） | 同类极简实现：Windows 全系统划词 + BYOK + DPAPI + 剪贴板回退还原 + 全局快捷键。**验证技术路线现实可行** |
 | `E:\learn\jdza_kk`（京东鲸小助） | **无参考价值，已排除**：Electron 内部工单自动化工具，无钩子/取词/UIA/剪贴板/AI 相关代码 |
 
 ---
@@ -185,10 +185,10 @@ Linux(Ubuntu) 挂起待评估：架构保留 `CaptureProvider` 平台抽象接�
 
 ## 6. 工程规范
 
-- **提交**：Conventional Commits 1.0（`feat: / fix: / docs: / refactor: / test: / chore: / build: / ci:`，可选 scope 如 `feat(selection): ...`）；每个提交可独立构建；详见 `docs/CONTRIBUTING.md`；
+- **提交**：Conventional Commits 1.0（`feat: / fix: / docs: / refactor: / test: / chore: / build: / ci:`，可选 scope 如 `feat(selection): ...`）；每个提交可独立构建；
 - **版本**：SemVer；`v*` tag 触发 GitHub Release 并由 electron-updater 分发；
 - **分支**：单人主干开发（main 保持可构建）；实验性改动开短期分支；
-- **目录**：`src/` 源码、`docs/` 设计文档（入库）、`references/` 第三方参考代码（gitignore，不入库）；
+- **目录**：`src/` source, `references/` third-party notes (gitignored)；
 - **红线**：任何 API key / .env 不入库。
 
 ---
