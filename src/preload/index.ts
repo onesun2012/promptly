@@ -46,6 +46,7 @@ const api = {
   setStats: (enabled: boolean) => ipcRenderer.invoke('stats:set', enabled),
   setLanguage: (locale: string) => ipcRenderer.invoke('settings:language', locale),
   setAutostart: (enabled: boolean) => ipcRenderer.invoke('settings:autostart', enabled),
+  setSelectionMode: (mode: 'auto' | 'hotkey') => ipcRenderer.invoke('settings:selectionMode', mode),
   openChat: () => ipcRenderer.send('chat:toggle'),
   resetBall: () => ipcRenderer.invoke('ball:reset'),
   onAppLocale: subscriber<string>('app:locale'),
@@ -56,6 +57,7 @@ const api = {
   hideMainWindow: () => ipcRenderer.send('main:hide'),
   showMainWindow: () => ipcRenderer.send('main:show'),
   openFeedback: () => ipcRenderer.invoke('app:feedback'),
+  openPrivacy: () => ipcRenderer.invoke('app:privacy'),
   onChatChunk: subscriber<{ conversationId: string; chunk: { type: string; content?: string } }>('chat:chunk'),
   onChatPreloadAction: subscriber<{ actionId: string; selection: string }>('chat:preload-action'),
 }

@@ -36,10 +36,11 @@ declare global {
       windowDragStart: () => void
       windowDragEnd: () => void
       ballMenu: (pos: { x: number; y: number }) => void
-      getSettings: () => Promise<{ language: string; autostart: boolean; statsEnabled: boolean }>
+      getSettings: () => Promise<{ language: string; autostart: boolean; statsEnabled: boolean; selectionMode: 'auto' | 'hotkey' }>
       setStats: (enabled: boolean) => Promise<{ ok: boolean }>
       setLanguage: (locale: string) => Promise<{ ok: boolean }>
       setAutostart: (enabled: boolean) => Promise<{ ok: boolean }>
+  setSelectionMode: (mode: 'auto' | 'hotkey') => Promise<{ ok: boolean }>
       openChat: () => void
       resetBall: () => Promise<{ ok: boolean }>
       onAppLocale: (callback: (locale: string) => void) => () => void
@@ -50,6 +51,7 @@ declare global {
       hideMainWindow: () => void
       showMainWindow: () => void
       openFeedback: () => Promise<{ ok: boolean }>
+  openPrivacy: () => Promise<{ ok: boolean }>
       onChatChunk: (callback: (data: { conversationId: string; chunk: { type: string; content?: string } }) => void) => () => void
       onChatPreloadAction: (callback: (data: { actionId: string; selection: string }) => void) => () => void
     }

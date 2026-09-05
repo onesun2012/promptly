@@ -9,6 +9,7 @@ directories:
 
 files:
   - out/**
+  - PRIVACY.md
   - "!**/.vscode/*"
   - "!src/*"
   - "!electron.vite.config.*"
@@ -27,6 +28,8 @@ electronFuses:
   onlyLoadAppFromAsar: true
 
 extraResources:
+  - from: PRIVACY.md
+    to: PRIVACY.md
   # native selection helper (compiled from src/helper by npm run build:helper)
   - from: build/helper
     to: helper

@@ -22,7 +22,8 @@ import {
   toggleChatWindow
 } from './chat-window'
 import * as secureStore from './secure-store'
-import { applyFirstRunAutostart, loadSettings, saveSettings, setAutostart } from './settings-store'
+import { applyFirstRunAutostart, loadSettings, saveSettings, setAutostart, setSelectionMode } from './settings-store'
+import { seedProviderFromEnv } from './seed-from-env'
 import { createBallWindow, initBallIpc, labelsFor, setBallLabels } from './ball'
 import { initTray, rebuildTrayMenu, resetBallPosition } from './tray'
 import { appIconPath } from './app-icon'
@@ -92,6 +93,7 @@ if (!gotLock) {
 
   app.whenReady().then(() => {
     applyFirstRunAutostart()
+    seedProviderFromEnv()
     createWindow()
     initBallIpc()
     initTray()
@@ -176,6 +178,27 @@ if (!gotLock) {
       setAutostart(Boolean(enabled))
       return { ok: true }
     })
+    ipcMain.handle('settings:selectionMode', (_e, mode: unknown) => {
+      setSelectionMode(mode === 'hotkey' ? 'hotkey' : 'auto')
+      return { ok: true }
+    })
+    ipcMain.handle('app:privacy', async () => {
+      const candidates = [
+        join(process.resourcesPath, 'PRIVACY.md'),
+        join(app.getAppPath(), 'PRIVACY.md'),
+        join(app.getAppPath(), '..', 'PRIVACY.md'),
+        join(process.cwd(), 'PRIVACY.md')
+      ]
+      for (const p of candidates) {
+        try {
+          const err = await shell.openPath(p)
+          if (!err) return { ok: true }
+        } catch {
+          // try next
+        }
+      }
+      return { ok: false }
+    })
     ipcMain.on('chat:toggle', () => toggleChatWindow())
     ipcMain.handle('ball:reset', () => {
       resetBallPosition()
@@ -202,10 +225,17 @@ if (!gotLock) {
       toggleChatWindow()
     })
 
-    // Q5 hotkey mode: capture the selection at the current cursor position.
-    // The default hotkey is always registered; per-mode switch lands with the
-    // settings page (M4).
+    // Q5: Ctrl+Shift+A always captures at cursor. In "hotkey" selectionMode,
+    // spontaneous mouse selections are ignored until this shortcut arms a window.
+    let expectHotkeyCapture = false
+    let hotkeyCaptureTimer: ReturnType<typeof setTimeout> | null = null
     globalShortcut.register('Control+Shift+A', () => {
+      expectHotkeyCapture = true
+      if (hotkeyCaptureTimer) clearTimeout(hotkeyCaptureTimer)
+      hotkeyCaptureTimer = setTimeout(() => {
+        expectHotkeyCapture = false
+        hotkeyCaptureTimer = null
+      }, 3000)
       helper.captureNow()
     })
 
@@ -217,6 +247,13 @@ if (!gotLock) {
     helper.on('event', (env) => {
       broadcast('pipeline:event', env)
       if (env.type === 'selectionCaptured') {
+        const mode = loadSettings().selectionMode
+        if (mode === 'hotkey' && !expectHotkeyCapture) return
+        expectHotkeyCapture = false
+        if (hotkeyCaptureTimer) {
+          clearTimeout(hotkeyCaptureTimer)
+          hotkeyCaptureTimer = null
+        }
         if (machine.validate(env)) {
           const payload = env.payload as { app?: unknown }
           machine.transition('POSITION_TOOLBAR', env.sessionId, String(payload.app ?? ''))
@@ -227,6 +264,7 @@ if (!gotLock) {
         const sp = env.payload as { state?: unknown }
         if (sp.state === 'IDLE') hideIfClickOutside()
       } else if (env.type === 'captureFailed') {
+        expectHotkeyCapture = false
         const payload = env.payload as { reason?: unknown }
         machine.transition('NO_ACTION', env.sessionId, String(payload.reason ?? ''))
       }

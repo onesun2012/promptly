@@ -3,10 +3,14 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { spawnSync } from 'node:child_process'
 import { join } from 'node:path'
 
+export type SelectionMode = 'auto' | 'hotkey'
+
 export interface AppSettings {
   language: string
   autostart: boolean
   initialized: boolean
+  /** SPEC Q5: auto = select-to-show toolbar; hotkey = only Ctrl+Shift+A */
+  selectionMode: SelectionMode
   ballPosition?: { x: number; y: number }
   /** anonymous install counter (one ping per version, no content). */
   statsEnabled: boolean
@@ -14,7 +18,13 @@ export interface AppSettings {
 }
 
 /** SPEC appendix D: first-run / install default is ON; Settings can turn it off. */
-const DEFAULTS: AppSettings = { language: 'en', autostart: true, initialized: false, statsEnabled: true }
+const DEFAULTS: AppSettings = {
+  language: 'en',
+  autostart: true,
+  initialized: false,
+  selectionMode: 'auto',
+  statsEnabled: true
+}
 let cache: AppSettings | null = null
 
 function file(): string {
@@ -25,7 +35,9 @@ export function loadSettings(): AppSettings {
   if (cache) return cache
   try {
     if (existsSync(file())) {
-      cache = { ...DEFAULTS, ...(JSON.parse(readFileSync(file(), 'utf8')) as Partial<AppSettings>) }
+      const raw = JSON.parse(readFileSync(file(), 'utf8')) as Partial<AppSettings>
+      const mode = raw.selectionMode === 'hotkey' ? 'hotkey' : 'auto'
+      cache = { ...DEFAULTS, ...raw, selectionMode: mode }
       return cache
     }
   } catch (e) {
@@ -37,6 +49,9 @@ export function loadSettings(): AppSettings {
 
 export function saveSettings(patch: Partial<AppSettings>): AppSettings {
   const merged = { ...loadSettings(), ...patch }
+  if (merged.selectionMode !== 'auto' && merged.selectionMode !== 'hotkey') {
+    merged.selectionMode = 'auto'
+  }
   cache = merged
   writeFileSync(file(), JSON.stringify(merged, null, 2), 'utf8')
   return merged
@@ -72,6 +87,10 @@ export function setAutostart(enabled: boolean): void {
     }
   }
   saveSettings({ autostart: enabled })
+}
+
+export function setSelectionMode(mode: SelectionMode): void {
+  saveSettings({ selectionMode: mode === 'hotkey' ? 'hotkey' : 'auto' })
 }
 
 export function setStatsEnabled(enabled: boolean): void {

@@ -33,6 +33,7 @@ const testResult = ref<TestConnectionResult | null>(null)
 const saveMsg = ref('')
 const settingsLanguage = ref('en')
 const autostart = ref(false)
+const selectionMode = ref<'auto' | 'hotkey'>('auto')
 const statsEnabled = ref(true)
 type UpdateState = { phase: string; version?: string; percent?: number }
 const updateState = ref<UpdateState>({ phase: 'idle' })
@@ -57,6 +58,7 @@ async function loadSettings(): Promise<void> {
   const s = await window.promptly.getSettings()
   settingsLanguage.value = s.language
   autostart.value = s.autostart
+  selectionMode.value = s.selectionMode === 'hotkey' ? 'hotkey' : 'auto'
   statsEnabled.value = s.statsEnabled
 }
 
@@ -71,6 +73,14 @@ async function onLanguageChange(): Promise<void> {
 
 async function onAutostartChange(): Promise<void> {
   await window.promptly.setAutostart(autostart.value)
+}
+
+async function onSelectionModeChange(): Promise<void> {
+  await window.promptly.setSelectionMode(selectionMode.value)
+}
+
+async function openPrivacy(): Promise<void> {
+  await window.promptly.openPrivacy()
 }
 
 async function testProvider(): Promise<void> {
@@ -321,6 +331,16 @@ function snippet(env: PipelineEvent | null): string {
             >{{ LOCALE_LABELS[l] }}</option>
           </select>
         </label>
+        <label>
+          {{ t('app.selectionMode') }}
+          <select
+            v-model="selectionMode"
+            @change="onSelectionModeChange"
+          >
+            <option value="auto">{{ t('app.selectionModeAuto') }}</option>
+            <option value="hotkey">{{ t('app.selectionModeHotkey') }}</option>
+          </select>
+        </label>
         <label class="check">
           <input
             v-model="autostart"
@@ -355,7 +375,7 @@ function snippet(env: PipelineEvent | null): string {
         <a
           class="muted"
           href="#"
-          @click.prevent
+          @click.prevent="openPrivacy"
         >{{ t('app.privacy') }}</a>
       </div>
       <p
