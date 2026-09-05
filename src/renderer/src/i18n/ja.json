@@ -45,7 +45,8 @@
     "rewrite": "書き換え",
     "cancel": "キャンセル",
     "retry": "再試行",
-    "processing": "選択範囲を処理中…"
+    "processing": "選択範囲を処理中…",
+    "replying": "{model} が応答中…"
   },
   "chat": {
     "newChat": "新規チャット",

@@ -45,7 +45,8 @@
     "rewrite": "Umschreiben",
     "cancel": "Abbrechen",
     "retry": "Erneut versuchen",
-    "processing": "Auswahl wird verarbeitet…"
+    "processing": "Auswahl wird verarbeitet…",
+    "replying": "{model} antwortet…"
   },
   "chat": {
     "newChat": "Neuer Chat",

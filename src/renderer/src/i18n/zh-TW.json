@@ -45,7 +45,8 @@
     "rewrite": "改寫",
     "cancel": "取消",
     "retry": "重試",
-    "processing": "正在處理選取內容…"
+    "processing": "正在處理選取內容…",
+    "replying": "{model} 正在回覆…"
   },
   "chat": {
     "newChat": "新對話",

@@ -121,7 +121,9 @@ if (!gotLock) {
       const requestId = 'req_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6)
       toolbarRun = { actionId, selection, selectionSessionId, conversationId: null }
       setToolbarMode('loading')
-      sendToToolbar('toolbar:phase', { phase: 'loading', actionId })
+      const active = secureStore.getActive()
+      const modelLabel = (active?.model || active?.name || '').trim()
+      sendToToolbar('toolbar:phase', { phase: 'loading', actionId, modelLabel })
       void chat
         .send({
           actionId,

@@ -45,7 +45,8 @@
     "rewrite": "Rewrite",
     "cancel": "Cancel",
     "retry": "Retry",
-    "processing": "Processing selection…"
+    "processing": "Processing selection…",
+    "replying": "{model} is responding…"
   },
   "chat": {
     "newChat": "New chat",

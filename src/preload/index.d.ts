@@ -29,7 +29,7 @@ declare global {
       toolbarCancel: () => void
       toolbarRetry: () => void
       toolbarOpenInChat: () => void
-      onToolbarPhase: (callback: (data: { phase: string; actionId?: string }) => void) => () => void
+      onToolbarPhase: (callback: (data: { phase: string; actionId?: string; modelLabel?: string }) => void) => () => void
       onToolbarStream: (callback: (data: { conversationId: string; chunk: { type: string; content?: string } }) => void) => () => void
       onChatOpenConversation: (callback: (data: { conversationId: string }) => void) => () => void
       ballOpenChat: () => void

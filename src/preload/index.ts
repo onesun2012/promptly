@@ -35,7 +35,7 @@ const api = {
   toolbarCancel: () => ipcRenderer.send('toolbar:cancel'),
   toolbarRetry: () => ipcRenderer.send('toolbar:retry'),
   toolbarOpenInChat: () => ipcRenderer.send('toolbar:open-in-chat'),
-  onToolbarPhase: subscriber<{ phase: string; actionId?: string }>('toolbar:phase'),
+  onToolbarPhase: subscriber<{ phase: string; actionId?: string; modelLabel?: string }>('toolbar:phase'),
   onToolbarStream: subscriber<{ conversationId: string; chunk: { type: string; content?: string } }>('toolbar:stream'),
   onChatOpenConversation: subscriber<{ conversationId: string }>('chat:open-conversation'),
   ballOpenChat: () => ipcRenderer.send('ball:open-chat'),

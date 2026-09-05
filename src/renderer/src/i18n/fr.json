@@ -45,7 +45,8 @@
     "rewrite": "Réécrire",
     "cancel": "Annuler",
     "retry": "Réessayer",
-    "processing": "Traitement de la sélection…"
+    "processing": "Traitement de la sélection…",
+    "replying": "{model} répond…"
   },
   "chat": {
     "newChat": "Nouveau chat",

@@ -7,7 +7,7 @@ const i18n = createAppI18n()
 window.promptly.onAppLocale((locale) => {
   i18n.global.locale.value = locale as 'en'
 })
-const t = (k: string): string => i18n.global.t(k)
+const t = (k: string, params?: Record<string, unknown>): string => String(i18n.global.t(k, params))
 
 interface ViewData {
   text: string
@@ -34,6 +34,7 @@ let renderedPhase: Phase | null = null
 let lastActionId = 'ask'
 let resultText = ''
 let resultError = false
+let lastModelLabel = ''
 
 function escapeHtml(s: string): string {
   return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] ?? c)
@@ -59,14 +60,19 @@ function render(): void {
   const animCls = animate ? ' appear' : ''
 
   if (phase === 'loading') {
+    const snippet = current.text.length > 46 ? current.text.slice(0, 46) + '…' : current.text
+    const hint = lastModelLabel
+      ? t('toolbar.replying', { model: lastModelLabel })
+      : t('toolbar.processing')
     app.innerHTML = `
       <div class="toolbar${animCls}">
         <div class="head">
           <span class="brand"><span class="spark">✦</span> ${escapeHtml(actionLabel(lastActionId))}…</span>
         </div>
+        <div class="snippet" title="${escapeHtml(current.text)}">“${escapeHtml(snippet)}”</div>
         <div class="loading">
           <div class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
-          <div class="hint">${escapeHtml(t('toolbar.processing'))}</div>
+          <div class="hint">${escapeHtml(hint)}</div>
         </div>
         <div class="foot">
           <span class="spacer"></span>
@@ -140,7 +146,7 @@ function render(): void {
 }
 
 /** Tell the main process our natural height so the window hugs the content
- * (action ≈110px, loading ≈96px, result grows up to the 240px body cap). */
+ * (action ≈110px, loading ≈120px with snippet, result grows up to the 240px body cap). */
 let heightTimer: ReturnType<typeof setTimeout> | null = null
 let lastReportedHeight = 0
 function reportHeight(): void {
@@ -166,9 +172,10 @@ window.promptly.onToolbarData(({ env, text }) => {
   render()
 })
 
-window.promptly.onToolbarPhase(({ phase: p, actionId }) => {
+window.promptly.onToolbarPhase(({ phase: p, actionId, modelLabel }) => {
   phase = p as Phase
   if (p === 'loading' && actionId) lastActionId = actionId
+  if (typeof modelLabel === 'string') lastModelLabel = modelLabel
   resultText = ''
   resultError = false
   render()
