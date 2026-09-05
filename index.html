@@ -1,17 +1,20 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Promptly — Select anything. Ask any AI.</title>
-  <meta name="description" content="Windows 上最好用的 Local-first BYOK 划词 AI：任意应用选中文字，用你自己的 API key 直接问 AI。无账号、无中继、零内容遥测。" />
+  <meta name="description" id="meta-desc" content="The best local-first BYOK selection AI for Windows. Select text in any app, use your own API key, talk to any model. No account, no relay, no content telemetry." />
   <style>
     :root { --bg:#0f1115; --surface:#171a21; --surface2:#1e222b; --border:#2a2f3a; --text:#e8eaed; --muted:#8b93a1; --accent:#7c5cff; --accent-h:#8b6fff; }
     * { box-sizing: border-box; }
     body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; line-height: 1.6; }
     a { color: var(--accent-h); }
     .wrap { max-width: 960px; margin: 0 auto; padding: 0 24px; }
-    header { padding: 72px 0 48px; text-align: center; }
+    .topbar { display:flex; justify-content:flex-end; gap:8px; padding:16px 24px 0; max-width:960px; margin:0 auto; }
+    .langbtn { background:transparent; border:1px solid var(--border); color:var(--muted); border-radius:8px; padding:4px 10px; cursor:pointer; font-size:13px; }
+    .langbtn.active, .langbtn:hover { border-color:var(--accent); color:var(--text); }
+    header { padding: 48px 0 48px; text-align: center; }
     h1 { font-size: 44px; margin: 0; letter-spacing: -0.02em; }
     h1 .spark { color: var(--accent); }
     .tagline { font-size: 20px; color: var(--muted); margin: 12px 0 28px; }
@@ -23,9 +26,9 @@
     .dl-note { color: var(--muted); font-size: 13px; margin-top: 14px; }
     .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; padding: 40px 0; }
     .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 22px; }
-    .card h3 { margin: 0 0 8px; font-size: 17px; }
+    .card h3 { margin: 12px 0 8px; font-size: 17px; }
     .card p { margin: 0; color: var(--muted); font-size: 14px; }
-    .shot { width: 100%; border-radius: 10px; border: 1px solid var(--border); background: var(--surface2); min-height: 200px; }
+    .shot { width: 100%; border-radius: 10px; border: 1px solid var(--border); background: var(--surface2); display:block; aspect-ratio: 16/10; object-fit: cover; }
     .tut { padding: 32px 0 48px; }
     .tut ol { color: var(--muted); max-width: 640px; margin: 12px auto 0; }
     .tut li { margin: 8px 0; }
@@ -37,53 +40,57 @@
   </style>
 </head>
 <body>
+  <div class="topbar">
+    <button type="button" class="langbtn active" data-lang="en" id="btn-en">EN</button>
+    <button type="button" class="langbtn" data-lang="zh" id="btn-zh">中文</button>
+  </div>
   <header class="wrap">
     <h1><span class="spark">✦</span> Promptly</h1>
-    <p class="tagline">Select anything. Ask any AI.</p>
+    <p class="tagline" data-i18n="tagline">Select anything. Ask any AI.</p>
     <div class="cta">
-      <a class="btn" href="https://github.com/onesun2012/promptly/releases/latest" id="dl-btn">下载 Windows 版</a>
-      <a class="btn ghost" href="https://github.com/onesun2012/promptly">GitHub 开源</a>
+      <a class="btn" href="https://github.com/onesun2012/promptly/releases/latest" id="dl-btn" data-i18n="ctaDownload">Download for Windows</a>
+      <a class="btn ghost" href="https://github.com/onesun2012/promptly" data-i18n="ctaGithub">View on GitHub</a>
     </div>
-    <p class="dl-note">累计下载 <span class="downloads" id="dl-count">…</span> 次 · 免安装管理员 · Windows 10/11 x64 · MIT 开源</p>
+    <p class="dl-note"><span data-i18n="dlPrefix">Total downloads</span> <span class="downloads" id="dl-count">…</span> <span data-i18n="dlSuffix">· no admin required · Windows 10/11 x64 · MIT</span></p>
   </header>
 
   <main class="wrap">
     <section class="features">
       <div class="card">
-        <img class="shot" src="img/toolbar.gif" alt="划词工具条" />
-        <h3>划词三态工具条</h3>
-        <p>任意应用选中文字即刻弹出：提问 / 翻译 / 改写 / 总结 / 解释，流式结果就地展示，一键复制。</p>
+        <img class="shot" src="img/toolbar.jpg" alt="Selection toolbar" data-i18n-alt="altToolbar" />
+        <h3 data-i18n="f1Title">Three-state selection toolbar</h3>
+        <p data-i18n="f1Body">Select text in any app and get Ask / Translate / Rewrite / Summarize / Explain. Streaming results stay in place — one-click copy.</p>
       </div>
       <div class="card">
-        <img class="shot" src="img/chat.png" alt="聊天窗" />
-        <h3>聊天窗追问 + 截图识别</h3>
-        <p>结果可带进聊天继续问；Ctrl+V 粘贴截图，视觉模型看图说话。</p>
+        <img class="shot" src="img/chat.jpg" alt="Chat window" data-i18n-alt="altChat" />
+        <h3 data-i18n="f2Title">Chat follow-ups + screenshot vision</h3>
+        <p data-i18n="f2Body">Open results in chat to keep asking. Paste a screenshot with Ctrl+V and use a vision model.</p>
       </div>
       <div class="card">
-        <img class="shot" src="img/ball.png" alt="悬浮球" />
-        <h3>悬浮球 · 全局待命</h3>
-        <p>低存在感常驻，可拖拽到任意位置，点击即开对话。</p>
+        <img class="shot" src="img/ball.jpg" alt="Floating ball" data-i18n-alt="altBall" />
+        <h3 data-i18n="f3Title">Floating ball, always ready</h3>
+        <p data-i18n="f3Body">Low-profile, draggable anywhere. Click to open chat.</p>
       </div>
       <div class="card">
-        <h3>🔑 BYOK — 你的 key，你做主</h3>
-        <p>智谱 / OpenAI 兼容 / Anthropic / Gemini 三协议，填自己的 API key 直连官方，无中继无加价。</p>
+        <h3 data-i18n="f4Title">🔑 BYOK — your key, your models</h3>
+        <p data-i18n="f4Body">OpenAI-compatible / Anthropic / Gemini. Your API key talks directly to the provider — no relay, no markup.</p>
       </div>
       <div class="card">
-        <h3>🔒 Local-first 隐私</h3>
-        <p>对话存本地 SQLite，key 经 Windows DPAPI 加密。零内容遥测——你问什么，我们永远不知道。</p>
+        <h3 data-i18n="f5Title">🔒 Local-first privacy</h3>
+        <p data-i18n="f5Body">Chats stay in local SQLite. Keys are encrypted with Windows DPAPI. Zero content telemetry.</p>
       </div>
       <div class="card">
-        <h3>🌍 10 种语言</h3>
-        <p>English / Français / Deutsch / Español / 日本語 / 한국어 / 简体中文 / 繁體中文 / Русский / العربية。</p>
+        <h3 data-i18n="f6Title">🌍 10 languages</h3>
+        <p data-i18n="f6Body">English / Français / Deutsch / Español / 日本語 / 한국어 / 简体中文 / 繁體中文 / Русский / العربية.</p>
       </div>
     </section>
 
     <section class="tut">
-      <h2 style="text-align:center;">三步上手</h2>
+      <h2 style="text-align:center;" data-i18n="tutTitle">Get started in 3 steps</h2>
       <ol>
-        <li>安装启动，悬浮球出现在屏幕右缘</li>
-        <li>托盘右键 → 设置 → Provider lab 填入你的 API Key（如智谱 <code>https://open.bigmodel.cn/api/paas/v4</code>）→ 测试连接 → 保存</li>
-        <li>任意应用里划选文字 → 工具条弹出 → 点「翻译」</li>
+        <li data-i18n="tut1">Install and launch — the floating ball appears on the right edge.</li>
+        <li data-i18n="tut2">Tray → Settings → Provider lab: paste Base URL + API key → Test connection → Save.</li>
+        <li data-i18n="tut3">Select text in any app → toolbar appears → hit Translate.</li>
       </ol>
     </section>
   </main>
@@ -92,15 +99,103 @@
     <div class="wrap">
       <div class="don">
         <a href="https://github.com/sponsors/onesun2012">♥ GitHub Sponsors</a>
-        <a href="https://ko-fi.com/">Ko-fi</a>
-        <a href="https://afdian.com/">爱发电（月捐）</a>
+        <a href="https://ko-fi.com/onesun">Ko-fi</a>
+        <a href="https://afdian.com/a/onesun" data-i18n="afdian">Afdian</a>
       </div>
-      <p><a href="https://github.com/onesun2012/promptly/blob/main/PRIVACY.md">隐私说明</a> · <a href="https://github.com/onesun2012/promptly">GitHub</a> · MIT License</p>
+      <p><a href="https://github.com/onesun2012/promptly/blob/main/PRIVACY.md" data-i18n="privacy">Privacy</a> · <a href="https://github.com/onesun2012/promptly">GitHub</a> · MIT License</p>
     </div>
   </footer>
 
   <script>
-    // live download count from GitHub API (sum of all release assets)
+    const I18N = {
+      en: {
+        tagline: 'Select anything. Ask any AI.',
+        ctaDownload: 'Download for Windows',
+        ctaGithub: 'View on GitHub',
+        dlPrefix: 'Total downloads',
+        dlSuffix: '· no admin required · Windows 10/11 x64 · MIT',
+        f1Title: 'Three-state selection toolbar',
+        f1Body: 'Select text in any app and get Ask / Translate / Rewrite / Summarize / Explain. Streaming results stay in place — one-click copy.',
+        f2Title: 'Chat follow-ups + screenshot vision',
+        f2Body: 'Open results in chat to keep asking. Paste a screenshot with Ctrl+V and use a vision model.',
+        f3Title: 'Floating ball, always ready',
+        f3Body: 'Low-profile, draggable anywhere. Click to open chat.',
+        f4Title: '🔑 BYOK — your key, your models',
+        f4Body: 'OpenAI-compatible / Anthropic / Gemini. Your API key talks directly to the provider — no relay, no markup.',
+        f5Title: '🔒 Local-first privacy',
+        f5Body: 'Chats stay in local SQLite. Keys are encrypted with Windows DPAPI. Zero content telemetry.',
+        f6Title: '🌍 10 languages',
+        f6Body: 'English / Français / Deutsch / Español / 日本語 / 한국어 / 简体中文 / 繁體中文 / Русский / العربية.',
+        tutTitle: 'Get started in 3 steps',
+        tut1: 'Install and launch — the floating ball appears on the right edge.',
+        tut2: 'Tray → Settings → Provider lab: paste Base URL + API key → Test connection → Save.',
+        tut3: 'Select text in any app → toolbar appears → hit Translate.',
+        privacy: 'Privacy',
+        afdian: 'Afdian',
+        altToolbar: 'Selection toolbar',
+        altChat: 'Chat window',
+        altBall: 'Floating ball',
+        metaDesc: 'The best local-first BYOK selection AI for Windows. Select text in any app, use your own API key, talk to any model. No account, no relay, no content telemetry.'
+      },
+      zh: {
+        tagline: 'Select anything. Ask any AI.',
+        ctaDownload: '下载 Windows 版',
+        ctaGithub: 'GitHub 开源',
+        dlPrefix: '累计下载',
+        dlSuffix: '次 · 免管理员 · Windows 10/11 x64 · MIT 开源',
+        f1Title: '划词三态工具条',
+        f1Body: '任意应用选中文字即刻弹出：提问 / 翻译 / 改写 / 总结 / 解释，流式结果就地展示，一键复制。',
+        f2Title: '聊天窗追问 + 截图识别',
+        f2Body: '结果可带进聊天继续问；Ctrl+V 粘贴截图，视觉模型看图说话。',
+        f3Title: '悬浮球 · 全局待命',
+        f3Body: '低存在感常驻，可拖拽到任意位置，点击即开对话。',
+        f4Title: '🔑 BYOK — 你的 key，你做主',
+        f4Body: 'OpenAI 兼容 / Anthropic / Gemini。填自己的 API key 直连官方，无中继无加价。',
+        f5Title: '🔒 Local-first 隐私',
+        f5Body: '对话存本地 SQLite，key 经 Windows DPAPI 加密。零内容遥测。',
+        f6Title: '🌍 10 种语言',
+        f6Body: 'English / Français / Deutsch / Español / 日本語 / 한국어 / 简体中文 / 繁體中文 / Русский / العربية。',
+        tutTitle: '三步上手',
+        tut1: '安装启动，悬浮球出现在屏幕右缘。',
+        tut2: '托盘右键 → 设置 → Provider lab 填入 Base URL + API Key → 测试连接 → 保存。',
+        tut3: '任意应用里划选文字 → 工具条弹出 → 点「翻译」。',
+        privacy: '隐私说明',
+        afdian: '爱发电（月捐）',
+        altToolbar: '划词工具条',
+        altChat: '聊天窗',
+        altBall: '悬浮球',
+        metaDesc: 'Windows 上最好用的 Local-first BYOK 划词 AI：任意应用选中文字，用你自己的 API key 直接问 AI。无账号、无中继、零内容遥测。'
+      }
+    }
+
+    function applyLang(lang) {
+      const pack = I18N[lang] || I18N.en
+      document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en'
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const k = el.getAttribute('data-i18n')
+        if (pack[k] != null) el.textContent = pack[k]
+      })
+      document.querySelectorAll('[data-i18n-alt]').forEach(el => {
+        const k = el.getAttribute('data-i18n-alt')
+        if (pack[k] != null) el.setAttribute('alt', pack[k])
+      })
+      const meta = document.getElementById('meta-desc')
+      if (meta) meta.setAttribute('content', pack.metaDesc)
+      document.getElementById('btn-en').classList.toggle('active', lang === 'en')
+      document.getElementById('btn-zh').classList.toggle('active', lang === 'zh')
+      try { localStorage.setItem('promptly-lang', lang) } catch (_) {}
+    }
+
+    document.getElementById('btn-en').addEventListener('click', () => applyLang('en'))
+    document.getElementById('btn-zh').addEventListener('click', () => applyLang('zh'))
+
+    let start = 'en'
+    try {
+      const saved = localStorage.getItem('promptly-lang')
+      if (saved === 'zh' || saved === 'en') start = saved
+    } catch (_) {}
+    applyLang(start)
+
     fetch('https://api.github.com/repos/onesun2012/promptly/releases')
       .then(r => r.json())
       .then(rels => {
