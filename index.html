@@ -28,7 +28,13 @@
     .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 22px; }
     .card h3 { margin: 12px 0 8px; font-size: 17px; }
     .card p { margin: 0; color: var(--muted); font-size: 14px; }
-    .shot { width: 100%; border-radius: 10px; border: 1px solid var(--border); background: var(--surface2); display:block; aspect-ratio: 16/10; object-fit: cover; }
+    .shot { width: 100%; border-radius: 10px; border: 1px solid var(--border); background: var(--surface2); display:block; aspect-ratio: 16/10; object-fit: cover; cursor: zoom-in; transition: opacity .15s ease; }
+    .shot:hover { opacity: 0.92; }
+    .lightbox { position: fixed; inset: 0; z-index: 1000; display: none; align-items: center; justify-content: center; padding: 24px; background: rgba(0,0,0,.82); cursor: zoom-out; }
+    .lightbox.open { display: flex; }
+    .lightbox img { max-width: min(1100px, 96vw); max-height: 90vh; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 20px 60px rgba(0,0,0,.45); object-fit: contain; cursor: default; }
+    .lightbox-close { position: absolute; top: 16px; right: 20px; width: 40px; height: 40px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); color: var(--text); font-size: 22px; line-height: 1; cursor: pointer; }
+    .lightbox-close:hover { border-color: var(--accent); color: var(--accent-h); }
     .tut { padding: 32px 0 48px; }
     .tut ol { color: var(--muted); max-width: 640px; margin: 12px auto 0; }
     .tut li { margin: 8px 0; }
@@ -105,6 +111,12 @@
       <p><a href="https://github.com/onesun2012/promptly/blob/main/PRIVACY.md" data-i18n="privacy">Privacy</a> · <a href="https://github.com/onesun2012/promptly">GitHub</a> · MIT License</p>
     </div>
   </footer>
+
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Image preview" hidden>
+    <button type="button" class="lightbox-close" id="lightbox-close" aria-label="Close">×</button>
+    <img id="lightbox-img" alt="" />
+  </div>
+
 
   <script>
     const I18N = {
@@ -195,6 +207,35 @@
       if (saved === 'zh' || saved === 'en') start = saved
     } catch (_) {}
     applyLang(start)
+
+
+    const lightbox = document.getElementById('lightbox')
+    const lightboxImg = document.getElementById('lightbox-img')
+    function openLightbox(src, alt) {
+      lightboxImg.src = src
+      lightboxImg.alt = alt || ''
+      lightbox.hidden = false
+      lightbox.classList.add('open')
+      document.body.style.overflow = 'hidden'
+    }
+    function closeLightbox() {
+      lightbox.classList.remove('open')
+      lightbox.hidden = true
+      lightboxImg.removeAttribute('src')
+      document.body.style.overflow = ''
+    }
+    document.querySelectorAll('img.shot').forEach(img => {
+      img.setAttribute('tabindex', '0')
+      img.setAttribute('role', 'button')
+      img.addEventListener('click', () => openLightbox(img.currentSrc || img.src, img.alt))
+      img.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLightbox(img.currentSrc || img.src, img.alt) }
+      })
+    })
+    document.getElementById('lightbox-close').addEventListener('click', e => { e.stopPropagation(); closeLightbox() })
+    lightbox.addEventListener('click', e => { if (e.target === lightbox) closeLightbox() })
+    lightboxImg.addEventListener('click', e => e.stopPropagation())
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && lightbox.classList.contains('open')) closeLightbox() })
 
     fetch('https://api.github.com/repos/onesun2012/promptly/releases')
       .then(r => r.json())
