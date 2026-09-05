@@ -712,18 +712,34 @@ namespace Promptly.Helper
                     blacklist = new string[0];
                     return;
                 }
-                blacklist = csv.ToLowerInvariant().Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                string[] parts = csv.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                System.Collections.Generic.List<string> list = new System.Collections.Generic.List<string>();
+                foreach (string p in parts)
+                {
+                    string n = NormalizeProcessName(p);
+                    if (n.Length > 0 && !list.Contains(n)) list.Add(n);
+                }
+                blacklist = list.ToArray();
+                Log("config: blacklist=" + string.Join(",", blacklist));
             }
 
             public bool IsBlacklisted(string processName)
             {
                 if (processName == null) return false;
-                string lower = processName.ToLowerInvariant();
+                string lower = NormalizeProcessName(processName);
                 foreach (string b in blacklist)
                 {
                     if (lower == b || lower.EndsWith("." + b, StringComparison.Ordinal)) return true;
                 }
                 return false;
+            }
+
+            private static string NormalizeProcessName(string name)
+            {
+                if (name == null) return "";
+                string s = name.Trim().ToLowerInvariant();
+                if (s.EndsWith(".exe", StringComparison.Ordinal)) s = s.Substring(0, s.Length - 4);
+                return s;
             }
         }
 

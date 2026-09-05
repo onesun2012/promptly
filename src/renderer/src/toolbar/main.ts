@@ -7,7 +7,8 @@ const i18n = createAppI18n()
 window.promptly.onAppLocale((locale) => {
   i18n.global.locale.value = locale as 'en'
 })
-const t = (k: string, params?: Record<string, unknown>): string => String(i18n.global.t(k, params))
+const t = (k: string, params?: Record<string, unknown>): string =>
+  params === undefined ? String(i18n.global.t(k)) : String(i18n.global.t(k, params))
 
 interface ViewData {
   text: string

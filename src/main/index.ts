@@ -184,6 +184,7 @@ if (!gotLock) {
     })
     ipcMain.handle('settings:blacklist', (_e, list: unknown) => {
       const blacklist = setBlacklist(list)
+      console.log('[settings] blacklist ->', JSON.stringify(blacklist))
       helper.setBlacklist(blacklist)
       return { ok: true, blacklist }
     })

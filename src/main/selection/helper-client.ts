@@ -31,7 +31,12 @@ export class HelperClient extends EventEmitter {
 
   setBlacklist(list: string[]): void {
     this.blacklist = [...list]
-    if (this.stopped || !this.proc) return
+    if (this.stopped) return
+    if (!this.proc) {
+      // Helper not running (startup race / after crash): spawn with new list.
+      if (!this.degraded) this.spawnHelper()
+      return
+    }
     this.respawningForConfig = true
     try {
       this.proc.kill()
