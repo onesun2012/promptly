@@ -54,6 +54,7 @@ win:
   icon: build/icon.png
 
 nsis:
+  include: build/installer.nsh
   # per-user install into %LOCALAPPDATA%\Programs, no admin required (SPEC constraint)
   oneClick: false
   perMachine: false

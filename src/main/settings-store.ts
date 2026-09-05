@@ -1,5 +1,6 @@
 import { app } from 'electron'
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
+import { spawnSync } from 'node:child_process'
 import { join } from 'node:path'
 
 export interface AppSettings {
@@ -12,7 +13,8 @@ export interface AppSettings {
   pingedVersion?: string
 }
 
-const DEFAULTS: AppSettings = { language: 'en', autostart: false, initialized: false, statsEnabled: true }
+/** SPEC appendix D: first-run / install default is ON; Settings can turn it off. */
+const DEFAULTS: AppSettings = { language: 'en', autostart: true, initialized: false, statsEnabled: true }
 let cache: AppSettings | null = null
 
 function file(): string {
@@ -40,17 +42,35 @@ export function saveSettings(patch: Partial<AppSettings>): AppSettings {
   return merged
 }
 
-/** Autostart defaults to OFF (UI spec v0.3: opt-in, not silent); the settings
- * checkbox turns it on. */
+/**
+ * SPEC: installer / first-run defaults autostart ON; Settings checkbox can turn it off.
+ * Existing profiles (initialized already) keep their saved choice and only sync the OS login item.
+ */
 export function applyFirstRunAutostart(): void {
   const s = loadSettings()
   if (!s.initialized) {
+    setAutostart(true)
     saveSettings({ initialized: true })
+    return
   }
+  app.setLoginItemSettings({ openAtLogin: s.autostart })
 }
 
 export function setAutostart(enabled: boolean): void {
   app.setLoginItemSettings({ openAtLogin: enabled })
+  // NSIS customInstall also writes HKCU Run "Promptly"; clear it when the user opts out
+  // so Settings off really disables boot start (not only Electron's own login-item entry).
+  if (process.platform === 'win32' && !enabled) {
+    try {
+      spawnSync(
+        'reg',
+        ['delete', 'HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run', '/v', 'Promptly', '/f'],
+        { windowsHide: true }
+      )
+    } catch {
+      // ignore: key may already be absent
+    }
+  }
   saveSettings({ autostart: enabled })
 }
 
