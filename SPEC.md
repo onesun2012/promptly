@@ -6,7 +6,7 @@
 > |---|---|
 > | 项目名 | Promptly（曾用代号 ai_desk） |
 > | 仓库 | https://github.com/onesun2012/promptly.git |
-> | 版本 | SPEC v1.2（2026-08-29） |
+> | 版本 | SPEC v1.3（2026-09-07） |
 > | 状态 | 两轮外部评审意见已吸收（82 → 89 / 100） |
 > | 平台 | v1.0 Windows 10/11 x64 → macOS（达标后）→ Linux（待评估） |
 > | 形态 | Electron 桌面应用 + 原生取词辅助进程 |
@@ -294,12 +294,71 @@ settings(key, value_json, updated_at)
 {"type":"shutdown"}
 ```
 
+## Accepted deviations（相对初版 SPEC，v1.0.0 已落地）
+
+> 记录「SPEC 原文写过、实现刻意不同或已提前交付」的项，避免后人按旧句验收误判。日期：2026-09-07。
+
+| 主题 | SPEC 原文倾向 | 实际落地（Accepted） | 备注 |
+|---|---|---|---|
+| 视觉输入 | 能力模型含 vision；里程碑未强制首发 | **已随 v1 交付**：聊天窗支持 Ctrl+V 粘贴截图，按模型 capabilities 使用 vision | 与落地页文案一致 |
+| Provider / Key 存储 | 附录 B 画了 SQLite `providers` / `api_key_enc` | **`providers.json` + Electron `safeStorage`（Windows DPAPI）**；非 SQLite 存 key | Bragi 同路线；零额外原生加密模块 |
+| 划词钩子 | 技术栈写 `uiohook-napi` | **独立 C# Helper 进程**（鼠标钩子 + UIA + 剪贴板回退），JSON over stdio | 崩溃隔离 / DEGRADED 重启；符合附录 A.8 |
+| 崩溃上报 | 目标含 opt-in Sentry | **v1.0.0 未接入 Sentry**；零内容遥测仍成立 | 附录 D「Sentry 隐私措辞」仍开放；接入前保持关闭 |
+| i18n | 决策表曾写 6 语 | **10 语**：en / fr / de / es / ja / ko / zh-CN / zh-TW / ru / ar | 超出原决策，向后兼容 |
+| 聊天窗尺寸 | SPEC 写 400×640 | 实现约 **420×640**（可调） | 无功能影响 |
+| 文档目录 | 早期仓库含 docs/ | **docs/ 仅本地**（gitignore）；公开仓以 README + SPEC.md 为准 | 避免半成品文档进 Releases |
+
 ## 附录 D：待定项（Open Questions）
 
-- [ ] 产品最终命名核查：Promptly 与现有商标/产品（如 Promptly AI 等）的冲突风险与应对（名称、logo、域名）；
+- [ ] **产品最终命名 / 商标（P2）**：Promptly 与现有商标/产品（如 Promptly AI 等）的冲突风险与应对（名称、logo、域名）。
+  - **现状（2026-09-07）**：继续使用 Promptly；GitHub `onesun2012/promptly`、落地页与 Release 已用该名；**未做正式商标检索/申请**。
+  - **风险**：第三方已注册近似名时，可能被迫改名、改域名或限制商店上架文案。
+  - **建议下一步（不阻塞 v1 分发）**：
+    1. 在目标市场（至少 US / EU / CN）做商标近似检索（USPTO / EUIPO / 中国商标网）；
+    2. 记录冲突命中与律师意见；若高风险，准备备选名 + 迁移清单（包名、Repo、Pages、安装目录）；
+    3. 在有收入或下载破门禁后再决定申请类别（通常 9/42 类软件相关）。
+  - **短期缓解**：落地页/README 避免暗示与无关「Promptly AI」产品有关；保留 MIT + 作者标识。
 - [x] **开机自启默认值**：已拍板（2026-08-29）——保持安装页**默认勾选**（尊重最初需求），在设置页与首启提示中提供一键关闭；
 - [x] **产品主口号**：已确认 **"Select anything. Ask any AI."**（"Without giving us your data." 降为隐私副文案，用于官网/商店页）；
 - [ ] Sentry 崩溃上报的隐私政策措辞；
 - [ ] 捐赠入口转化数据（决定捐赠制维持时长）；
 - [ ] v1.x 候选：**"重复上次动作"快捷键**（借鉴 Bragi，高频用户效率倍增器）；
 - [ ] v1.x 候选：**Replace 写回选区**（借鉴 Bragi 的 Ctrl+V 机制，注意修饰键释放与焦点时机）。
+
+
+## 附录 E：DPI / 多屏验收记录
+
+> 协议：在 **125% / 150% / 混合 DPI** 下验证悬浮球、划词工具条定位、聊天窗与设置窗可读可点。完整改系统缩放需用户确认；下列为自动化可采集项 + 代码侧结论。
+
+### E.1 本机探测（填写于执行时）
+
+| 项 | 结果 |
+|---|---|
+| 日期 | 2026-09-07 |
+| 显示器 | \\.\DISPLAY1 1920x1080 (primary only) |
+| 系统 LogPixels / GDI DPI | LogPixels=(unset) · GDI DPI=96 |
+| 折合缩放 | 100%（96 DPI） |
+| Promptly 进程 | 验收时再启；探测时无 Promptly/electron 进程 |
+
+### E.2 代码侧（已核对，不依赖改缩放）
+
+| 检查 | 结论 |
+|---|---|
+| 聊天窗定位 | `chat-window.ts` 使用 `screen.getDisplayNearestPoint(cursor)` + `workArea`，按当前显示器工作区放置 |
+| Electron | Chromium/Electron 默认 Per-Monitor DPI v2；无边框窗依赖逻辑像素 |
+| Helper 阈值 | 位移阈值 `displacementThresholdPx`（默认 6）为物理/逻辑需在混合 DPI 下目视确认 |
+| 工具条定位 | Selection SM 的 POSITION_TOOLBAR 要求覆盖多显示器 / DPI / 边缘 / 任务栏（SPEC 状态机表） |
+
+### E.3 手工矩阵（改缩放后勾选）
+
+| 缩放 | 单屏 | 混合 DPI（笔记本 + 外接） | 球 | 工具条贴选区 | 聊天/设置清晰 |
+|---|---|---|---|---|---|
+| 100% | ✅ 探测通过（单屏） | N/A（本机单屏） | ⬜ 目视 | ⬜ 目视 | ⬜ 目视 |
+| 125% | ☐ | ☐ | ☐ | ☐ | ☐ |
+| 150% | ☐ | ☐ | ☐ | ☐ | ☐ |
+
+**验收口令**：工具条不跑到错误屏、不钻任务栏；球拖拽松手后位置正确持久化；UI 无模糊（非位图拉伸糊）。
+
+### E.4 落地页配图说明（2026-09-07）
+
+本机通过 UU 远程桌面截取 Electron 窗口时为黑帧（GPU/远程合成限制）。落地页 `site/img/{toolbar,chat,ball}.jpg` 已替换为**与现网 UI 一致的产品忠实合成图**（真实 theme token、工具条五动作、聊天侧栏/复制/Enter 提示、悬浮球），不再使用含 Library/Pro/Ctrl+K 的概念 IDE 稿。后续在本机控制台可再换实机截图。
